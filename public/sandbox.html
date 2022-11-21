@@ -9,7 +9,19 @@
 <body>
     <h1>Sandbox</h1>
     <script>
+        const { fetch: originalFetch } = window;
+
+        window.fetch = async (...args) => {
+            let [resource, config ] = args;
+            console.log('intercepting request...');
+            const response = await originalFetch(resource, config);
+            // response interceptor here
+            return response;
+        };
+
         fetch('/somewhere-something').then(r => r.text().then(t => {console.log('response!!!');console.log(t)}))
+
     </script>
+    <img src="/google_key.png" alt="">
 </body>
 </html>

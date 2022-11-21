@@ -16,3 +16,8 @@ https://mozilla.github.io/nunjucks/files/nunjucks.min.js
 
 iframe sandbox
 
+Dont trust service worker.
+
+Allow service worker to only be registered in "/sandbox/"
+
+with iframe allow same site
