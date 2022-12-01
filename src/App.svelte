@@ -116,7 +116,7 @@
 
     onMount(async () => {
         setTimeout(() => {
-            fileInit = e => {
+            fileInit = (e) => {
                 e.focus();
                 document.execCommand('selectAll',false,null);
             }
@@ -158,10 +158,10 @@
             {#each $files as file, i}
                 {#if showHiddenFiles || file.filename[0] != "."}
                     <button on:click={_ => $activeFileIndex = i} class="tab" class:active={i == $activeFileIndex}>
-                        <div class="filename-input" type="text" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
+                        <div spellcheck="false" class="filename-input" type="text" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
                         {#if !file.builtin}
                             <button on:click={_ => deleteFile(i)} class="delete-file-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
                                     <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
                                 </svg>
                             </button>
@@ -221,14 +221,16 @@
         pointer-events: all !important;
     }
 
-    .filename-input:focus {
+    .tab:has(.filename-input:focus) {
         color: white;
+        border-bottom-color: white;
     }
     
     .filename-input {
         font-family: monospace;
         padding: 2px;
         pointer-events: none;
+        outline: none;
     }
 
     .new-file-button svg {
@@ -284,11 +286,19 @@
         height: 100%;
         border-bottom: 1px solid transparent;
         color: #8b888f;
+        gap: 0;
+    }
+
+    .tab:hover {
+        background-color: #ffffff08;
+        border-bottom: 1px solid #fff4;
+        color: #fffa;
     }
 
     .tab.active {
         color: #fce550;
         border-bottom-color: #fce550;
+        background-color: #ffffff12;
     }
 
     iframe {
