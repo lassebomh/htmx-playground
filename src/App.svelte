@@ -1,16 +1,16 @@
-<script>
+<script lang="ts">
     import { writable } from 'svelte/store'
     import { onMount } from 'svelte';
 
-    import defaultLoader from './assets/sandbox/head.html?raw'
+    import defaultLoaderTags from './assets/sandbox/loader.html?raw'
     import defaultServer from './assets/sandbox/server.js?raw'
-    import defaultIndex from './assets/sandbox/index.html?raw'
+    import defaultPage from './assets/sandbox/index.html?raw'
     
     import './assets/app.css'
     import Ace from './components/Ace.svelte'
 
+    let showHiddenFiles = false;
     let sandbox;
-    let srcdoc;
 
     let activeFileIndex = writable(null);
     let files = writable(null);
@@ -72,25 +72,57 @@
 
         $activeFileIndex = $files.findIndex((file) => file.filename == "server.js");
     }
+    
+    document.addEventListener('keypress', (event) => {
+        if (event.ctrlKey && event.key === 'z') {
+            event.stopPropagation();
+            event.preventDefault()
+            updateSrcdoc()
+        }
+    });
 
-    // function initSandbox() {
-    //     sandbox.contentWindow.postMessage({'type': "initialize_sandbox", 'files': $files}, '*')
-    // }
+    function createFile() {
+        files.set([...$files, {
+            filename: "partial.html",
+            contents: "",
+            builtin: false,
+        }])
+        activeFileIndex.set($files.length - 1)
+    }
 
+    function deleteFile(index) {
+        let selectIndex = index
+        console.log($files[selectIndex]);
+        
+        while (!$files[selectIndex] || selectIndex == index || (!showHiddenFiles && $files[selectIndex].filename[0] == ".")) {
+            selectIndex--;
+        }
+        
+        activeFileIndex.set(selectIndex)
+        files.set($files.filter((_, i) => i !== index))
+    }
+    
     function updateSrcdoc() {
         sandbox.srcdoc = ""
 
         let setup = $files.find((file) => file.filename == '.loader.html').contents
         let index = $files.find((file) => file.filename == 'index.html').contents
-        // @ts-ignore
-        sandbox.srcdoc = nunjucks.renderString(index, { loader: setup });
-
-        setTimeout(() => {
-            sandbox.contentWindow.postMessage({'type': "initialize_sandbox", 'files': $files}, '*')
-        }, 1000)
+        let filedata = `<script> const files = ` + JSON.stringify($files).replaceAll('/', '\\/') + `<\/script>\n`;
+    
+        sandbox.srcdoc = filedata + setup + index;
     }
 
+    let fileInit = (e) => {}
+
     onMount(async () => {
+        setTimeout(() => {
+            fileInit = e => {
+                e.focus();
+                document.execCommand('selectAll',false,null);
+            }
+            
+        }, 500)
+
         try {
             load()
         } catch (error) {
@@ -100,15 +132,18 @@
             $files = [
                 {
                     filename: "server.js",
-                    contents: defaultServer
+                    contents: defaultServer,
+                    builtin: true,
                 },
                 {
                     filename: "index.html",
-                    contents: defaultIndex
+                    contents: defaultPage,
+                    builtin: true,
                 },
                 {
                     filename: ".loader.html",
-                    contents: defaultLoader
+                    contents: defaultLoaderTags,
+                    builtin: true,
                 },
             ]
         }
@@ -121,10 +156,24 @@
     <div class="tabs">
         {#if $files}
             {#each $files as file, i}
-                <button on:click={_ => $activeFileIndex = i} class="tab" class:active={i == $activeFileIndex}>
-                    {file.filename}
-                </button>
+                {#if showHiddenFiles || file.filename[0] != "."}
+                    <button on:click={_ => $activeFileIndex = i} class="tab" class:active={i == $activeFileIndex}>
+                        <div class="filename-input" type="text" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
+                        {#if !file.builtin}
+                            <button on:click={_ => deleteFile(i)} class="delete-file-button">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                                </svg>
+                            </button>
+                        {/if}
+                    </button>
+                {/if}
             {/each}
+            <button on:click={createFile} class="new-file-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+                </svg>
+            </button>
         {/if}
     </div>
     <div class="util-buttons">
@@ -148,12 +197,61 @@
 <style>
     main {
         display: flex;
-        height: inherit;
+        flex-grow: 1;
+    }
+
+    button, input[type="text"] {
+        background-color: transparent;
+        border: none;
+        color: inherit;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+
+    button {
+        padding: 0;
+    }
+
+    .tab.active .filename-input {
+        cursor: text;
+        pointer-events: all !important;
+    }
+
+    .filename-input:focus {
+        color: white;
+    }
+    
+    .filename-input {
+        font-family: monospace;
+        padding: 2px;
+        pointer-events: none;
+    }
+
+    .new-file-button svg {
+        opacity: 0.5;
+    }
+
+    .new-file-button:hover svg {
+        opacity: 1;
+    }
+
+    .tab:hover .delete-file-button svg {
+        opacity: 0.8;
+    }
+    .delete-file-button svg {
+        opacity: 0;
+    }
+    .tab.active .delete-file-button svg {
+        opacity: 1;
     }
 
     .editor-container {
         width: 50%;
-        height: inherit;
+        height: 100%;
         background-color: #222222;
     }
 
@@ -166,7 +264,7 @@
     }
 
     .util-buttons {
-        /* height: inherit; */
+        /* height: 100%; */
         display: flex;
         gap: 3px;
         padding: 3px 3px;
@@ -182,13 +280,10 @@
 
     .tab {
         font-size: 1em;
-        font-family: monospace;
-        padding: 6px 8px;
-        color: #8b888f;
-        background-color: transparent;
+        padding: 6px 6px;
         height: 100%;
-        border: none;
         border-bottom: 1px solid transparent;
+        color: #8b888f;
     }
 
     .tab.active {
@@ -197,7 +292,7 @@
     }
 
     iframe {
-        height: inherit;
+        height: 100%;
         width: 50%;
     }
 </style>

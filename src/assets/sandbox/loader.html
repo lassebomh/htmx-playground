@@ -12,7 +12,7 @@
     Polly.register(FetchAdapter);
     Polly.register(XHRAdapter);
 
-    const polly = new Polly('Simple Example', {
+    const polly = new Polly('sandbox-server', {
         adapters: ['fetch', 'xhr'],
         mode: "passthrough",
         logging: true,
@@ -20,6 +20,10 @@
 
     const server = polly.server;
     const fileMap = {};
+    
+    files.forEach(file => {
+        fileMap[file.filename] = file.contents
+    });
 
     function readFile(filename) {
         return fileMap[filename]
@@ -28,7 +32,7 @@
     const on = {
         get: (route, handler) => {
             server.get(route).intercept(async (req, res) => {
-                console.log(req);
+                // console.log(req);
 
                 // var request = new Request(req.url, {
                 // })
@@ -43,26 +47,25 @@
             });
         }
     }
+    
+    eval(readFile('server.js'))
 
-    window.addEventListener('message', async (message) => {
-        if (message.data == null || message.data.type != 'initialize_sandbox') return;
+    // window.addEventListener('message', async (message) => {
+    //     if (message.data == null || message.data.type != 'initialize_sandbox') return;
         
-        message.data.files.forEach(file => {
-            fileMap[file.filename] = file.contents
-        });
 
-        eval(readFile('server.js'))
+    //     eval(readFile('server.js'))
             
-        // let res = await fetch('/')
-        // document.head.parentElement.innerHTML = await res.text()
+    //     // let res = await fetch('/')
+    //     // document.head.parentElement.innerHTML = await res.text()
 
-        // let headers = {}
-        // let tres = await fetch('/clicked')
-        // console.log(tres);
-        // console.log(await tres.text())
-        // console.log([...tres.headers.entries()]);
-        // console.log([...tres.headers.entries()].reduce((map, obj) => {map[obj[0]] = obj[1]; return map;}, {}));
-    })
+    //     // let headers = {}
+    //     // let tres = await fetch('/clicked')
+    //     // console.log(tres);
+    //     // console.log(await tres.text())
+    //     // console.log([...tres.headers.entries()]);
+    //     // console.log([...tres.headers.entries()].reduce((map, obj) => {map[obj[0]] = obj[1]; return map;}, {}));
+    // })
 
     // nunjucks.configure({ autoescape: true });
     // console.log(nunjucks.renderString('Hello {{ username }}', { username: 'James' }));

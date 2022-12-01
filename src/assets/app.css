@@ -4,4 +4,6 @@ body {
     height: 100vh;
     color: #dddddd;
     font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
 }

@@ -14,9 +14,14 @@
     onMount(() => {
         // @ts-ignore
         editor = ace.edit(container);
-        editor.setTheme("ace/theme/monokai");
+
         editor.setOptions({
             fontSize: '11pt',
+            // wrap: true,
+            indentedSoftWrap: true,
+            showLineNumbers: false, // hide the gutter
+            theme: "ace/theme/monokai"
+
         })
 
         editor.session.on('change', () => {
