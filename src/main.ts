@@ -1,10 +1,11 @@
 import App from './App.svelte'
-import './assets/global.css'
+
+nunjucks.configure('views', {
+  autoescape: false,
+});
 
 const app = new App({
-    target: document.body
+  target: document.body
 })
-
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js');
 
 export default app

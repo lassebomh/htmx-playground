@@ -1,97 +1,203 @@
+<script>
+    import { writable } from 'svelte/store'
+    import { onMount } from 'svelte';
 
-
-<script lang="ts">
-    import GoldenLayout from 'svelte-golden-layout';
-	import type { LayoutConfig, ResolvedLayoutConfig, VirtualLayout } from 'golden-layout';
-    import { get, type Writable } from 'svelte/store';
-	import { propertyStore } from 'svelte-writable-derived';
-
-    import { sandbox } from './lib/store'
-
-    import './assets/goldenlayout-theme.css';
-
-    import Monaco from "./lib/Monaco.svelte";
-    import Sidebar from "./lib/Sidebar.svelte";
-    import TestFile from './lib/TestFile.svelte';
-    import Sandbox from './lib/Sandbox.svelte';
-
-    const components = { Sidebar, Monaco, TestFile, Sandbox };
-	let goldenLayout: VirtualLayout;
+    import defaultLoader from './assets/sandbox/head.html?raw'
+    import defaultServer from './assets/sandbox/server.js?raw'
+    import defaultIndex from './assets/sandbox/index.html?raw'
     
-    let layout: Writable<LayoutConfig> = propertyStore(sandbox, 'layout');
+    import './assets/app.css'
+    import Ace from './components/Ace.svelte'
 
-    // $: $layout = {
-    //     root: {
-    //         type: 'stack',
-    //         isClosable: false,
-    //         content: Object.keys(get(sandbox).files).map(filename => {
-    //             return {
-    //                 type: 'component',
-    //                 title: filename,
-    //                 componentType: 'Monaco',
-    //                 componentState: {
-    //                     filename,
-    //                 },
-    //             }}
-    //         ),
-    //     }
-    // };
+    let sandbox;
+    let srcdoc;
 
-	function handleSave() {
-		console.log(goldenLayout.saveLayout());
-	}
+    let activeFileIndex = writable(null);
+    let files = writable(null);
+    let file = writable(null);
+    
+    $: if ($files != null && $activeFileIndex != null) {
+        $file = $files[$activeFileIndex];
+    }
 
-	function handleRestore() {
-        console.log('try restore');
+    function getPlaygroundIdentifier() {
+        const hashSplit = window.location.hash.substring(1).split(':')
+        if (hashSplit.length != 2) throw new Error("No playground id")
+
+        return {schema: hashSplit[0], id: atob(hashSplit[1])}
+    }
+    function setPlaygroundIdentifier(schema, id) {
+        window.location.hash = "#" + schema + ":" + btoa(id)
+    }
+
+    function save() {
+        let schema;
+        let id;
+
+        try {
+            let pid = getPlaygroundIdentifier()
+            schema = pid.schema
+            id = pid.id
+            
+        } catch (error) {
+            schema = 'local'
+            id = crypto.randomUUID().replaceAll('-', '')
+            setPlaygroundIdentifier(schema, id)
+        }
+
+        switch (schema) {
+            case "local":
+                localStorage.setItem(id, JSON.stringify($files))
+                break;
         
-		// layout = saved as unknown as LayoutConfig;
-	}
+            default:
+                throw new Error("Unknown save schema")
+                break;
+        }
+    }
+    function load() {
+        const { schema, id } = getPlaygroundIdentifier()
+         
+        switch (schema) {
+            case "local":
+                $files = JSON.parse(localStorage.getItem(id))
+                break;
+        
+            default:
+                throw new Error("Unknown load schema")
+                break;
+        }
 
+        if ($files == null) throw new Error("Failed to load playground")
+
+        $activeFileIndex = $files.findIndex((file) => file.filename == "server.js");
+    }
+
+    // function initSandbox() {
+    //     sandbox.contentWindow.postMessage({'type': "initialize_sandbox", 'files': $files}, '*')
+    // }
+
+    function updateSrcdoc() {
+        sandbox.srcdoc = ""
+
+        let setup = $files.find((file) => file.filename == '.loader.html').contents
+        let index = $files.find((file) => file.filename == 'index.html').contents
+        // @ts-ignore
+        sandbox.srcdoc = nunjucks.renderString(index, { loader: setup });
+
+        setTimeout(() => {
+            sandbox.contentWindow.postMessage({'type': "initialize_sandbox", 'files': $files}, '*')
+        }, 1000)
+    }
+
+    onMount(async () => {
+        try {
+            load()
+        } catch (error) {
+
+            $activeFileIndex = 0
+
+            $files = [
+                {
+                    filename: "server.js",
+                    contents: defaultServer
+                },
+                {
+                    filename: "index.html",
+                    contents: defaultIndex
+                },
+                {
+                    filename: ".loader.html",
+                    contents: defaultLoader
+                },
+            ]
+        }
+
+        updateSrcdoc()
+    })
 </script>
 
+<div class="editor-topbar">
+    <div class="tabs">
+        {#if $files}
+            {#each $files as file, i}
+                <button on:click={_ => $activeFileIndex = i} class="tab" class:active={i == $activeFileIndex}>
+                    {file.filename}
+                </button>
+            {/each}
+        {/if}
+    </div>
+    <div class="util-buttons">
+        <button on:click={updateSrcdoc} class="reload-button">
+            Reload
+        </button>
+        <button on:click={save} class="save-button">
+            Save
+        </button>
+    </div>
+</div>
 <main>
-    <div class="sidebar">
-		<h1>Config</h1>
-		<p>
-			<button on:click={handleSave}>Save Layout</button>
-			<!-- <button on:click={handleRestore} disabled={saved === undefined}>Restore Layout</button> -->
-		</p>
-		{#each Object.entries($sandbox.files) as [filename, content]}
-			<pre>File: {filename}</pre>
-            <pre>{content}</pre>
-            <br/>
-		{/each}
-		<h2>Saved Layout</h2>
-		<!-- {#if saved !== undefined}
-			<pre>{JSON.stringify(saved, undefined, 2)}</pre>
-		{:else}
-			<p>(none)</p>
-		{/if} -->
+    <div class="editor-container">
+        {#if $files}
+            <Ace {file} />
+        {/if}
     </div>
-    <div class="layout-container">
-        <GoldenLayout bind:goldenLayout config={get(layout)} let:componentType let:componentState>
-            <svelte:component this={components[componentType]} {...componentState} />
-        </GoldenLayout>
-    </div>
+    <iframe bind:this={sandbox} title="Sandbox" frameborder="0" sandbox="allow-scripts"></iframe> 
 </main>
 
 <style>
-    .layout-container {
-        width: 100%;
-        height: 100%;
-        border-left: 4px solid #151515;
-    }
-
-    .sidebar {
-        /* overflow: hidden scroll; */
-        width: 300px;
-    }
-
     main {
         display: flex;
-        width: 200px;
-        width: inherit;
+        height: inherit;
+    }
+
+    .editor-container {
+        width: 50%;
         height: inherit;
         background-color: #222222;
+    }
+
+    .editor-topbar {
+        padding-left: 42px;
+        background-color: #1c1c1c;
+        /* width: 100%; */
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .util-buttons {
+        /* height: inherit; */
+        display: flex;
+        gap: 3px;
+        padding: 3px 3px;
+    }
+
+    .tabs {
+        padding: 0px 0px;
+        display: flex;
+        align-items: center;
+        justify-content: start;
+        /* gap: 2px; */
+    }
+
+    .tab {
+        font-size: 1em;
+        font-family: monospace;
+        padding: 6px 8px;
+        color: #8b888f;
+        background-color: transparent;
+        height: 100%;
+        border: none;
+        border-bottom: 1px solid transparent;
+    }
+
+    .tab.active {
+        color: #fce550;
+        border-bottom-color: #fce550;
+    }
+
+    iframe {
+        height: inherit;
+        width: 50%;
     }
 </style>

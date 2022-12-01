@@ -1,5 +1,5 @@
 {
-  "name": "htmx-sandbox",
+  "name": "htmx-sandbox-2",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,18 +12,20 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^1.1.0",
     "@tsconfig/svelte": "^3.0.0",
-    "golden-layout": "^2.6.0",
     "svelte": "^3.52.0",
     "svelte-check": "^2.9.2",
     "svelte-preprocess": "^4.10.7",
-    "svelte-writable-derived": "^2.1.5",
     "tslib": "^2.4.0",
     "typescript": "^4.6.4",
     "vite": "^3.2.3"
   },
   "dependencies": {
+    "@babel/parser": "^7.20.5",
+    "@babel/traverse": "^7.20.5",
     "monaco-editor": "^0.34.1",
+    "monaco-jsx-highlighter": "^2.0.4",
+    "monaco-jsx-syntax-highlight": "^1.2.0",
     "monaco-themes": "^0.4.3",
-    "svelte-golden-layout": "^0.1.1"
+    "svelte-writable-derived": "^2.1.5"
   }
 }
