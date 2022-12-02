@@ -3,14 +3,32 @@
 <script src="./js/pollyjs-adapter-fetch.js"></script>
 <script src="./js/pollyjs-adapter-xhr.js"></script>
 <script>
-    const PollyJS = window['@pollyjs/core'];
-    const FetchAdapter = window['@pollyjs/adapter-fetch']
-    const XHRAdapter = window['@pollyjs/adapter-xhr']
+    const fileContents = {};
+    files.forEach(file => fileContents[file.filename] = file.contents);
 
-    const { Polly } = PollyJS;
+    function readFile(filename) {
+        return fileContents[filename]
+    }
 
-    Polly.register(FetchAdapter);
-    Polly.register(XHRAdapter);
+    let TemplateLoader = {
+        getSource: (name) => ({
+            src: readFile(name),
+            path: name
+        })
+    }
+    var templates = new nunjucks.Environment(TemplateLoader, {
+        autoescape: false
+    })
+
+    function render(request, template, context) {
+        let out = templates.render(template, {...context, request})
+        return new Response(out)
+    }
+
+    const { Polly } = window['@pollyjs/core'];
+
+    Polly.register(window['@pollyjs/adapter-fetch']);
+    Polly.register(window['@pollyjs/adapter-xhr']);
 
     const polly = new Polly('sandbox-server', {
         adapters: ['fetch', 'xhr'],
@@ -19,56 +37,26 @@
     });
 
     const server = polly.server;
-    const fileMap = {};
     
-    files.forEach(file => {
-        fileMap[file.filename] = file.contents
-    });
+    const on = {};
 
-    function readFile(filename) {
-        return fileMap[filename]
-    }
+    ['get','put','post','patch','delete','merge','head','options'].forEach((method) => {
+        on[method] = (route, handler) => {
+            server[method](route).intercept(async (req, res) => {
+                // var request = new Request(req.url, {})
+                var response = await handler(req, ...Object.values(req.params))
 
-    const on = {
-        get: (route, handler) => {
-            server.get(route).intercept(async (req, res) => {
-                // console.log(req);
+                if (!response) throw new Error("Handler returned no response!")
 
-                // var request = new Request(req.url, {
-                // })
-
-                var response = await handler(req)
-
-                for (const [k,v] of response.headers.entries()) res.setHeader(k,v);
+                for (const [k,v] of response.headers.entries()) {
+                    res.setHeader(k,v);
+                }
                 
-                res.status(response.status).send(await response.text());
-                //    .setHeaders([...response.headers.entries()].reduce((map, obj) => {map[obj[0]] = obj[1]; return map;}, {}))
-
+                res.status(response.status)
+                   .send(await response.text());
             });
         }
-    }
-    
-    eval(readFile('server.js'))
-
-    // window.addEventListener('message', async (message) => {
-    //     if (message.data == null || message.data.type != 'initialize_sandbox') return;
+    })
         
-
-    //     eval(readFile('server.js'))
-            
-    //     // let res = await fetch('/')
-    //     // document.head.parentElement.innerHTML = await res.text()
-
-    //     // let headers = {}
-    //     // let tres = await fetch('/clicked')
-    //     // console.log(tres);
-    //     // console.log(await tres.text())
-    //     // console.log([...tres.headers.entries()]);
-    //     // console.log([...tres.headers.entries()].reduce((map, obj) => {map[obj[0]] = obj[1]; return map;}, {}));
-    // })
-
-    // nunjucks.configure({ autoescape: true });
-    // console.log(nunjucks.renderString('Hello {{ username }}', { username: 'James' }));
-
-
+    eval(readFile('server.js'))
 </script>

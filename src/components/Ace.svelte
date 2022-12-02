@@ -16,10 +16,10 @@
         editor = ace.edit(container);
 
         editor.setOptions({
-            fontSize: '11pt',
+            fontSize: '12pt',
             // wrap: true,
             indentedSoftWrap: true,
-            showLineNumbers: false, // hide the gutter
+            // showLineNumbers: false,
             theme: "ace/theme/monokai"
 
         })

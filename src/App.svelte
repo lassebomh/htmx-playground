@@ -157,15 +157,13 @@
         {#if $files}
             {#each $files as file, i}
                 {#if showHiddenFiles || file.filename[0] != "."}
-                    <button on:click={_ => $activeFileIndex = i} class="tab" class:active={i == $activeFileIndex}>
+                    <button on:click={_ => $activeFileIndex = i} class="tab" class:builtin={file.builtin} class:active={i == $activeFileIndex}>
                         <div spellcheck="false" class="filename-input" type="text" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
-                        {#if !file.builtin}
-                            <button on:click={_ => deleteFile(i)} class="delete-file-button">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
-                                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
-                                </svg>
-                            </button>
-                        {/if}
+                        <button on:click={_ => deleteFile(i)} class="delete-file-button" disabled={file.builtin}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x" viewBox="0 0 16 16">
+                                <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                            </svg>
+                        </button>
                     </button>
                 {/if}
             {/each}
@@ -176,7 +174,11 @@
             </button>
         {/if}
     </div>
-    <div class="util-buttons">
+    <div class="utilities">
+        <div class="show-hidden-files">
+            <label for="show-hidden-files-checkbox">Show hidden files</label>
+            <input id="show-hidden-files-checkbox" type="checkbox" bind:checked={showHiddenFiles}>
+        </div>
         <button on:click={updateSrcdoc} class="reload-button">
             Reload
         </button>
@@ -200,7 +202,7 @@
         flex-grow: 1;
     }
 
-    button, input[type="text"] {
+    button {
         background-color: transparent;
         border: none;
         color: inherit;
@@ -216,7 +218,14 @@
         padding: 0;
     }
 
-    .tab.active .filename-input {
+    .show-hidden-files {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .tab.active:not(.builtin) .filename-input {
         cursor: text;
         pointer-events: all !important;
     }
@@ -227,10 +236,14 @@
     }
     
     .filename-input {
-        font-family: monospace;
         padding: 2px;
         pointer-events: none;
         outline: none;
+    }
+
+    .new-file-button {
+        padding: 8.5px;
+        padding-bottom: 9.5px;
     }
 
     .new-file-button svg {
@@ -242,13 +255,16 @@
     }
 
     .tab:hover .delete-file-button svg {
-        opacity: 0.8;
+        opacity: 0.5;
     }
     .delete-file-button svg {
         opacity: 0;
     }
     .tab.active .delete-file-button svg {
-        opacity: 1;
+        opacity: 0.8;
+    }
+    .tab.builtin .delete-file-button {
+        opacity: 0;
     }
 
     .editor-container {
@@ -258,14 +274,14 @@
     }
 
     .editor-topbar {
-        padding-left: 42px;
+        /* padding-left: 42px; */
         background-color: #1c1c1c;
         /* width: 100%; */
         display: flex;
         justify-content: space-between;
     }
 
-    .util-buttons {
+    .utilities {
         /* height: 100%; */
         display: flex;
         gap: 3px;
@@ -281,10 +297,11 @@
     }
 
     .tab {
-        font-size: 1em;
-        padding: 6px 6px;
+        font-size: 0.9em;
+        padding: 6px 10px;
+        padding-right: 4px;
         height: 100%;
-        border-bottom: 1px solid transparent;
+        border-bottom: 1px solid #fff2;
         color: #8b888f;
         gap: 0;
     }
