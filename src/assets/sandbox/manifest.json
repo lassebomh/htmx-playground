@@ -1,0 +1,9 @@
+{
+    "name": "HTMX Example",
+    "method": "url",
+    "files": [
+        {
+            "id": "./index.html"
+        }
+    ]
+}

@@ -55,11 +55,30 @@
                 break;
         }
     }
+
+    async function getFile(schema, id) {
+        // hxbox:<playground_id>:<file_id>
+        // https://localhost:5500/sandbox/index.html
+
+        switch (schema) {
+            case "url":
+                $files = JSON.parse(localStorage.getItem(id))
+                break;
+        
+            default:
+                throw new Error("Unknown load schema")
+                break;
+        }
+    }
+
     function load() {
         const { schema, id } = getPlaygroundIdentifier()
          
         switch (schema) {
             case "local":
+                $files = JSON.parse(localStorage.getItem(id))
+                break;
+            case "url":
                 $files = JSON.parse(localStorage.getItem(id))
                 break;
         

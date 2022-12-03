@@ -42,7 +42,8 @@
 
     ['get','put','post','patch','delete','merge','head','options'].forEach((method) => {
         on[method] = (route, handler) => {
-            server[method](route).intercept(async (req, res) => {
+            let parsedRoute = route.replaceAll(/\/<([^>]+)>/gm, (_, m) => "/:"+m)
+            server[method](parsedRoute).intercept(async (req, res) => {
                 // var request = new Request(req.url, {})
                 var response = await handler(req, ...Object.values(req.params))
 
