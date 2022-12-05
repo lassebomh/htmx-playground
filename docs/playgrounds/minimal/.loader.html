@@ -1,0 +1,102 @@
+<script src="./js/nunjucks.js"></script>
+<script src="./js/pollyjs-core.js"></script>
+<script src="./js/pollyjs-adapter-fetch.js"></script>
+<script src="./js/pollyjs-adapter-xhr.js"></script>
+<script>
+    const fileContents = {};
+    files.forEach(file => fileContents[file.filename] = file.contents);
+
+    function readFile(filename) {
+        return fileContents[filename]
+    }
+
+    function isValidHttpUrl(string) {
+        let url;
+        try {
+            url = new URL(string);
+        } catch {
+            return false;
+        }
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+
+    let TemplateLoader = {
+        getSource: (name) => ({
+            src: readFile(name),
+            path: name
+        })
+    }
+    var templates = new nunjucks.Environment(TemplateLoader, {
+        autoescape: false
+    })
+
+    function render(request, template, context) {
+        let out = templates.render(template, {...context, request})
+        return new Response(out, {
+            headers: {
+                'content-type': 'text/html'
+            }
+        })
+    }
+
+    const { Polly } = window['@pollyjs/core'];
+
+    Polly.register(window['@pollyjs/adapter-fetch']);
+    Polly.register(window['@pollyjs/adapter-xhr']);
+
+    const polly = new Polly('sandbox-server', {
+        adapters: ['fetch', 'xhr'],
+        mode: "passthrough",
+        logging: true,
+    });
+
+    const server = polly.server;
+    
+    const on = {};
+
+    ['get','put','post','patch','delete','merge','head','options'].forEach((method) => {
+        on[method] = (route, handler) => {
+            let parsedRoute = route.replaceAll(/\/<([^>]+)>/gm, (_, m) => "/:"+m)
+            server[method](parsedRoute).intercept(async (req, res) => {
+                var requestHeaders = Object.assign({}, req.headers)
+                var request = new Request(req.url, {
+                    body: req.body,
+                    headers: requestHeaders,
+                    method: req.method,
+                })
+
+                var response = await handler(request, ...Object.values(req.params))
+
+                if (!response) throw new Error("Handler returned no response!") // Return 404?
+
+                let responseHeaders = {}
+
+                for (const [k,v] of response.headers.entries()) {
+                    res.setHeader(k,v);
+                    responseHeaders[k] = v
+                }
+
+                let text = await response.text()
+                
+                res.status(response.status).send(text);
+
+                window.parent.postMessage({
+                    type: "network_log",
+                    request: {
+                        url: req.url,
+                        body: req.body,
+                        method: req.method,
+                        headers: requestHeaders,
+                    },
+                    response: {
+                        headers: responseHeaders,
+                        status: response.status,
+                        body: text,
+                    },
+                }, "*")
+            });
+        }
+    })
+        
+    eval(readFile('server.js'))
+</script>

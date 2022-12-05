@@ -45,8 +45,10 @@
 </script>
 
 <main>
-    <input type="checkbox" checked={false} id="toggle">
-    <label class="topbar" for="toggle">Network Viewer ({logs.length})</label>
+    <input type="checkbox" checked={true} id="toggle">
+    <label class="topbar" for="toggle">
+        ({logs.length}) Network Viewer<span style="font-family: monospace;">{(logs[logI] && (": " + logs[logI].request.url)) || ""}</span>
+    </label>
     <div class="body">
         <div class="log-list">
             {#if logs.length > 0}
@@ -77,7 +79,7 @@
     main {
         border-top: 1px solid #fff2;
         background-color: #202020;
-        height: 40px;
+        height: 41px;
         transition: height .3s ease-in-out;
         display: flex;
         flex-direction: column;
@@ -104,7 +106,7 @@
     .log-header {
         padding: 8px;
         margin: 0;
-        color: #fff6;
+        color: #fff9;
         font-weight: 400;
         border-bottom: 1px #fff3 solid;
         border-top: 1px #fff3 solid;
@@ -130,7 +132,7 @@
         border-top: 1px solid #fff2;
         background-color: #282828;
         display: flex;
-        height: calc(100% - 40px);
+        height: calc(100% - 41px);
     }
 
     .log-list {
