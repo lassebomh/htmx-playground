@@ -22,7 +22,11 @@
 
     function render(request, template, context) {
         let out = templates.render(template, {...context, request})
-        return new Response(out)
+        return new Response(out, {
+            headers: {
+                'content-type': 'text/html'
+            }
+        })
     }
 
     const { Polly } = window['@pollyjs/core'];
@@ -44,17 +48,40 @@
         on[method] = (route, handler) => {
             let parsedRoute = route.replaceAll(/\/<([^>]+)>/gm, (_, m) => "/:"+m)
             server[method](parsedRoute).intercept(async (req, res) => {
-                // var request = new Request(req.url, {})
-                var response = await handler(req, ...Object.values(req.params))
+                var request = new Request(req.url, {
+                    body: req.body,
+                    headers: req.headers,
+                    method: req.method,
+                })
+
+                var response = await handler(request, ...Object.values(req.params))
 
                 if (!response) throw new Error("Handler returned no response!")
 
+                let responseHeaders = {}
+
                 for (const [k,v] of response.headers.entries()) {
                     res.setHeader(k,v);
+                    responseHeaders[k] = v
                 }
+
+                let text = await response.text()
                 
-                res.status(response.status)
-                   .send(await response.text());
+                res.status(response.status).send(text);
+
+                window.parent.postMessage({
+                    type: "network_log",
+                    request: {
+                        url: req.url,
+                        body: req.body,
+                        method: req.method
+                    },
+                    response: {
+                        headers: responseHeaders,
+                        status: response.status,
+                        body: text,
+                    },
+                }, "*")
             });
         }
     })

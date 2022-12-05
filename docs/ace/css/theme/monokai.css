@@ -1,128 +1,128 @@
-.ace-monokai .ace_gutter {
-  background: #191919;
-  color: #8F908A
+.ace_gutter {
+  background: #191919 !important;
+  color: #8F908A !important;
 }
 
-.ace-monokai .ace_print-margin {
-  width: 0px;
-  background: #555651
+.ace_print-margin {
+  width: 0px !important;
+  background: #555651 !important;
 }
 
-.ace-monokai {
-  background-color: #222222;
-  color: #F8F8F2
+.ace_editor {
+  background-color: #222222 !important;
+  color: #F8F8F2 !important;
 }
 
-.ace-monokai .ace_cursor {
-  color: #F8F8F0
+.ace_cursor {
+  color: #F8F8F0 !important;
 }
 
-.ace-monokai .ace_marker-layer .ace_selection {
-  background: #3E3E3E
+.ace_marker-layer .ace_selection {
+  background: #3E3E3E !important;
 }
 
 .ace-monokai.ace_multiselect .ace_selection.ace_start {
-  box-shadow: 0 0 3px 0px #222222;
+  box-shadow: 0 0 3px 0px #222222 !important;
 }
 
-.ace-monokai .ace_marker-layer .ace_step {
-  background: rgb(102, 82, 0)
+.ace_marker-layer .ace_step {
+  background: rgb(102, 82, 0) !important;
 }
 
-.ace-monokai .ace_marker-layer .ace_bracket {
-  margin: -1px 0 0 -1px;
-  border: 1px solid #3E3E3E
+.ace_marker-layer .ace_bracket {
+  margin: -1px 0 0 -1px !important;
+  border: 1px solid #3E3E3E !important;
 }
 
-.ace-monokai .ace_marker-layer .ace_active-line {
-  background: #2d2c2d
+.ace_marker-layer .ace_active-line {
+  background: #2d2c2d !important;
 }
 
-.ace-monokai .ace_gutter-active-line {
-  background-color: #272727
+.ace_gutter-active-line {
+  background-color: #272727 !important;
 }
 
-.ace-monokai .ace_marker-layer .ace_selected-word {
-  border: 1px solid #3E3E3E
+.ace_marker-layer .ace_selected-word {
+  border: 1px solid #3E3E3E !important;
 }
 
-.ace-monokai .ace_invisible {
-  color: #52524d
+.ace_invisible {
+  color: #52524d !important;
 }
 
-.ace-monokai .ace_entity.ace_name.ace_tag,
-.ace-monokai .ace_keyword,
-.ace-monokai .ace_meta.ace_tag,
-.ace-monokai .ace_storage {
-  color: #fa5080
+.ace_entity.ace_name.ace_tag,
+.ace_keyword,
+.ace_meta.ace_tag,
+.ace_storage {
+  color: #fa5080 !important;
 }
 
-.ace-monokai .ace_punctuation,
-.ace-monokai .ace_punctuation.ace_tag {
-  color: #8b888f
+.ace_punctuation,
+.ace_punctuation.ace_tag {
+  color: #8b888f !important;
 }
 
-.ace-monokai .ace_constant.ace_character,
-.ace-monokai .ace_constant.ace_language,
-.ace-monokai .ace_constant.ace_numeric,
-.ace-monokai .ace_constant.ace_other {
-  color: #AE81FF
+.ace_constant.ace_character,
+.ace_constant.ace_language,
+.ace_constant.ace_numeric,
+.ace_constant.ace_other {
+  color: #AE81FF !important;
 }
 
-.ace-monokai .ace_invalid {
-  color: #F8F8F0;
-  background-color: #FC618D
+.ace_invalid {
+  color: #F8F8F0 !important;
+  background-color: #FC618D !important;
 }
 
-.ace-monokai .ace_invalid.ace_deprecated {
-  color: #F8F8F0;
-  background-color: #AE81FF
+.ace_invalid.ace_deprecated {
+  color: #F8F8F0 !important;
+  background-color: #AE81FF !important;
 }
 
-.ace-monokai .ace_support.ace_constant,
-.ace-monokai .ace_support.ace_function {
-  color: #66D9EF
+.ace_support.ace_constant,
+.ace_support.ace_function {
+  color: #66D9EF !important;
 }
 
-.ace-monokai .ace_fold {
-  background-color: #5ad4e6;
-  border-color: #F8F8F2
+.ace_fold {
+  background-color: #5ad4e6 !important;
+  border-color: #F8F8F2 !important;
 }
 
-.ace-monokai .ace_storage.ace_type,
-.ace-monokai .ace_support.ace_class,
-.ace-monokai .ace_support.ace_type {
-  font-style: italic;
-  color: #66D9EF
+.ace_storage.ace_type,
+.ace_support.ace_class,
+.ace_support.ace_type {
+  font-style: italic !important;
+  color: #66D9EF !important;
 }
 
 /* fc618d */
 
-.ace-monokai .ace_entity.ace_name.ace_function,
-.ace-monokai .ace_entity.ace_other,
-.ace-monokai .ace_entity.ace_other.ace_attribute-name,
-.ace-monokai .ace_variable {
-  color: #5ad4e6;
-  font-style: italic;
+.ace_entity.ace_name.ace_function,
+.ace_entity.ace_other,
+.ace_entity.ace_other.ace_attribute-name,
+.ace_variable {
+  color: #5ad4e6 !important;
+  font-style: italic !important;
 }
 
-.ace-monokai .ace_variable.ace_parameter {
-  font-style: italic;
-  color: #FD971F
+.ace_variable.ace_parameter {
+  font-style: italic !important;
+  color: #FD971F !important;
 }
 
-.ace-monokai .ace_string {
-  color: #E6DB74
+.ace_string {
+  color: #E6DB74 !important;
 }
 
-.ace-monokai .ace_comment {
-  color: #75715E
+.ace_comment {
+  color: #75715E !important;
 }
 
-/* .ace-monokai .ace_indent-guide {
-  background: url("../monokai-1.png") right repeat-y
+/* .ace_indent-guide {
+  background: url("../monokai-1.png") right repeat-y !important;
 } */
 /* 
-.ace-monokai .ace_indent-guide-active {
-  background: url("../monokai-2.png") right repeat-y;
+.ace_indent-guide-active {
+  background: url("../monokai-2.png") right repeat-y !important;
 } */

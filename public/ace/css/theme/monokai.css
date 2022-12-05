@@ -1,5 +1,5 @@
 .ace-monokai .ace_gutter {
-  background: #191919;
+  background: #222;
   color: #8F908A
 }
 
@@ -39,7 +39,7 @@
 }
 
 .ace-monokai .ace_gutter-active-line {
-  background-color: #272727
+  background-color: #222;
 }
 
 .ace-monokai .ace_marker-layer .ace_selected-word {

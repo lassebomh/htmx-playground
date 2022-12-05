@@ -17,7 +17,7 @@
 
         editor.setOptions({
             fontSize: '12pt',
-            // wrap: true,
+            wrap: true,
             indentedSoftWrap: true,
             // showLineNumbers: false,
             theme: "ace/theme/monokai"
@@ -45,7 +45,9 @@
             if (editor && filename) {
                 const fileModes = {
                     'js': "ace/mode/javascript",
-                    'html': "ace/mode/nunjucks"
+                    'html': "ace/mode/nunjucks",
+                    'json': "ace/mode/json",
+                    'md': "ace/mode/markdown",
                 }
                 editor.session.setMode(fileModes[get(filename).split('.').pop()])
                 editor.session.setValue(get(contents))
@@ -56,11 +58,12 @@
 
 </script>
 
-<div bind:this={container}></div>
+<main bind:this={container}></main>
 
 <style>
-    div {
-        height: inherit;
+    main {
+        /* height: 100%; */
         width: 100%;
+        flex-grow: 1;
     }
 </style>

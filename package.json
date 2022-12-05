@@ -22,6 +22,10 @@
   "dependencies": {
     "@babel/parser": "^7.20.5",
     "@babel/traverse": "^7.20.5",
+    "@types/marked": "^4.0.7",
+    "highlight.js": "^11.7.0",
+    "isomorphic-dompurify": "^0.24.0",
+    "marked": "^4.2.3",
     "monaco-editor": "^0.34.1",
     "monaco-jsx-highlighter": "^2.0.4",
     "monaco-jsx-syntax-highlight": "^1.2.0",

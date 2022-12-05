@@ -2,9 +2,55 @@ body {
     margin: 0;
     padding: 0;
     height: 100vh;
-    color: #dddddd;
+    color: white;
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
     font-size: 16px;
+}
+
+.flex-bt {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* height: 100%; */
+}
+
+button {
+    background-color: transparent;
+    border: none;
+    color: inherit;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    box-sizing: border-box;
+    padding: 0;
+}
+
+.hide {
+    display: none;
+}
+
+pre > code {
+    white-space: initial;
+}
+
+::-webkit-scrollbar {
+    background-color: #ffffff17;
+    width: 8px;
+}
+::-webkit-scrollbar:hover {
+    background-color: #ffffff17;
+}
+::-webkit-scrollbar-button {
+    display: none;
+}
+::-webkit-scrollbar-thumb {
+    background-color: #fff2;
+    border-radius: 1000px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: #fff5;
 }
