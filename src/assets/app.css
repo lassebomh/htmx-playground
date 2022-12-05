@@ -38,19 +38,16 @@ pre > code {
 }
 
 ::-webkit-scrollbar {
-    background-color: #ffffff17;
+    background-color: #ffffff1e;
     width: 8px;
-}
-::-webkit-scrollbar:hover {
-    background-color: #ffffff17;
 }
 ::-webkit-scrollbar-button {
     display: none;
 }
 ::-webkit-scrollbar-thumb {
-    background-color: #fff2;
+    background-color: rgba(255, 255, 255, 0.233);
     border-radius: 1000px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #fff5;
+    background-color: rgba(255, 255, 255, 0.308);
 }

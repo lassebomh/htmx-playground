@@ -65,24 +65,6 @@
         updateSrcdoc()
     })
 
-    window.addEventListener('message', (message) => {
-        console.log(message);
-        
-        if (message.data && message.data.type) {
-            switch (message.data.type) {
-                case "console":
-                    logs.push(message.data.log)
-                    break;
-                case "network":
-                    network.push(message.data.exchange)
-                    break;
-            
-                default:
-                    break;
-            }
-        }
-    })
-
 </script>
 
 {#if $playground}
@@ -119,8 +101,8 @@
 
     .topbar {
         background-color: #161616;
-        height: 40px;
-        padding: 0 10px;
+        height: 50px;
+        padding: 0 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;

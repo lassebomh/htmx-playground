@@ -10,6 +10,16 @@
         return fileContents[filename]
     }
 
+    function isValidHttpUrl(string) {
+        let url;
+        try {
+            url = new URL(string);
+        } catch {
+            return false;
+        }
+        return url.protocol === "http:" || url.protocol === "https:";
+    }
+
     let TemplateLoader = {
         getSource: (name) => ({
             src: readFile(name),
@@ -48,15 +58,16 @@
         on[method] = (route, handler) => {
             let parsedRoute = route.replaceAll(/\/<([^>]+)>/gm, (_, m) => "/:"+m)
             server[method](parsedRoute).intercept(async (req, res) => {
+                var requestHeaders = Object.assign({}, req.headers)
                 var request = new Request(req.url, {
                     body: req.body,
-                    headers: req.headers,
+                    headers: requestHeaders,
                     method: req.method,
                 })
 
                 var response = await handler(request, ...Object.values(req.params))
 
-                if (!response) throw new Error("Handler returned no response!")
+                if (!response) throw new Error("Handler returned no response!") // Return 404?
 
                 let responseHeaders = {}
 
@@ -74,7 +85,8 @@
                     request: {
                         url: req.url,
                         body: req.body,
-                        method: req.method
+                        method: req.method,
+                        headers: requestHeaders,
                     },
                     response: {
                         headers: responseHeaders,

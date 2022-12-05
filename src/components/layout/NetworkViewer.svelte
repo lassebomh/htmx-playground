@@ -1,23 +1,58 @@
 <script type="ts">
+    import hljs from 'highlight.js'
+
+    hljs.configure({ languages: ['http'] })
+
     let logs = []
     let logI = 0
 
     window.addEventListener('message', (event) => {
         if (event.data && event.data.type == "network_log") {
-            logs = [...logs, event.data]
+            logs = [event.data, ...logs]
         }
     })
+
+    function highlightHttpRequest(e) {
+        let log = logs[logI]
+        let code = ""
+
+        code += `${log.request.method} ${log.request.url} HTTP/1.1\n`
+
+        for (let [key, value] of Object.entries(log.request.headers)) {
+            code += `${key}: ${value}\n`
+        }
+
+        if (log.request.body) code += "\n" + log.request.body + "\n"
+
+        e.innerHTML = hljs.highlight('http', code).value;
+    }
+
+    function highlightHttpResponse(e) {
+        let log = logs[logI]
+        let code = ""
+
+        code += `HTTP/1.1 ${log.response.status} ${log.response.statusText || ""}\n`
+        
+        for (let [key, value] of Object.entries(log.response.headers)) {
+            code += `${key}: ${value}\n`
+        }
+
+        if (log.response.body) code += "\n" + log.response.body + "\n"
+
+        e.innerHTML = hljs.highlight('http', code).value;
+    }
+
 </script>
 
 <main>
-    <input type="checkbox" checked={true} id="toggle">
+    <input type="checkbox" checked={false} id="toggle">
     <label class="topbar" for="toggle">Network Viewer ({logs.length})</label>
     <div class="body">
         <div class="log-list">
             {#if logs.length > 0}
                 {#each logs as log, i}
-                    <button on:click={_ => logI = i}>
-                        <div>{log.request.url}</div>
+                    <button on:click={_ => logI = i} class:active={i == logI}>
+                        <div>{log.request.method} {log.request.url}</div>
                         <div>{log.response.status}</div>
                     </button>
                 {/each}
@@ -25,8 +60,14 @@
         </div>
         <div class="log-viewer">
             {#if logs.length > 0}
-                {logs[logI].request.url}
-                {logs[logI].response.status}
+                <div>
+                    <h4 class="log-header" style="border-top: 0;">Request</h4>
+                    <pre use:highlightHttpRequest></pre>
+                </div>
+                <div>
+                    <h4 class="log-header">Response</h4>
+                    <pre use:highlightHttpResponse></pre>
+                </div>
             {/if}
         </div>
     </div>
@@ -34,9 +75,10 @@
 
 <style>
     main {
-        background-color: #2f2f2f;
-        height: 42px;
-        transition: height 0.3s ease-in-out;
+        border-top: 1px solid #fff2;
+        background-color: #202020;
+        height: 40px;
+        transition: height .3s ease-in-out;
         display: flex;
         flex-direction: column;
         position: absolute;
@@ -46,15 +88,37 @@
         max-height: 100%;
     }
 
+    pre {
+        padding: 16px;
+        margin: 0;
+        white-space: pre-line;
+    }
+
+    .log-viewer {
+        height: 100%;
+        flex-grow: 1;
+        overflow-y: auto;
+        font-family: monospace;
+    }
+
+    .log-header {
+        padding: 8px;
+        margin: 0;
+        color: #fff6;
+        font-weight: 400;
+        border-bottom: 1px #fff3 solid;
+        border-top: 1px #fff3 solid;
+    }
+
     .topbar {
-        font-size: 1.2em;
+        font-size: 18px;
         display: block;
         padding: 0.5em;
         cursor: pointer;
     }
 
     .topbar:hover {
-        background-color: #fff1;
+        background-color: #ffffff05;
     }
 
     #toggle {
@@ -66,7 +130,7 @@
         border-top: 1px solid #fff2;
         background-color: #282828;
         display: flex;
-        height: calc(100% - 42px);
+        height: calc(100% - 40px);
     }
 
     .log-list {
@@ -84,18 +148,16 @@
         width: 100%;
         display: flex;
         justify-content: space-between;
+        overflow-y: auto;
         font-family: monospace;
     }
 
-    .log-list button:hover {
+    .log-list button.active {
         background-color: #fff1;
     }
 
-
-    .log-viewer {
-        height: 100%;
-        flex-grow: 1;
-        overflow-y: auto;
+    .log-list button:hover {
+        background-color: #fff2;
     }
 
     main:has(#toggle:not(:checked)) {
