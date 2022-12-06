@@ -8,6 +8,7 @@
     import Sidebar from "./components/layout/Sidebar.svelte";
 
     import { srcdoc, activeFileIndex, openFile, playground } from './playground';
+import Resizer from './components/Resizer.svelte';
 
     $: if ($playground != null && $activeFileIndex != null) {
         $openFile = $playground.files[$activeFileIndex]
@@ -68,7 +69,7 @@
 </script>
 
 {#if $playground}
-    
+
 <main>
     <div class="topbar">
         <div class="topbar-left">   
@@ -80,13 +81,15 @@
             <div>Donate</div>
         </div>
     </div>
-    <div class="center">
-        <Sidebar />
-        <div class="windows">
-            <Editor />
-            <Sandbox />
-        </div>
-    </div>
+    
+    <Resizer startSize={1} endSize={6}>
+        <Sidebar slot="start" />
+
+        <Resizer slot="end" startSize={3} endSize={2}>
+            <Editor slot="start" />
+            <Sandbox slot="end" />
+        </Resizer>
+    </Resizer>
 </main>
 
 {/if}
@@ -106,6 +109,7 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        border-bottom: 1px solid #fff3;
     }
 
     .topbar-right {
@@ -121,18 +125,5 @@
         font-size: 1.3em;
         background-color: transparent;
         border: none;
-    }
-
-    .center {
-        flex-grow: 1;
-        display: flex;
-    }
-
-    .windows {
-        flex-grow: 1;
-        display: flex;
-        /* flex-direction: column; */
-        height: 100%;
-        position: relative;
     }
 </style>

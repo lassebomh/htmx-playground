@@ -90,10 +90,7 @@
         </div>
     </div>
     <div class="editor-container">
-        {#if $openFile != null}
-            <Ace file={openFile} />
-            <NetworkViewer />
-        {/if}
+        <Ace file={openFile} />
     </div>
 </main>
 
@@ -101,7 +98,8 @@
 
 <style>
     main {
-        flex-grow: 1;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
     }

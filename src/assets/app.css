@@ -1,19 +1,11 @@
 body {
     margin: 0;
     padding: 0;
+    width: 100vw;
     height: 100vh;
     color: white;
     font-family: Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
     font-size: 16px;
-}
-
-.flex-bt {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    /* height: 100%; */
 }
 
 button {
@@ -40,6 +32,7 @@ pre > code {
 ::-webkit-scrollbar {
     background-color: #ffffff1e;
     width: 8px;
+    height: 8px;
 }
 ::-webkit-scrollbar-button {
     display: none;

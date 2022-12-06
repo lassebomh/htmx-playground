@@ -1,4 +1,5 @@
 import App from './App.svelte'
+import Test from './Test.svelte'
 import './assets/app.css'
 import 'highlight.js/styles/github-dark.css'
 

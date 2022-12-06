@@ -48,7 +48,7 @@
 
 </script>
 
-<main class:hide={readme_html == null}>
+<main>
     {@html readme_html}
     {#if parse_error_message != ""}
         <div class="parse-error">{parse_error_message}</div>
@@ -57,11 +57,9 @@
 
 <style>
     main {
-        background-color: #191919;
-        width: 400px;
         height: 100%;
+        background-color: #191919;
         padding: 0 1em;
-        border-top: 1px solid #252525;
     }
 
     .parse-error {
