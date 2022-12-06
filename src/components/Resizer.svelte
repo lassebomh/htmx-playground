@@ -1,15 +1,15 @@
 <script lang="ts">
-    import { onMount } from "svelte";
-
     let dragging = false;
     let main;
 
     export let startSize;
     export let endSize;
 
-    onMount(() => {
-        main.style.gridTemplateColumns = `${startSize}fr 6px ${endSize}fr`;
-    })
+    function init(main) {
+        main.style.display = 'grid';
+        main.style.gridTemplateAreas = 'start dragbar end';
+        main.style.gridTemplateColumns = `${startSize} 6px ${endSize}`;
+    }
 
     function mousedown(event) {
         dragging = true;
@@ -32,24 +32,32 @@
     }
 </script>
 
-<main bind:this={main} on:mouseup={mouseup} on:mousemove={mousemove} class:dragging={dragging}>
-    <div class="container">
-        <slot name="start" />
-    </div>
-    <div class="dragbar" draggable="false" on:mousedown={mousedown} />
-    <div class="container">
-        <slot name="end" />
-    </div>
-</main>
+{#if $$slots.end && $$slots.start}
+    <main bind:this={main} on:mouseup={mouseup} on:mousemove={mousemove} class:dragging={dragging} use:init>
+        <div class="container">
+            <slot name="start" />
+        </div>
+        <div class="dragbar" draggable="false" on:mousedown={mousedown} />
+        <div class="container">
+            <slot name="end" />
+        </div>
+    </main>
+{:else}
+    <main bind:this={main}>
+        <div class="container">
+            {#if $$slots.start}
+                <slot name="start" />
+            {:else}
+                <slot name="end" />
+            {/if}
+        </div>
+    </main>
+{/if}
 
 <style>
     main {
         width: 100%;
         flex-grow: 1;
-        
-        display: grid;
-        grid-template-areas: 'start dragbar end';
-        /* grid-template-columns: 1fr 6px 1fr;	 */
     }
 
     main.dragging {
@@ -58,11 +66,13 @@
 
     main.dragging .container {
         pointer-events: none;
+        user-select: none;
     }
 
     .container {
         display: flex;
         flex-direction: column;
+        height: 100%;
     }
 
     .dragbar {

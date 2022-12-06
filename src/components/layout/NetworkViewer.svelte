@@ -1,8 +1,5 @@
 <script type="ts">
-    import hljs from 'highlight.js'
     import LogView from '../LogView.svelte'
-
-    hljs.configure({ languages: ['http'] })
 
     let logs = []
     let logI = 0
@@ -48,7 +45,7 @@
         border-top: 1px solid #fff2;
         background-color: #202020;
         height: 41px;
-        transition: height .3s ease-in-out;
+        transition: height .15s ease-in-out;
         display: flex;
         flex-direction: column;
         position: absolute;

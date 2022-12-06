@@ -8,19 +8,16 @@
     import Sidebar from "./components/layout/Sidebar.svelte";
 
     import { srcdoc, activeFileIndex, openFile, playground } from './playground';
-import Resizer from './components/Resizer.svelte';
+    import Resizer from './components/Resizer.svelte';
+
+    let hasReadme = false;
 
     $: if ($playground != null && $activeFileIndex != null) {
-        $openFile = $playground.files[$activeFileIndex]
+        $openFile = $playground.files[$activeFileIndex];
+        hasReadme = $playground.files.find((file) => file.filename == '.readme.md') != null;
     }
 
-    let logs = []
-    let network = []
-    
     async function loadFile(method, location) {
-        // hxbox:<playground_id>:<file_id>
-        // https://localhost:5500/sandbox/index.html
-
         switch (method) {
             case "url":
                 return await (await fetch(location)).text()
@@ -82,13 +79,20 @@ import Resizer from './components/Resizer.svelte';
         </div>
     </div>
     
-    <Resizer startSize={1} endSize={6}>
-        <Sidebar slot="start" />
-        <Resizer slot="end" startSize={3} endSize={2}>
+    {#if hasReadme}
+        <Resizer startSize='300px' endSize='6fr'>
+            <Sidebar slot="start" />
+            <Resizer slot="end" startSize='3fr' endSize='2fr'>
+                <Editor slot="start" />
+                <Sandbox slot="end" />
+            </Resizer>
+        </Resizer>
+    {:else}
+        <Resizer slot="end" startSize='3fr' endSize='2fr'>
             <Editor slot="start" />
             <Sandbox slot="end" />
         </Resizer>
-    </Resizer>
+    {/if}
 </main>
 
 {/if}
@@ -104,7 +108,7 @@ import Resizer from './components/Resizer.svelte';
     .topbar {
         background-color: #191919;
         height: 50px;
-        padding: 0 18px;
+        padding: 0 12px;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -124,5 +128,6 @@ import Resizer from './components/Resizer.svelte';
         font-size: 1.3em;
         background-color: transparent;
         border: none;
+        padding: 0.2em;
     }
 </style>

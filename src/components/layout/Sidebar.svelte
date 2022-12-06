@@ -6,7 +6,6 @@
     import { get, writable } from "svelte/store";
     import { propertyStore } from 'svelte-writable-derived'
 
-
     marked.setOptions({
         highlight: function(code) {
             return hljs.highlightAuto(code).value;
