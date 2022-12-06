@@ -84,7 +84,6 @@ import Resizer from './components/Resizer.svelte';
     
     <Resizer startSize={1} endSize={6}>
         <Sidebar slot="start" />
-
         <Resizer slot="end" startSize={3} endSize={2}>
             <Editor slot="start" />
             <Sandbox slot="end" />
@@ -103,13 +102,13 @@ import Resizer from './components/Resizer.svelte';
     }
 
     .topbar {
-        background-color: #161616;
+        background-color: #191919;
         height: 50px;
         padding: 0 18px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        border-bottom: 1px solid #fff3;
+        border-bottom: 1px solid #fff2;
     }
 
     .topbar-right {

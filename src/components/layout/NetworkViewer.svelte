@@ -1,6 +1,6 @@
 <script type="ts">
     import hljs from 'highlight.js'
-import LogView from '../LogView.svelte'
+    import LogView from '../LogView.svelte'
 
     hljs.configure({ languages: ['http'] })
 
@@ -19,7 +19,12 @@ import LogView from '../LogView.svelte'
 <main>
     <input type="checkbox" checked={true} id="toggle">
     <label class="topbar" for="toggle">
-        ({logs.length}) Requests<span style="font-family: monospace;">{(logs[logI] && (": " + logs[logI].request.url)) || ""}</span>
+        <span>({logs.length}) Requests</span>
+        {#if logs[logI] != null}
+            <span class="recent-request-url">
+                {logs[logI].request.url}
+            </span>
+        {/if}
     </label>
     <div class="body">
         <div class="log-list">
@@ -53,11 +58,17 @@ import LogView from '../LogView.svelte'
         max-height: 100%;
     }
 
+    .recent-request-url {
+        font-family: monospace;
+        color: #fff7;
+    }
+
     .topbar {
         font-size: 18px;
         display: block;
         padding: 0.5em;
         cursor: pointer;
+        background-color: #1b1b1b;
     }
 
     .topbar:hover {
@@ -71,7 +82,7 @@ import LogView from '../LogView.svelte'
     .body {
         flex-grow: 1;
         border-top: 1px solid #fff2;
-        background-color: #1b1b1b;
+        background-color: #222222;
         display: flex;
         height: calc(100% - 41px);
     }

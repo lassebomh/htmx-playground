@@ -58,7 +58,7 @@
 <style>
     main {
         height: 100%;
-        background-color: #191919;
+        background-color: #1c1c1c;
         padding: 0 1em;
     }
 
