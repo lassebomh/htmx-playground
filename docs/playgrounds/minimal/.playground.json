@@ -8,13 +8,13 @@
             "builtin": true
         },
         {
-            "location": "./playgrounds/minimal/.playground.json",
-            "filename": ".playground.json",
+            "location": "./playgrounds/minimal/server.js",
+            "filename": "server.js",
             "builtin": true
         },
         {
-            "location": "./playgrounds/minimal/server.js",
-            "filename": "server.js",
+            "location": "./playgrounds/minimal/.playground.json",
+            "filename": ".playground.json",
             "builtin": true
         },
         {
