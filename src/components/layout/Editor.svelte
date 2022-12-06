@@ -106,6 +106,7 @@
 
     #show-hidden ~ label {
         padding: 9px;
+        cursor: pointer;
     }
 
     #show-hidden ~ label svg {
@@ -155,7 +156,7 @@
         padding: 6px 10px;
         padding-right: 4px;
         height: 100%;
-        border-bottom: 2px solid #fff2;
+        border-bottom: 2px solid #fff0;
         color: #8b888f;
         gap: 0;
     }

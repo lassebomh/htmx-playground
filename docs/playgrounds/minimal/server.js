@@ -14,5 +14,8 @@ let i = 0
 
 on.post("/movie", (request) => {
     i = (i+1) % movies.length
-    return new Response(movies[i])
+    let context = {
+        movie: movies[i]
+    }
+    return render(request, 'movie.html', context)
 })

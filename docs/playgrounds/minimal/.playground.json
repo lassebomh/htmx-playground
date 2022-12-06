@@ -21,6 +21,10 @@
             "location": "./playgrounds/minimal/.loader.html",
             "filename": ".loader.html",
             "builtin": true
+        },
+        {
+            "location": "./playgrounds/minimal/movie.html",
+            "filename": "movie.html"
         }
     ]
 }

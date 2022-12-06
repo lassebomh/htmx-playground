@@ -10,6 +10,17 @@
     import { srcdoc, activeFileIndex, openFile, playground } from './playground';
     import Resizer from './components/Resizer.svelte';
 
+    let TemplateLoader = {
+        getSource: (name) => ({
+            src: ($playground.files.find(file => name == file.filename) || {contents: ""}).contents,
+            path: name
+        })
+    }
+
+    var templates = new nunjucks.Environment(TemplateLoader, {
+        autoescape: false
+    })
+
     let hasReadme = false;
 
     $: if ($playground != null && $activeFileIndex != null) {
@@ -20,7 +31,8 @@
     async function loadFile(method, location) {
         switch (method) {
             case "url":
-                return await (await fetch(location)).text()
+                let file = await (await fetch(location)).text()
+                return file
             default:
                 throw new Error("Unknown file load method")
         }
@@ -35,8 +47,8 @@
         $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
     }
     
-    document.addEventListener('keypress', (event) => {
-        if (event.ctrlKey && event.key === 'z') {
+    document.addEventListener('keydown', (event) => {
+        if (event.ctrlKey && event.key === 'b') {
             event.stopPropagation();
             event.preventDefault()
             updateSrcdoc()
@@ -46,20 +58,44 @@
     function updateSrcdoc() {
         $srcdoc = ""
 
-        let loader = $playground.files.find((file) => file.filename == '.loader.html').contents
-        let index = $playground.files.find((file) => file.filename == 'index.html').contents
-        let filedata = `<script> const files = ` + JSON.stringify($playground.files).replaceAll('/', '\\/') + `<\/script>\n`;
+        let loader = $playground.files.find((file) => file.filename == '.loader.html').contents;
+        let index = $playground.files.find((file) => file.filename == 'index.html').contents;
+        let meta = `<script> const files = ` + JSON.stringify($playground.files).replaceAll('/', '\\/') + `<\/script>\n`;
+
+        setTimeout(_ => $srcdoc = meta+templates.renderString(loader+index), 1)
+    }
+
+    async function save() {
+        let body = {
+            'public': true,
+            'files': {}
+        }
+
+        $playground.files.forEach(file => {
+            body.files[file.filename] = {
+                'content': file.contents
+            }
+        });
+
+        let response = await fetch('https://api.github.com/gists', {
+            method: 'POST',
+            body: JSON.stringify(body),
+            // mode: '',
+            headers: {
+                'Accept': 'application/vnd.github+json',
+                'Authorization': 'Bearer ' + localStorage.getItem('gh_token'),
+                'Content-Type': 'application/json'
+            }
+        })
+
+        console.log(response);
+        console.log(await response.json());
+    }
     
-        $srcdoc = filedata + loader + index;
-    }
-
-    function fileInit(e) {
-        e.focus();
-        document.execCommand('selectAll',false,null);
-    }
-
+    let initLoad = loadPlayground('url', './playgrounds/minimal/.playground.json')
+    
     onMount(async () => {
-        await loadPlayground('url', './playgrounds/minimal/.playground.json')
+        await initLoad;
         updateSrcdoc()
     })
 
@@ -73,9 +109,10 @@
             <input class="name-edit" type="text" bind:value={$playground.name}>
         </div>
         <div class="topbar-right">
-            <div>Save</div>
-            <div>Share</div>
-            <div>Donate</div>
+            <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
+            <button on:click={save}>Save</button>
+            <button>Share</button>
+            <button>Donate</button>
         </div>
     </div>
     
@@ -103,6 +140,23 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+    }
+
+    .reload-button {
+        border: 1px solid #fff5;
+        font-family: monospace;
+        color: #fffa;
+        padding: 0.5em;
+        border-radius: 5px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .reload-button:hover {
+        border-color: #fff8;
+        background-color: #fff2;
+        color: #fffd;
     }
 
     .topbar {

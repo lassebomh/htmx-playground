@@ -31,7 +31,8 @@
     })
 
     function render(request, template, context) {
-        let out = templates.render(template, {...context, request})
+        let out = templates.render(template, {...context, request});
+        
         return new Response(out, {
             headers: {
                 'content-type': 'text/html'
