@@ -110,9 +110,10 @@
         </div>
         <div class="topbar-right">
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
-            <button on:click={save}>Save</button>
+            <a href="https://github.com/lassebomh/htmx-sandbox">Star on GitHub</a>
+            <!-- <button on:click={save}>Save</button>
             <button>Share</button>
-            <button>Donate</button>
+            <button>Donate</button> -->
         </div>
     </div>
     
@@ -142,7 +143,7 @@
         flex-direction: column;
     }
 
-    .reload-button {
+    .topbar-right button, .topbar-right a {
         border: 1px solid #fff5;
         font-family: monospace;
         color: #fffa;
@@ -151,12 +152,21 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        text-transform: uppercase;
+        font-size: 0.8em;
+        text-decoration: none;
     }
 
-    .reload-button:hover {
+    .topbar-right button:hover, .topbar-right a:hover {
         border-color: #fff8;
         background-color: #fff2;
         color: #fffd;
+    }
+
+    .topbar-right button:active, .topbar-right a:active {
+        border-color: #fff6;
+        background-color: #fff1;
+        color: #fffa;
     }
 
     .topbar {

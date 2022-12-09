@@ -101,14 +101,17 @@
         justify-content: space-between;
         overflow-y: auto;
         font-family: monospace;
+        color: #fff8;
     }
 
     .log-list button.active {
         background-color: #fff1;
+        color: #ffff;
     }
 
     .log-list button:hover {
         background-color: #fff2;
+        color: #fffa;
     }
 
     main:has(#toggle:not(:checked)) {
