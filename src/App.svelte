@@ -105,7 +105,8 @@
 
 <main>
     <div class="topbar">
-        <div class="topbar-left">   
+        <div class="topbar-left">
+            <img src="./logo_transparent_64.png" alt="">
             <input class="name-edit" type="text" bind:value={$playground.name}>
         </div>
         <div class="topbar-right">
@@ -170,6 +171,17 @@
         border-color: #fff6;
         background-color: #fff1;
         color: #fffa;
+    }
+
+    .topbar-left {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.3em;
+    }
+
+    .topbar-left img {
+        height: 2em;
     }
 
     .topbar {
