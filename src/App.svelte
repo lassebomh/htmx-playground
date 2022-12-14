@@ -110,6 +110,7 @@
         </div>
         <div class="topbar-right">
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
+            <a href="https://www.buymeacoffee.com/lassebomh">Donate ❤️</a>
             <a href="https://github.com/lassebomh/htmx-sandbox">Star on GitHub</a>
             <!-- <button on:click={save}>Save</button>
             <button>Share</button>
@@ -148,6 +149,7 @@
         font-family: monospace;
         color: #fffa;
         padding: 0.5em;
+        padding-bottom: 0.6em;
         border-radius: 5px;
         display: flex;
         justify-content: center;
