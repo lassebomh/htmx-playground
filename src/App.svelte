@@ -107,7 +107,7 @@
     <div class="topbar">
         <div class="topbar-left">
             <img src="./logo_transparent_96.png" alt="">
-            <input class="name-edit" type="text" bind:value={$playground.name}>
+            <span class="name-edit" type="text" bind:textContent={$playground.name} contenteditable></span>
         </div>
         <div class="topbar-right">
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
@@ -145,19 +145,43 @@
         flex-direction: column;
     }
 
+    /* .reload-button {
+        border: 2px solid #0f25 !important;
+        font-weight: 600;
+        color: white !important;
+    } */
+    
+    .reload-button {
+        border-color: #0f28 !important;
+        background-color: #0f23 !important;
+        color: #fffe !important;
+        font-weight: 600;
+    }
+
+    .reload-button:hover {
+        border-color: #0f27 !important;
+        background-color: #0f24 !important;
+        color: #ffff !important;
+    }
+
+    .reload-button:active {
+        border-color: #0f29 !important;
+        background-color: #0f23 !important;
+    }
+
     .topbar-right button, .topbar-right a {
         border: 1px solid #fff5;
         font-family: monospace;
         color: #fffa;
-        padding: 0 0.5em;
-        height: 2em;
+        padding: 0 0.7em;
+        height: 2.2em;
         /* padding-bottom: 0.6em; */
         border-radius: 5px;
         display: flex;
         justify-content: center;
         align-items: center;
         text-transform: uppercase;
-        font-size: 0.8em;
+        font-size: 0.9em;
         text-decoration: none;
     }
 
@@ -208,5 +232,6 @@
         background-color: transparent;
         border: none;
         padding: 0.2em;
+        min-width: 40px;
     }
 </style>

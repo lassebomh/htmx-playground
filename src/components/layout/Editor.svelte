@@ -53,7 +53,7 @@
                     {#if $showHiddenFiles || file.filename[0] != "."}
                         <button on:click={_ => $activeFileIndex = i} class="tab" class:builtin={file.builtin} class:active={i == $activeFileIndex}>
                             {#if !file.builtin && i == $activeFileIndex}
-                                <div spellcheck="false" class="filename-input" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
+                                <div class="filename-input" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
                             {:else}
                                 <div class="filename-input">{file.filename}</div>
                             {/if}
@@ -130,17 +130,19 @@
         /* width: 100%; */
         display: flex;
         justify-content: space-between;
-        height: 36px;
+        height: 45px;
     }
 
     .topbar > * {
-        height: inherit;
         display: flex;
         align-items: center;
     }
 
     .topbar-left {
         flex-grow: 1;
+        width: 0;
+        overflow-x: auto;
+        display: block;
     }
 
     .tabs {
@@ -153,7 +155,7 @@
 
     .tab {
         font-size: 0.9em;
-        padding: 6px 10px;
+        padding: 7px 10px;
         padding-right: 4px;
         height: 100%;
         border-bottom: 2px solid #fff0;
