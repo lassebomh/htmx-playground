@@ -144,12 +144,6 @@
         display: flex;
         flex-direction: column;
     }
-
-    /* .reload-button {
-        border: 2px solid #0f25 !important;
-        font-weight: 600;
-        color: white !important;
-    } */
     
     .reload-button {
         border-color: #0f28 !important;
