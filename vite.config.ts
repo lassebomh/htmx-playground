@@ -8,5 +8,5 @@ export default defineConfig({
     outDir: "./docs",
 
   },
-  base: "/htmx-sandbox/"
+  base: "/htmx-playground/"
 })
