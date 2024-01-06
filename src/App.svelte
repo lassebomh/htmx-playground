@@ -95,7 +95,7 @@
     async function loadPlaygroundFromURL() {
         let location = prompt("Enter the raw URL to the playground JSON file:", "");
         if (location != null || location != "") {
-            loadPlayground('url', location)
+            await loadPlayground('url', location)
             updateSrcdoc()
             window.history.replaceState(window.history.state, "", window.location.pathname + "?" + (new URLSearchParams({'url': encodeURIComponent(location)}).toString()))
 
@@ -108,7 +108,6 @@
         let string = prompt("Paste the playground JSON:", "");
         if (string != null || string != "") {
             playground.set(JSON.parse(string))
-            console.log($playground);
             
             $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
             updateSrcdoc()
