@@ -8,7 +8,6 @@ If this helped you and you want to show your appreciation, then you are very wel
 
 ## Limitations
 
- - There is no functionality to save or share playgrounds, but this might be implemented in the future.
  - `index.html` cannot contain templating.
  - No page navigation
  - No mobile support

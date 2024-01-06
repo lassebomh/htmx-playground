@@ -41,7 +41,9 @@
     async function loadPlayground(method, location) {
         let pg = JSON.parse(await loadFile(method, location))
         await Promise.all(pg.files.map(async (file) => {
-            file.contents = await loadFile(pg.method, file.location)
+            if (!file.contents) {
+                file.contents = await loadFile(pg.method, file.location)
+            }
         }))
         playground.set(pg)
         $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
@@ -65,39 +67,69 @@
         setTimeout(_ => $srcdoc = meta+templates.renderString(loader+index), 1)
     }
 
-    async function save() {
-        let body = {
-            'public': true,
-            'files': {}
+    function serializePlaygroundToJson() {
+
+        let _playground = structuredClone($playground);
+
+        for (let i = 0; i < _playground.files.length; i++) {
+            const file = _playground.files[i];
+            if (file.filename != ".playground.json") {
+                _playground.files[i].contents = file.contents;
+            }
         }
 
-        $playground.files.forEach(file => {
-            body.files[file.filename] = {
-                'content': file.contents
-            }
-        });
-
-        let response = await fetch('https://api.github.com/gists', {
-            method: 'POST',
-            body: JSON.stringify(body),
-            // mode: '',
-            headers: {
-                'Accept': 'application/vnd.github+json',
-                'Authorization': 'Bearer ' + localStorage.getItem('gh_token'),
-                'Content-Type': 'application/json'
-            }
-        })
-
-        console.log(response);
-        console.log(await response.json());
+        return _playground;
     }
     
-    let initLoad = loadPlayground('url', './playgrounds/minimal/.playground.json')
-    
+    let loaderEntry = new URLSearchParams(window.location.search).entries().next();
+    let initLoad;
+    let showEditor = true;
+
+    if (loaderEntry.value) {
+        let [method, location] = loaderEntry.value;
+        initLoad = loadPlayground(method, decodeURIComponent(location))
+    } else {
+        initLoad = loadPlayground('url', './playgrounds/minimal/.playground.json')
+    }
+
+    async function loadPlaygroundFromURL() {
+        let location = prompt("Enter the raw URL to the playground JSON file:", "");
+        if (location != null || location != "") {
+            loadPlayground('url', location)
+            updateSrcdoc()
+            window.history.replaceState(window.history.state, "", window.location.pathname + "?" + (new URLSearchParams({'url': encodeURIComponent(location)}).toString()))
+
+            showEditor = false;
+            setTimeout(() => showEditor = true, 50)
+        } 
+    }
+
+    async function loadPlaygroundFromJSON() {
+        let string = prompt("Paste the playground JSON:", "");
+        if (string != null || string != "") {
+            playground.set(JSON.parse(string))
+            console.log($playground);
+            
+            $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
+            updateSrcdoc()
+            window.history.replaceState(window.history.state, "", window.location.pathname)
+
+            showEditor = false;
+            setTimeout(() => showEditor = true, 50)
+        }
+
+    }
+
     onMount(async () => {
         await initLoad;
         updateSrcdoc()
     })
+
+    function savePlaygroundJsonToClipboard() {
+        let _playground = serializePlaygroundToJson();
+        let text = JSON.stringify(_playground);
+        navigator.clipboard.writeText(text);
+    }
 
 </script>
 
@@ -107,27 +139,23 @@
     <div class="topbar">
         <div class="topbar-left">
             <img src="./logo_transparent_96.png" alt="">
-            <span class="name-edit" type="text" bind:textContent={$playground.name} contenteditable></span>
+            <span class="name-edit" bind:textContent={$playground.name} contenteditable></span>
         </div>
         <div class="topbar-right">
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
-            <a href="https://github.com/lassebomh/htmx-playground">Star on GitHub</a>
-            <!-- <button on:click={save}>Save</button>
-            <button>Share</button>
-            <button>Donate</button> -->
+            <button on:click={savePlaygroundJsonToClipboard}>Copy as JSON</button>
+            <div class="load-dropdown">
+              <button>Load playground</button>
+              <div class="load-dropdown-content">
+                <button on:click={loadPlaygroundFromURL}>From URL</button>
+                <button on:click={loadPlaygroundFromJSON}>From JSON</button>
+              </div>
+            </div>
         </div>
     </div>
     
-    {#if hasReadme}
-        <Resizer startSize='300px' endSize='6fr'>
-            <Sidebar slot="start" />
-            <Resizer slot="end" startSize='3fr' endSize='2fr'>
-                <Editor slot="start" />
-                <Sandbox slot="end" />
-            </Resizer>
-        </Resizer>
-    {:else}
-        <Resizer slot="end" startSize='3fr' endSize='2fr'>
+    {#if showEditor}
+        <Resizer slot="end" startSize='3fr' endSize='3fr'>
             <Editor slot="start" />
             <Sandbox slot="end" />
         </Resizer>
@@ -142,6 +170,7 @@
         height: 100%;
         display: flex;
         flex-direction: column;
+        background-color: #222222;
     }
     
     .reload-button {
@@ -168,6 +197,7 @@
         color: #fffa;
         padding: 0 0.7em;
         height: 2.2em;
+        background-color: #191919;
         /* padding-bottom: 0.6em; */
         border-radius: 5px;
         display: flex;
@@ -179,15 +209,29 @@
     }
 
     .topbar-right button:hover, .topbar-right a:hover {
-        border-color: #fff8;
-        background-color: #fff2;
-        color: #fffd;
+        border-color: #888888;
+        background-color: #222;
+        color: #ddd;
     }
 
     .topbar-right button:active, .topbar-right a:active {
-        border-color: #fff6;
-        background-color: #fff1;
-        color: #fffa;
+        border-color: #666;
+        background-color: #111;
+        color: #aaa;
+    }
+
+    .load-dropdown {
+        position: relative;
+        display: inline-block;
+    }
+    .load-dropdown-content {
+        display: none;
+        position: absolute;
+        z-index: 1;
+        left: 0;
+    }
+    .load-dropdown:hover .load-dropdown-content {
+        display: block;
     }
 
     .topbar-left {

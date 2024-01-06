@@ -18,6 +18,10 @@
     function mouseup(event) {
         if (!dragging) return;
         dragging = false;
+
+        if (window['editor']) {
+            window['editor'].resize()
+        }
     }
 
     function mousemove(event) {

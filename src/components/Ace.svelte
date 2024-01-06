@@ -15,6 +15,8 @@
         // @ts-ignore
         editor = ace.edit(container);
 
+        window['editor'] = editor;
+
         editor.setOptions({
             fontSize: '12pt',
             wrap: true,
@@ -22,6 +24,11 @@
             // showLineNumbers: false,
             theme: "ace/theme/monokai"
 
+        })
+
+        container.addEventListener("resize", () => {
+            console.log('resized');
+            editor.resize()
         })
 
         editor.session.on('change', () => {

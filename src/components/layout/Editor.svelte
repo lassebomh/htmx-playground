@@ -37,8 +37,8 @@
     }
 
     function fileInit(e) {
-        e.focus();
-        document.execCommand('selectAll',false,null);
+        // e.focus();
+        // document.execCommand('selectAll',false,null);
     }
 
 </script>
@@ -53,7 +53,7 @@
                     {#if $showHiddenFiles || file.filename[0] != "."}
                         <button on:click={_ => $activeFileIndex = i} class="tab" class:builtin={file.builtin} class:active={i == $activeFileIndex}>
                             {#if !file.builtin && i == $activeFileIndex}
-                                <div class="filename-input" bind:innerHTML={file.filename} contenteditable="true" use:fileInit></div>
+                                <div class="filename-input" bind:innerText={file.filename} contenteditable="true" use:fileInit></div>
                             {:else}
                                 <div class="filename-input">{file.filename}</div>
                             {/if}

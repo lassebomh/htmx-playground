@@ -25,6 +25,7 @@
     "@types/marked": "^4.0.7",
     "highlight.js": "^11.7.0",
     "isomorphic-dompurify": "^0.24.0",
+    "lz-string": "^1.5.0",
     "marked": "^4.2.3",
     "monaco-editor": "^0.34.1",
     "monaco-jsx-highlighter": "^2.0.4",
