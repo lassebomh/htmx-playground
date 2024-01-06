@@ -4,7 +4,7 @@
 </script>
 
 <main>
-    <iframe srcdoc={$srcdoc} title="Sandbox" frameborder="0" sandbox="allow-scripts"></iframe> 
+    <iframe srcdoc={$srcdoc} title="Sandbox" frameborder="0" sandbox="allow-scripts allow-popups allow-same-origin"></iframe> 
     <NetworkViewer />
 </main>
 

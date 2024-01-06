@@ -111,7 +111,6 @@
         </div>
         <div class="topbar-right">
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
-            <a href="https://www.buymeacoffee.com/lassebomh">Monetary Appreciation</a>
             <a href="https://github.com/lassebomh/htmx-playground">Star on GitHub</a>
             <!-- <button on:click={save}>Save</button>
             <button>Share</button>
