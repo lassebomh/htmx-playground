@@ -4,6 +4,8 @@
     let logs = []
     let logI = 0
 
+    let open = true;
+
     window.addEventListener('message', (event) => {
         if (event.data && event.data.type == "network_log") {
             logs = [event.data, ...logs]
@@ -13,16 +15,20 @@
 
 </script>
 
-<main>
-    <input type="checkbox" checked={true} id="toggle">
-    <label class="topbar" for="toggle">
-        <span>({logs.length}) Requests</span>
-        {#if logs[logI] != null}
-            <span class="recent-request-url">
-                {logs[logI].request.url}
-            </span>
-        {/if}
-    </label>
+<main class="{open ? 'open' : ''}">
+    <div class="topbar" on:click={() => open = !open}>
+        <div>
+            Network Viewer
+        </div>
+        <div>
+            <span>({logs.length}) Requests</span>
+            {#if logs[logI] != null}
+                <span class="recent-request-url">
+                    {logs[logI].request.url}
+                </span>
+            {/if}
+        </div>
+    </div>
     <div class="body">
         <div class="log-list">
             {#if logs.length > 0}
@@ -55,6 +61,10 @@
         max-height: 100%;
     }
 
+    main:not(.open) {
+        height: 50%;
+    }
+
     .recent-request-url {
         font-family: monospace;
         color: #fff7;
@@ -62,7 +72,8 @@
 
     .topbar {
         font-size: 18px;
-        display: block;
+        display: flex;
+        justify-content: space-between;
         padding: 0.5em;
         cursor: pointer;
         background-color: #1b1b1b;
@@ -70,10 +81,6 @@
 
     .topbar:hover {
         background-color: #ffffff05;
-    }
-
-    #toggle {
-        display: none;
     }
 
     .body {
@@ -114,16 +121,12 @@
         color: #fffa;
     }
 
-    main:has(#toggle:not(:checked)) {
-        height: 50%;
-    }
-
-    #toggle:checked ~ .body {
+    main.open .body {
         overflow-y: hidden;
         /* border-top: none; */
     }
 
-    #toggle:checked ~ .body .log-list {
+    main.open .body .log-list {
         overflow-y: hidden;
     }
 </style>
