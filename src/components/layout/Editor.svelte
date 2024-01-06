@@ -36,11 +36,6 @@
         activeFileIndex.set($playground.files.length - 1)
     }
 
-    function fileInit(e) {
-        // e.focus();
-        // document.execCommand('selectAll',false,null);
-    }
-
 </script>
 
 {#if $playground != null}
