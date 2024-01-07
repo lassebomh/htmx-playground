@@ -18,10 +18,6 @@
         })
     }
 
-    var templates = new nunjucks.Environment(TemplateLoader, {
-        autoescape: false
-    })
-
     let hasReadme = false;
 
     $: if ($playground != null && $activeFileIndex != null) {
@@ -190,13 +186,7 @@
             <button on:click={_ => {document.body.classList.remove('hide-popup');}}>README</button>
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
             <button on:click={savePlaygroundJsonToClipboard}>Copy as JSON</button>
-            <div class="load-dropdown">
-              <button>Load playground</button>
-              <div class="load-dropdown-content">
-                <button on:click={_=>loadPlaygroundFromURL(prompt("Enter the raw URL to the playground JSON file:", ""))}>From URL</button>
-                <button on:click={loadPlaygroundFromJSON}>From JSON</button>
-              </div>
-            </div>
+            <button on:click={_=>loadPlaygroundFromURL(prompt("Enter the raw URL to the playground JSON file:", ""))}>Load Playground</button>
         </div>
     </div>
     

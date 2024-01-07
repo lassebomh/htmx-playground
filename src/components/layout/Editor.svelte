@@ -149,7 +149,7 @@
     }
 
     .tab {
-        font-size: 0.9em;
+        font-size: 1rem;
         padding: 7px 10px;
         padding-right: 4px;
         height: 100%;
