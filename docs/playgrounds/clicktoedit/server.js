@@ -1,8 +1,8 @@
 
 let contact = {
-    firstName: 'Lasse',
-    lastName: 'Bomholt',
-    email: 'lasse@bomh.net',
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'john@doe.com',
 }
 
 on.get("/", (request) => {

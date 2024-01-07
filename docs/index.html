@@ -3,34 +3,33 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTMX Playground</title>
+    <title>HTMX Playground - Django inspired HTMX sandbox</title>
+    <script>
+        function addScript(src, type, crossorigin, charset, defer) {
+        var script = document.createElement('script');
+        script.src = src;
+        script.type = type || 'text/javascript';
+        if (charset) script.charset = charset;
+        if (defer) script.defer = true;
+        if (crossorigin) script.setAttribute('crossorigin', '');
+        document.head.appendChild(script);
+        }
     
-<script>
-    function addScript(src, type, crossorigin, charset, defer) {
-      var script = document.createElement('script');
-      script.src = src;
-      script.type = type || 'text/javascript';
-      if (charset) script.charset = charset;
-      if (defer) script.defer = true;
-      if (crossorigin) script.setAttribute('crossorigin', '');
-      document.head.appendChild(script);
-    }
-  
-    function addStylesheet(href) {
-      var link = document.createElement('link');
-      link.rel = 'stylesheet';
-      link.href = href;
-      document.head.appendChild(link);
-    }
-  
-    if (window.innerWidth > 600) {
-      addScript('./ace/src-min/ace.js', 'text/javascript', null, 'utf-8', true);
-      addScript('/htmx-playground/assets/index.a1d2efac.js', 'module', 'anonymous');
-      addStylesheet('./ace/css/theme/monokai.css');
-      addStylesheet('/htmx-playground/assets/index.a1632dc7.css');
-    }
+        function addStylesheet(href) {
+        var link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        document.head.appendChild(link);
+        }
+    
+        if (window.innerWidth > 600) {
+            addScript('./ace/src-min/ace.js', 'text/javascript', null, 'utf-8', true);
+            addScript('/htmx-playground/assets/index.a1d2efac.js', 'module', 'anonymous');
+            addStylesheet('./ace/css/theme/monokai.css');
+            addStylesheet('/htmx-playground/assets/index.a1632dc7.css');
+        }
 
-  </script>
+    </script> 
     <link rel="icon" href="./logo_full.png" type="image/png" />
     <meta name="description" content="HTMX Playground allows you to write code in a backend-like environment, running entirely inside the browser. You can define endpoints within server.js and render your own templates. It will run a mock server that intersepts outgoing requests from HTMX.">
     <style>

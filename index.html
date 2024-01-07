@@ -10,20 +10,20 @@
     
     <script>
         function addScript(src, type, crossorigin, charset, defer) {
-        var script = document.createElement('script');
-        script.src = src;
-        script.type = type || 'text/javascript';
-        if (charset) script.charset = charset;
-        if (defer) script.defer = true;
-        if (crossorigin) script.setAttribute('crossorigin', '');
-        document.head.appendChild(script);
+            var script = document.createElement('script');
+            script.src = src;
+            script.type = type || 'text/javascript';
+            if (charset) script.charset = charset;
+            if (defer) script.defer = true;
+            if (crossorigin) script.setAttribute('crossorigin', '');
+            document.head.appendChild(script);
         }
     
         function addStylesheet(href) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
         }
     
         // if (window.innerWidth > 600) {
