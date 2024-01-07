@@ -1,0 +1,29 @@
+<html>
+<head>
+    <link href="https://unpkg.com/water.css@2/out/dark.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@<2/dist/htmx.js" defer></script>
+</head>
+<body>
+    
+    <h1>Active Search <span class="htmx-indicator">Searching...</span></h1>
+
+    <input type="search" 
+            name="search" placeholder="Type to search..." 
+            hx-post="/search" 
+            hx-trigger="input changed delay:500ms, search" 
+            hx-target="#search-results"
+            hx-indicator=".htmx-indicator">
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Distance</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+            </tr>
+        </thead>
+        <tbody id="search-results"></tbody>
+    </table>
+
+</body>
+</html>

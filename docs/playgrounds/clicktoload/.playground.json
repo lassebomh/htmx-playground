@@ -1,0 +1,29 @@
+{
+    "name": "Click to Load",
+    "method": "url",
+    "files": [
+        {
+            "location": "./playgrounds/clicktoload/server.js",
+            "filename": "server.js",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/clicktoload/.playground.json",
+            "filename": ".playground.json",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/.loader.html",
+            "filename": ".loader.html",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/clicktoload/index.html",
+            "filename": "index.html"
+        },
+        {
+            "location": "./playgrounds/clicktoload/loadmore.html",
+            "filename": "loadmore.html"
+        }
+    ]
+}

@@ -1,0 +1,16 @@
+{% for contact in contacts %}
+     {% if loop.last %}
+          <tr hx-get="/contacts/?page={{ nextPage }}"
+               hx-trigger="revealed"
+               hx-swap="afterend">
+ 
+               <td>{{ contact.name }}</td>
+               <td>{{ contact.phoneNr }}</td>
+          </tr>
+     {% else %}
+          <tr>
+               <td>{{ contact.name }}</td>
+               <td>{{ contact.phoneNr }}</td>
+          </tr>
+     {% endif %}
+{% endfor %}

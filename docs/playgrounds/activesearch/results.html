@@ -1,0 +1,7 @@
+{% for result in results %}
+    <tr>
+        <td>{{ result.score|round(2) }}</td>
+        <td>{{ result.item.firstName }}</td>
+        <td>{{ result.item.lastName }}</td>
+    </tr>
+{% endfor %}

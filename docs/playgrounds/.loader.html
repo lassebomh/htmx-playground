@@ -3,21 +3,16 @@
 <script src="./js/pollyjs-adapter-fetch.js"></script>
 <script src="./js/pollyjs-adapter-xhr.js"></script>
 <script>
+
+    document.addEventListener('htmx:configRequest', function(evt) {
+        evt.detail.path = window.location.href + evt.detail.path;
+    });
+
     const fileContents = {};
     files.forEach(file => fileContents[file.filename] = file.contents);
 
     function readFile(filename) {
         return fileContents[filename]
-    }
-
-    function isValidHttpUrl(string) {
-        let url;
-        try {
-            url = new URL(string);
-        } catch {
-            return false;
-        }
-        return url.protocol === "http:" || url.protocol === "https:";
     }
 
     let TemplateLoader = {
@@ -54,11 +49,14 @@
     const server = polly.server;
     
     const on = {};
-
+    
     ['get','put','post','patch','delete','merge','head','options'].forEach((method) => {
         on[method] = (route, handler) => {
-            let parsedRoute = route.replaceAll(/\/<([^>]+)>/gm, (_, m) => "/:"+m)
+            
+            let parsedRoute = window.location.href + route.replaceAll(/\/<([^>]+)>/gm, (_, m) => "/:"+m)
+
             server[method](parsedRoute).intercept(async (req, res) => {
+
                 var requestHeaders = Object.assign({}, req.headers)
                 var request = new Request(req.url, {
                     body: req.body,
@@ -66,7 +64,7 @@
                     method: req.method,
                 })
 
-                var response = await handler(request, ...Object.values(req.params))
+                var response = await handler(request, ...Object.values(req.params), ...new URL(req.url).searchParams.values())
 
                 if (!response) throw new Error("Handler returned no response!") // Return 404?
 
@@ -78,13 +76,14 @@
                 }
 
                 let text = await response.text()
+
                 
                 res.status(response.status).send(text);
-
+                
                 window.parent.postMessage({
                     type: "network_log",
                     request: {
-                        url: req.url,
+                        url: req.url.replace(window.location.href, ''),
                         body: req.body,
                         method: req.method,
                         headers: requestHeaders,
@@ -97,7 +96,8 @@
                 }, "*")
             });
         }
-    })
-        
-    eval(readFile('server.js'))
+    })    
+</script>
+<script type="module">
+    ///server.js
 </script>

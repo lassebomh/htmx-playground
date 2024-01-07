@@ -1,0 +1,29 @@
+{
+    "name": "Active Search",
+    "method": "url",
+    "files": [
+        {
+            "location": "./playgrounds/activesearch/server.js",
+            "filename": "server.js",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/activesearch/.playground.json",
+            "filename": ".playground.json",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/.loader.html",
+            "filename": ".loader.html",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/activesearch/index.html",
+            "filename": "index.html"
+        },
+        {
+            "location": "./playgrounds/activesearch/results.html",
+            "filename": "results.html"
+        }
+    ]
+}
