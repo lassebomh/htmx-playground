@@ -1,11 +1,9 @@
 <script lang='ts'>
     import { srcdoc } from "../../playground";
-    import NetworkViewer from "./NetworkViewer.svelte";
 </script>
 
 <main>
     <iframe srcdoc={$srcdoc} title="Sandbox" frameborder="0" sandbox="allow-scripts allow-popups allow-popups-to-escape-sandbox allow-forms"></iframe> 
-    <NetworkViewer />
 </main>
 
 <style>

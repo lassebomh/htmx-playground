@@ -15,12 +15,16 @@ let genres = [
 ]
 
 on.get("/", (request) => {
-    return render(request, 'index.html', {
+
+    let context = {
         text: "Click for a random music genre"
-    })
+    }
+
+    return render(request, 'index.html', context)
 })
 
 on.post("/random-genre", (request) => {
+    
     let genre = genres[Math.floor(Math.random() * genres.length)]
 
     let context = {

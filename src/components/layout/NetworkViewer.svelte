@@ -16,19 +16,16 @@
 </script>
 
 <main class="{open ? 'open' : ''}">
-    <div class="topbar" on:click={() => open = !open}>
+    <button class="topbar" on:click={() => open = !open}>
         <div>
-            Network Viewer
-        </div>
-        <div>
-            <span>({logs.length}) Requests</span>
+            Network Viewer ({logs.length})
             {#if logs[logI] != null}
                 <span class="recent-request-url">
                     {logs[logI].request.url}
                 </span>
             {/if}
         </div>
-    </div>
+    </button>
     <div class="body">
         <div class="log-list">
             {#if logs.length > 0}
@@ -68,6 +65,7 @@
     .recent-request-url {
         font-family: monospace;
         color: #fff7;
+        margin-left: 1em;
     }
 
     .topbar {
@@ -92,7 +90,7 @@
     }
 
     .log-list {
-        min-width: 200px;
+        min-width: 400px;
         width: max-content;
         max-width: 40%;
         border-right: 1px solid #fff2;

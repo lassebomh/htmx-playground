@@ -1,0 +1,29 @@
+{
+    "name": "Modal Dialog in Bootstrap",
+    "method": "url",
+    "files": [
+        {
+            "location": "./playgrounds/boostrapmodaldialog/server.js",
+            "filename": "server.js",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/boostrapmodaldialog/.playground.json",
+            "filename": ".playground.json",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/.loader.html",
+            "filename": ".loader.html",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/boostrapmodaldialog/index.html",
+            "filename": "index.html"
+        },
+        {
+            "location": "./playgrounds/boostrapmodaldialog/modal.html",
+            "filename": "modal.html"
+        }
+    ]
+}

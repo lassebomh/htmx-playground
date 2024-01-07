@@ -9,6 +9,7 @@
 
     import { srcdoc, activeFileIndex, openFile, playground } from './playground';
     import Resizer from './components/Resizer.svelte';
+    import NetworkViewer from './components/layout/NetworkViewer.svelte';
 
     let TemplateLoader = {
         getSource: (name) => ({
@@ -173,7 +174,7 @@
 <main>
     <div class="topbar">
         <div class="topbar-left">
-            <img src="./logo_transparent_96.png" alt="">
+            <img src="./logo_transparent_96.png" width="32" height="32" alt="HTMX Playground">
             <span class="name-edit" bind:textContent={$playground.name} contenteditable></span>
         </div>
         <div class="topbar-right">
@@ -184,7 +185,9 @@
                 <option value="./playgrounds/clicktoload/.playground.json">Click To Load</option>
                 <option value="./playgrounds/infinitescroll/.playground.json">Infinite Scroll</option>
                 <option value="./playgrounds/activesearch/.playground.json">Active Search</option>
+                <option value="./playgrounds/boostrapmodaldialog/.playground.json">Modal Dialog in Bootstrap</option>
             </select>
+            <button on:click={_ => {document.body.classList.remove('hide-popup');}}>README</button>
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
             <button on:click={savePlaygroundJsonToClipboard}>Copy as JSON</button>
             <div class="load-dropdown">
@@ -198,10 +201,13 @@
     </div>
     
     {#if showEditor}
-        <Resizer startSize='3fr' endSize='3fr'>
-            <Editor slot="start" />
-            <Sandbox slot="end" />
-        </Resizer>
+        <div style="margin-bottom: 41px; height: 100%; display: flex;">
+            <Resizer startSize='3fr' endSize='3fr'>
+                <Editor slot="start" />
+                <Sandbox slot="end" />
+            </Resizer>
+        </div>
+        <NetworkViewer />
     {/if}
 </main>
 
@@ -212,6 +218,7 @@
         width: 100%;
         height: 100%;
         display: flex;
+        position: relative;
         flex-direction: column;
         background-color: #222222;
     }
@@ -284,10 +291,6 @@
         gap: 0.3em;
     }
 
-    .topbar-left img {
-        height: 2em;
-    }
-
     .topbar {
         background-color: #191919;
         height: 50px;
@@ -296,6 +299,7 @@
         justify-content: space-between;
         align-items: center;
         border-bottom: 1px solid #fff2;
+        overflow-x: hidden;
     }
 
     .topbar-right {

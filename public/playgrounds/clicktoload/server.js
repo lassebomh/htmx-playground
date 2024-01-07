@@ -6,7 +6,7 @@ function getContacts(page) {
 
     let contacts = []
 
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < 6; i++) {
         contacts.push({
             name: faker.person.fullName(),
             phoneNr: faker.phone.number(),

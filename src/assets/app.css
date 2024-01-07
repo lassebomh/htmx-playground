@@ -1,11 +1,8 @@
-body {
+#app {
     margin: 0;
     padding: 0;
     width: 100vw;
     height: 100vh;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 16px;
 }
 
 button {

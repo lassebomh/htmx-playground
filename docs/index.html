@@ -4,14 +4,137 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HTMX Playground</title>
-    <script src="./ace/src-min/ace.js" type="text/javascript" charset="utf-8"></script>
-    <script src="./js/nunjucks.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./ace/src-min/ace.js" type="text/javascript" charset="utf-8" defer></script>
+    <script src="./js/nunjucks.js" type="text/javascript" charset="utf-8" defer></script>
     
     <link rel="stylesheet" href="./ace/css/theme/monokai.css">  
     <link rel="icon" href="./logo_full.png" type="image/png" />
-  <script type="module" crossorigin src="/htmx-playground/assets/index.cac8dc7e.js"></script>
-  <link rel="stylesheet" href="/htmx-playground/assets/index.63c98ae5.css">
+    <meta name="description" content="HTMX Playground allows you to write code in a backend-like environment, running entirely inside the browser. You can define endpoints within server.js and render your own templates. It will run a mock server that intersepts outgoing requests from HTMX.">
+    <style>
+        
+        body {
+            background-color: #222222;
+            margin: 0;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+            color: white;
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            position: relative;
+        }
+
+        body.hide-popup #popup-top {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        #popup-top {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #0007;
+            z-index: 100;
+            opacity: 1;
+        }
+
+        main#popup {
+            position: absolute;
+            margin: 2em auto;
+            width: calc(100vmin - 16px);
+            height: calc(100% - 8vmin);
+            flex-grow: 1;
+            background-color: #252525;
+            border-radius: 4px;
+            box-shadow: 0px 7px 32px #000;
+            overflow-y: auto;
+        }
+
+        #popup article {
+            padding: 0.5em 1.5em;
+            font-size: 20px;
+        }
+
+        #close-popup {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 2.5em;
+            height: 2.5em;
+            font-size: 1.75em;
+            background-color: #fff1;
+        }
+        #close-popup:hover {
+            background-color: #fff2;
+            border-top-right-radius: inherit;
+        }
+
+        a {
+            color: #3391ff;
+        }
+        a:visited {
+            color: #7657ff;
+        }
+
+        h1 {
+            display: flex;
+            gap: 0.5em;
+            align-items: center;
+        }
+
+
+    </style>
+  <script type="module" crossorigin src="/htmx-playground/assets/index.24a78ace.js"></script>
+  <link rel="stylesheet" href="/htmx-playground/assets/index.4b301ece.css">
 </head>
 <body spellcheck="false">
+    <script>
+        if (localStorage.getItem('popup-shown') == 'true') {
+            document.body.classList.add('hide-popup');
+        }
+    </script>
+    <div id="popup-top">
+        <main id="popup">
+            <article>
+                <h1><img src="./logo_transparent_96.png" alt="HTMX Playground" width="64" height="64"> HTMX Playground</h1>
+                
+                <p>
+                    A simple code sandbox for playing around with HTMX. No setup needed!
+                </p>
+                <p>
+                    It allows you to write code in a backend-like environment, running entirely inside the browser. You can define endpoints within server.js and render your own templates. It will run a mock server that intersepts outgoing requests from HTMX. The request handling and templating engine should be very familiar to people who use Django. In principle, this project isn't specific to HTMX, so you are free to try out other libraries as well.
+                </p>
+                <h2>Saving & sharing</h2>
+                <ol>
+                    <li>Press "Copy as JSON" in the top right.</li>
+                    <li>Upload the contents as a Gist, and enter the raw URL in "Load Playground > From URL"</li>
+                    <li>The URL on this page will update, and can now be shared.</li>
+                </ol>
+                <p>
+                    The code is available <a target="_blank" href="https://github.com/lassebomh/htmx-playground">on GitHub</a>.
+                </p>
+
+                <h2>Limitations</h2>
+                <ul>
+                    <li>No page navigation</li>
+                    <li>No mobile support</li>
+                </ul>
+
+                <h2>Libraries used</h2>
+                <ul>
+                    <li>Svelte</li>
+                    <li>Monaco (code editor)</li>
+                    <li>PollyJS (mock server)</li>
+                    <li>Nunjucks (templating engine)</li>
+                </ul>
+                
+            </article>
+            <button id="close-popup" onclick="document.body.classList.add('hide-popup'); localStorage.setItem('popup-shown', 'true')">✕</button>
+        </main>
+    </div>
+    <div id="app"></div>
 </body>
 </html>
