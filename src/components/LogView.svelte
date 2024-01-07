@@ -12,13 +12,13 @@
         for (let [key, value] of Object.entries(log.request.headers)) requestCode += `${key}: ${value}\n`;
         if (log.request.body) requestCode += "\n" + log.request.body + "\n"
     
-        requestCodeHTML = hljs.highlight('http', requestCode).value;
+        requestCodeHTML = hljs.highlight(requestCode, {language: 'http'}).value;
     
         let responseCode = `HTTP/1.1 ${log.response.status} ${log.response.statusText || ""}\n`
         for (let [key, value] of Object.entries(log.response.headers)) responseCode += `${key}: ${value}\n`;
         if (log.response.body) responseCode += "\n" + log.response.body + "\n"
     
-        responseCodeHTML = hljs.highlight('http', responseCode).value;
+        responseCodeHTML = hljs.highlight(responseCode, {language: 'http'}).value;
     }
     
 

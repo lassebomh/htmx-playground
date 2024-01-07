@@ -1,0 +1,20 @@
+<html>
+<head>
+    <link href="https://unpkg.com/water.css@2/out/dark.css" rel="stylesheet">
+    <script src="https://unpkg.com/htmx.org@<2/dist/htmx.js" defer></script>
+</head>
+<body>
+    <h1>Click to Load</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Phone Number</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% include 'loadmore.html' %}
+        </tbody>
+    </table>
+</body>
+</html>

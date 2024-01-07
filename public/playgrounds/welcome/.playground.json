@@ -1,0 +1,29 @@
+{
+    "name": "Welcome to the HTMX playground!",
+    "method": "url",
+    "files": [
+        {
+            "location": "./playgrounds/welcome/server.js",
+            "filename": "server.js",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/welcome/.playground.json",
+            "filename": ".playground.json",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/.loader.html",
+            "filename": ".loader.html",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/welcome/index.html",
+            "filename": "index.html"
+        },
+        {
+            "location": "./playgrounds/welcome/button.html",
+            "filename": "button.html"
+        }
+    ]
+}

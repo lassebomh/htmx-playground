@@ -1,0 +1,33 @@
+{
+    "name": "Click to Edit",
+    "method": "url",
+    "files": [
+        {
+            "location": "./playgrounds/clicktoedit/server.js",
+            "filename": "server.js",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/clicktoedit/.playground.json",
+            "filename": ".playground.json",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/.loader.html",
+            "filename": ".loader.html",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/clicktoedit/index.html",
+            "filename": "index.html"
+        },
+        {
+            "location": "./playgrounds/clicktoedit/contact.html",
+            "filename": "contact.html"
+        },
+        {
+            "location": "./playgrounds/clicktoedit/contact-edit.html",
+            "filename": "contact-edit.html"
+        }
+    ]
+}

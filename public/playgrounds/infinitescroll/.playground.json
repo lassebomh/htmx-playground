@@ -1,0 +1,29 @@
+{
+    "name": "Infinite Scroll",
+    "method": "url",
+    "files": [
+        {
+            "location": "./playgrounds/infinitescroll/server.js",
+            "filename": "server.js",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/infinitescroll/.playground.json",
+            "filename": ".playground.json",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/.loader.html",
+            "filename": ".loader.html",
+            "builtin": true
+        },
+        {
+            "location": "./playgrounds/infinitescroll/index.html",
+            "filename": "index.html"
+        },
+        {
+            "location": "./playgrounds/infinitescroll/loadmore.html",
+            "filename": "loadmore.html"
+        }
+    ]
+}

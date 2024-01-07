@@ -33,12 +33,32 @@
             case "url":
                 let file = await (await fetch(location)).text()
                 return file
+            case "json":
+                return location
+            default:
+                throw new Error("Unknown file load method")
+        }
+    }
+
+    function updateURI(method, location) {
+        switch (method) {
+            case "url":
+                window.history.replaceState(
+                    window.history.state,
+                    "",
+                    window.location.pathname + "?" + (new URLSearchParams({'url': encodeURIComponent(location)}).toString())
+                )
+                return
+            case "json":
+                window.history.replaceState(window.history.state, "", window.location.pathname)
+                return
             default:
                 throw new Error("Unknown file load method")
         }
     }
 
     async function loadPlayground(method, location) {
+        showEditor = false;
         let pg = JSON.parse(await loadFile(method, location))
         await Promise.all(pg.files.map(async (file) => {
             if (!file.contents) {
@@ -46,10 +66,15 @@
             }
         }))
         playground.set(pg)
+        
+        updateURI(method, location)
+
         $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
+        
+        setTimeout(() => showEditor = true, 50)
     }
     
-    document.addEventListener('keydown', (event) => {
+    window.addEventListener('keydown', (event) => {
         if (event.ctrlKey && event.key === 'b') {
             event.stopPropagation();
             event.preventDefault()
@@ -61,10 +86,28 @@
         $srcdoc = ""
 
         let loader = $playground.files.find((file) => file.filename == '.loader.html').contents;
-        let index = $playground.files.find((file) => file.filename == 'index.html').contents;
+        let serverjs = $playground.files.find((file) => file.filename == 'server.js').contents;
+
         let meta = `<script> const files = ` + JSON.stringify($playground.files).replaceAll('/', '\\/') + `<\/script>\n`;
 
-        setTimeout(_ => $srcdoc = meta+templates.renderString(loader+index), 1)
+        let ipl = document.createElement('iframe')
+
+        ipl.setAttribute('sandbox', 'allow-scripts');
+        ipl.style.display = 'none';
+        ipl.srcdoc = meta + loader.replace('///server.js', serverjs+'\n\nfetch(window.location.href+"/");');
+        
+        function iplListener(event) {
+            if (event.data.type == "network_log" && event.data.request.url.replace('/', '').replace('index.html', '').trim() == '') {
+                let index = event.data.response.body
+                $srcdoc = meta+loader.replace('///server.js', serverjs)+index
+                window.removeEventListener('message', iplListener)
+                ipl.remove()
+            }
+        }
+
+        window.addEventListener('message', iplListener)
+
+        document.body.appendChild(ipl)
     }
 
     function serializePlaygroundToJson() {
@@ -89,32 +132,21 @@
         let [method, location] = loaderEntry.value;
         initLoad = loadPlayground(method, decodeURIComponent(location))
     } else {
-        initLoad = loadPlayground('url', './playgrounds/minimal/.playground.json')
+        initLoad = loadPlayground('url', './playgrounds/welcome/.playground.json')
     }
 
-    async function loadPlaygroundFromURL() {
-        let location = prompt("Enter the raw URL to the playground JSON file:", "");
-        if (location != null || location != "") {
+    async function loadPlaygroundFromURL(location) {
+        if (location) {
             await loadPlayground('url', location)
             updateSrcdoc()
-            window.history.replaceState(window.history.state, "", window.location.pathname + "?" + (new URLSearchParams({'url': encodeURIComponent(location)}).toString()))
-
-            showEditor = false;
-            setTimeout(() => showEditor = true, 50)
         } 
     }
 
     async function loadPlaygroundFromJSON() {
         let string = prompt("Paste the playground JSON:", "");
         if (string != null || string != "") {
-            playground.set(JSON.parse(string))
-            
-            $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
+            await loadPlayground('json', string)
             updateSrcdoc()
-            window.history.replaceState(window.history.state, "", window.location.pathname)
-
-            showEditor = false;
-            setTimeout(() => showEditor = true, 50)
         }
 
     }
@@ -130,6 +162,10 @@
         navigator.clipboard.writeText(text);
     }
 
+    async function loadExample(e) {
+        await loadPlaygroundFromURL(e.target.value)
+    }
+
 </script>
 
 {#if $playground}
@@ -141,12 +177,20 @@
             <span class="name-edit" bind:textContent={$playground.name} contenteditable></span>
         </div>
         <div class="topbar-right">
+            <select name="" id="languages" on:change={loadExample}>
+                <option value="" selected disabled>Find examples</option>
+                <option value="./playgrounds/welcome/.playground.json">Welcome</option>
+                <option value="./playgrounds/clicktoedit/.playground.json">Click To Edit</option>
+                <option value="./playgrounds/clicktoload/.playground.json">Click To Load</option>
+                <option value="./playgrounds/infinitescroll/.playground.json">Infinite Scroll</option>
+                <option value="./playgrounds/activesearch/.playground.json">Active Search</option>
+            </select>
             <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
             <button on:click={savePlaygroundJsonToClipboard}>Copy as JSON</button>
             <div class="load-dropdown">
               <button>Load playground</button>
               <div class="load-dropdown-content">
-                <button on:click={loadPlaygroundFromURL}>From URL</button>
+                <button on:click={_=>loadPlaygroundFromURL(prompt("Enter the raw URL to the playground JSON file:", ""))}>From URL</button>
                 <button on:click={loadPlaygroundFromJSON}>From JSON</button>
               </div>
             </div>
@@ -154,7 +198,7 @@
     </div>
     
     {#if showEditor}
-        <Resizer slot="end" startSize='3fr' endSize='3fr'>
+        <Resizer startSize='3fr' endSize='3fr'>
             <Editor slot="start" />
             <Sandbox slot="end" />
         </Resizer>
@@ -190,7 +234,7 @@
         background-color: #0f23 !important;
     }
 
-    .topbar-right button, .topbar-right a {
+    .topbar-right button, .topbar-right select {
         border: 1px solid #fff5;
         font-family: monospace;
         color: #fffa;
@@ -207,13 +251,13 @@
         text-decoration: none;
     }
 
-    .topbar-right button:hover, .topbar-right a:hover {
+    .topbar-right button:hover, .topbar-right select:hover {
         border-color: #888888;
         background-color: #222;
         color: #ddd;
     }
 
-    .topbar-right button:active, .topbar-right a:active {
+    .topbar-right button:active, .topbar-right select:active {
         border-color: #666;
         background-color: #111;
         color: #aaa;
