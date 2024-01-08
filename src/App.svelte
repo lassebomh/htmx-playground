@@ -18,6 +18,13 @@
         })
     }
 
+    let exclusiveView = '';
+    let mobile = window.innerWidth < 800;
+
+    if (mobile) {
+        exclusiveView = 'sandbox';
+    }
+
     let hasReadme = false;
 
     $: if ($playground != null && $activeFileIndex != null) {
@@ -54,7 +61,7 @@
         }
     }
 
-    async function loadPlayground(method, location) {
+    async function loadPlayground(method, location, allowUpdateURI) {
         showEditor = false;
         let pg = JSON.parse(await loadFile(method, location))
         await Promise.all(pg.files.map(async (file) => {
@@ -64,7 +71,9 @@
         }))
         playground.set(pg)
         
-        updateURI(method, location)
+        if (allowUpdateURI) {
+            updateURI(method, location)
+        }
 
         $activeFileIndex = $playground.files.findIndex((file) => file.filename == "server.js");
         
@@ -127,14 +136,14 @@
 
     if (loaderEntry.value) {
         let [method, location] = loaderEntry.value;
-        initLoad = loadPlayground(method, decodeURIComponent(location))
+        initLoad = loadPlayground(method, decodeURIComponent(location), true)
     } else {
-        initLoad = loadPlayground('url', './playgrounds/welcome/.playground.json')
+        initLoad = loadPlayground('url', './playgrounds/welcome/.playground.json', false)
     }
 
     async function loadPlaygroundFromURL(location) {
         if (location) {
-            await loadPlayground('url', location)
+            await loadPlayground('url', location, true)
             updateSrcdoc()
         } 
     }
@@ -142,7 +151,7 @@
     async function loadPlaygroundFromJSON() {
         let string = prompt("Paste the playground JSON:", "");
         if (string != null || string != "") {
-            await loadPlayground('json', string)
+            await loadPlayground('json', string, true)
             updateSrcdoc()
         }
 
@@ -174,30 +183,60 @@
             <span class="name-edit" bind:textContent={$playground.name} contenteditable></span>
         </div>
         <div class="topbar-right">
-            <select name="" id="languages" on:change={loadExample}>
-                <option value="" selected disabled>Find examples</option>
-                <option value="./playgrounds/welcome/.playground.json">Welcome</option>
-                <option value="./playgrounds/clicktoedit/.playground.json">Click To Edit</option>
-                <option value="./playgrounds/clicktoload/.playground.json">Click To Load</option>
-                <option value="./playgrounds/infinitescroll/.playground.json">Infinite Scroll</option>
-                <option value="./playgrounds/activesearch/.playground.json">Active Search</option>
-                <option value="./playgrounds/boostrapmodaldialog/.playground.json">Modal Dialog in Bootstrap</option>
-            </select>
-            <button on:click={_ => {document.body.classList.remove('hide-popup');}}>README</button>
-            <button class="reload-button" on:click={updateSrcdoc}>RELOAD (CTRL+B)</button>
-            <button on:click={savePlaygroundJsonToClipboard}>Copy as JSON</button>
-            <button on:click={_=>loadPlaygroundFromURL(prompt("Enter the raw URL to the playground JSON file:", ""))}>Load Playground</button>
+            <div class="buttons-container">
+                <select name="" id="examples" on:change={loadExample} style="text-transform: initial;">
+                    <option value="" selected disabled>Find examples...</option>
+                    <option value="./playgrounds/welcome/.playground.json">Welcome</option>
+                    <option value="./playgrounds/clicktoedit/.playground.json">Click To Edit</option>
+                    <option value="./playgrounds/clicktoload/.playground.json">Click To Load</option>
+                    <option value="./playgrounds/infinitescroll/.playground.json">Infinite Scroll</option>
+                    <option value="./playgrounds/activesearch/.playground.json">Active Search</option>
+                    <option value="./playgrounds/boostrapmodaldialog/.playground.json">Modal Dialog in Bootstrap</option>
+                </select>
+            </div>
+            <div class="buttons-container">
+                <button class="reload-button" on:click={updateSrcdoc}>
+                    RELOAD <span style="font-size: 1.5em;">⟳</span>
+                </button>
+                {#if mobile}
+                    <div class="buttons-container" style="gap: 0;">
+                        {#if exclusiveView == 'sandbox'}
+                            <button on:click={_ => exclusiveView = 'editor'} style="flex-grow: 1;">
+                                Show Code
+                            </button>
+                        {:else}
+                            <button on:click={_ => exclusiveView = 'sandbox'} style="flex-grow: 1;">
+                                Show Sandbox
+                            </button>
+                        {/if}
+                    </div>
+                {/if}
+                <button style="flex-shrink: 0;" on:click={_ => {document.body.classList.remove('hide-popup');}}>
+                    Read me
+                </button>
+            </div>
+
+            {#if !mobile}
+                <button on:click={savePlaygroundJsonToClipboard}>Copy as JSON</button>
+                <button on:click={_=>loadPlaygroundFromURL(prompt("Enter the raw URL to the playground JSON file:", ""))}>Load Playground</button>
+            {/if}
         </div>
     </div>
     
     {#if showEditor}
         <div style="margin-bottom: 41px; height: 100%; display: flex;">
-            <Resizer startSize='3fr' endSize='3fr'>
-                <Editor slot="start" />
-                <Sandbox slot="end" />
-            </Resizer>
+            {#if exclusiveView == 'sandbox'}
+                <Sandbox />
+            {:else if exclusiveView == 'editor'}
+                <Editor />
+            {:else}
+                <Resizer startSize='3fr' endSize='3fr'>
+                    <Editor slot="start" />
+                    <Sandbox slot="end" />
+                </Resizer>
+            {/if}
         </div>
-        <NetworkViewer />
+        <NetworkViewer {mobile} />
     {/if}
 </main>
 
@@ -294,7 +333,7 @@
 
     .topbar-right {
         display: flex;
-        gap: 1em;
+        gap: 0.5em;
         justify-content: space-between;
         align-items: center;
     }
@@ -307,5 +346,33 @@
         border: none;
         padding: 0.2em;
         min-width: 40px;
+    }
+
+    .buttons-container {
+        display: flex;
+        gap: 0.5em;
+    }
+    
+    @media only screen and (max-width: 800px) {
+        .topbar-right {
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .topbar {
+            height: auto;
+            padding: 12px;
+            flex-direction: column;
+            gap: .5em;
+            flex-grow: 1;    flex-shrink: 0;
+        }
+
+        #examples {
+            flex-grow: 1;
+        }
+        .buttons-container {
+            width: 100%;
+        }
+        
     }
 </style>

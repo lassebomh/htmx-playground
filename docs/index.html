@@ -3,33 +3,47 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>HTMX Playground - Django inspired HTMX sandbox</title>
+    <title>HTMX Playground</title>
+    
     <script>
         function addScript(src, type, crossorigin, charset, defer) {
-        var script = document.createElement('script');
-        script.src = src;
-        script.type = type || 'text/javascript';
-        if (charset) script.charset = charset;
-        if (defer) script.defer = true;
-        if (crossorigin) script.setAttribute('crossorigin', '');
-        document.head.appendChild(script);
+            var script = document.createElement('script');
+            script.src = src;
+            script.type = type || 'text/javascript';
+            if (charset) script.charset = charset;
+            if (defer) script.defer = true;
+            if (crossorigin) script.setAttribute('crossorigin', '');
+            document.head.appendChild(script);
         }
     
         function addStylesheet(href) {
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.href = href;
-        document.head.appendChild(link);
-        }
-    
-        if (window.innerWidth > 600) {
-            addScript('./ace/src-min/ace.js', 'text/javascript', null, 'utf-8', true);
-            addScript('/htmx-playground/assets/index.a1d2efac.js', 'module', 'anonymous');
-            addStylesheet('./ace/css/theme/monokai.css');
-            addStylesheet('/htmx-playground/assets/index.a1632dc7.css');
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = href;
+            document.head.appendChild(link);
         }
 
-    </script> 
+        function loadAssets() {
+            addScript('./ace/src-min/ace.js', 'text/javascript', null, 'utf-8', true);
+            addScript('/htmx-playground/assets/index.4cd08bd2.js', 'module', 'anonymous');
+            addStylesheet('./ace/css/theme/monokai.css');
+            addStylesheet('/htmx-playground/assets/index.2c526b56.css');
+            console.log('load assets');
+        }
+
+        if (localStorage.getItem('popup-shown') == 'true') {
+            loadAssets()
+        }
+
+        function closePopup() {
+            document.body.classList.add('hide-popup')
+
+            if (localStorage.getItem('popup-shown') !== 'true') {
+                localStorage.setItem('popup-shown', 'true')
+                loadAssets();
+            }
+        }
+    </script>  
     <link rel="icon" href="./logo_full.png" type="image/png" />
     <meta name="description" content="HTMX Playground allows you to write code in a backend-like environment, running entirely inside the browser. You can define endpoints within server.js and render your own templates. It will run a mock server that intersepts outgoing requests from HTMX.">
     <style>
@@ -81,17 +95,15 @@
         }
 
         #close-popup {
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 2.5em;
-            height: 2.5em;
-            font-size: 1.75em;
-            background-color: #fff1;
+            font-size: 1.2em;
+            padding: 0.4em 0.6em;
+            border-radius: 5px;
+            background-color: #0f06;
+            color: white;
+            border: none;
         }
         #close-popup:hover {
-            background-color: #fff2;
-            border-top-right-radius: inherit;
+            background-color: #0f07;
         }
 
         a {
@@ -106,24 +118,6 @@
             gap: 0.5em;
             align-items: center;
         }
-
-        #mobile-warning {
-            display: none;
-            padding: 0.5em;
-            padding-left: 0.75em;
-            border-left: 4px solid red;
-            background-color: #f002;
-        }
-
-        @media only screen and (max-width: 600px) {
-            #mobile-warning {
-                display: block;
-            }
-            #close-popup {
-                display: none;
-            }
-        }
-
 
     </style>
 </head>
@@ -144,9 +138,12 @@
                 <p>
                     It allows you to write code in a backend-like environment, running entirely inside the browser. You can define endpoints within server.js and render your own templates. It will run a mock server that intersepts outgoing requests from HTMX. The request handling and templating engine should be very familiar to people who use Django. In principle, this project isn't specific to HTMX, so you are free to try out other libraries as well.
                 </p>
-                <p id="mobile-warning">
-                    This web app does not work on mobile!
+                <p>
+                    Check out the examples! I've adapted them from the original <a href="https://htmx.org/examples/">htmx.org examples</a>.
                 </p>
+                <div style="text-align: center;">
+                    <button id="close-popup" onclick="closePopup()">Go to playground ↪</button>
+                </div>
                 <h2>Saving & sharing</h2>
                 <ol>
                     <li>Press "Copy as JSON" in the top right.</li>
@@ -160,19 +157,18 @@
                 <h2>Limitations</h2>
                 <ul>
                     <li>No page navigation</li>
-                    <li>No mobile support</li>
+                    <li>Limited mobile support</li>
                 </ul>
 
                 <h2>Libraries used</h2>
                 <ul>
                     <li>Svelte</li>
-                    <li>Monaco (code editor)</li>
+                    <li>Ace (code editor)</li>
                     <li>PollyJS (mock server)</li>
                     <li>Nunjucks (templating engine)</li>
                 </ul>
                 
             </article>
-            <button id="close-popup" onclick="document.body.classList.add('hide-popup'); localStorage.setItem('popup-shown', 'true')">✕</button>
         </main>
     </div>
     <div id="app"></div>

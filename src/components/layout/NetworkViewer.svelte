@@ -1,6 +1,8 @@
 <script type="ts">
     import LogView from '../LogView.svelte'
 
+    export let mobile;
+
     let logs = []
     let logI = 0
 
@@ -27,16 +29,18 @@
         </div>
     </button>
     <div class="body">
-        <div class="log-list">
-            {#if logs.length > 0}
-                {#each logs as log, i}
-                    <button on:click={_ => logI = i} class:active={i == logI}>
-                        <div>{log.request.method} {log.request.url}</div>
-                        <div>{log.response.status}</div>
-                    </button>
-                {/each}
-            {/if}
-        </div>
+        {#if !mobile}
+            <div class="log-list">
+                {#if logs.length > 0}
+                    {#each logs as log, i}
+                        <button on:click={_ => logI = i} class:active={i == logI}>
+                            <div>{log.request.method} {log.request.url}</div>
+                            <div>{log.response.status}</div>
+                        </button>
+                    {/each}
+                {/if}
+            </div>
+        {/if}
         {#if logs.length > 0 && logI != null}
             <LogView log={logs[logI]} />
         {/if}
@@ -126,5 +130,8 @@
 
     main.open .body .log-list {
         overflow-y: hidden;
+    }
+
+    @media only screen and (max-width: 800px) {
     }
 </style>

@@ -20,8 +20,6 @@
     
         responseCodeHTML = hljs.highlight(responseCode, {language: 'http'}).value;
     }
-    
-
 </script>
 
 <main>
