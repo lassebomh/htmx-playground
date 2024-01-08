@@ -55,7 +55,7 @@
         transition: height .15s ease-in-out;
         display: flex;
         flex-direction: column;
-        position: absolute;
+        position: fixed;
         bottom: 0;
         width: 100%;
         z-index: 10;
