@@ -25,19 +25,3 @@ button {
 pre > code {
     white-space: initial;
 }
-
-::-webkit-scrollbar {
-    background-color: #ffffff1e;
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-button {
-    display: none;
-}
-::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.233);
-    border-radius: 1000px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.308);
-}

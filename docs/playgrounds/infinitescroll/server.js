@@ -26,7 +26,7 @@ on.get("/", (request) => {
     return render(request, 'index.html', context)
 })
 
-on.get("/contacts", (request, page) => {
+on.get("/contacts", async (request, page) => {
 
     page = parseInt(page)
 
@@ -34,6 +34,8 @@ on.get("/contacts", (request, page) => {
         contacts: getContacts(page),
         nextPage: page+1,
     }
+
+    await sleep(500);
 
     return render(request, 'loadmore.html', context)
 })

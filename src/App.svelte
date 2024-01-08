@@ -170,6 +170,7 @@
 
     async function loadExample(e) {
         await loadPlaygroundFromURL(e.target.value)
+        if (mobile) exclusiveView = 'sandbox'
     }
 
 </script>
@@ -351,6 +352,10 @@
     .buttons-container {
         display: flex;
         gap: 0.5em;
+    }
+
+    #examples {
+        color: white;
     }
     
     @media only screen and (max-width: 800px) {

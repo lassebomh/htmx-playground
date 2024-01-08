@@ -48,7 +48,7 @@
 </script>
 
 <main>
-    {@html readme_html}
+    <!-- {@html readme_html} -->
     {#if parse_error_message != ""}
         <div class="parse-error">{parse_error_message}</div>
     {/if}

@@ -69,7 +69,7 @@
     .recent-request-url {
         font-family: monospace;
         color: #fff7;
-        margin-left: 1em;
+        margin-left: 0.5em;
     }
 
     .topbar {

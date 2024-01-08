@@ -2,7 +2,8 @@
      {% if loop.last %}
           <tr hx-get="/contacts/?page={{ nextPage }}"
                hx-trigger="revealed"
-               hx-swap="afterend">
+               hx-swap="afterend"
+               hx-indicator=".htmx-indicator">
  
                <td>{{ contact.name }}</td>
                <td>{{ contact.phoneNr }}</td>
