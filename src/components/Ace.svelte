@@ -19,7 +19,7 @@
 
         editor.setOptions({
             fontSize: '12pt',
-            wrap: true,
+            // wrap: true,
             indentedSoftWrap: true,
             // showLineNumbers: false,
             theme: "ace/theme/monokai"
