@@ -1,0 +1,16 @@
+{
+    "files": {
+        "/server.js": null,
+        "/index.html": null,
+        "/button.html": null
+    },
+    "title": "Example",
+    "baseLocation": {
+        "method": "fetch",
+        "version": "v1",
+        "params": {
+            "url": "/v1/internal"
+        }
+    },
+    "readmeHTML": "<blockquote onclick=\"console.log('hello world')\" cite=\"https://news.ycombinator.com/item?id=38906989\">\"Finally a way to use HTMX as a SPA framework\"<footer><cite>Hackernews commenter</cite></footer></blockquote>"
+}

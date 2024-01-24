@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                overflow: hidden;
+            }
+            
+            iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+            }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
+        <script type="module">
+            import mime from 'https://esm.sh/mime@4.0.1/lite';
+
+            window.mime = mime;
+
+            async function handleServiceWorkerRequest(event) {
+                let response;
+
+                if (event.data.self) {
+                    let url = new URL(event.data.request.url)
+                    let fileContents = window.files[url.pathname]
+
+                    if (fileContents !== undefined) {
+                        response = new Response(fileContents, {
+                            status: 200,
+                            headers: {
+                                'Content-Type': mime.getType(url.pathname),
+                            }
+                        })
+                    } else {
+                        response = new Response(null, {status: 404});
+                    }
+
+                } else {
+                    if (window.requestHandler == null) {
+                        throw new Error("Couldn't handle request, because window.requestHandler is undefined.")
+                    } else {
+                        response = await window.requestHandler(event.data.request);
+                    }
+                }
+
+                const clonedResponse = response.clone();
+                const body = await clonedResponse.blob();
+                const headers = Object.fromEntries(response.headers.entries());
+
+                const serializedResponse = {
+                    body: body,
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: headers
+                };
+
+                event.ports[0].postMessage({ id: event.data.id, response: serializedResponse });
+            }
+
+            let pgIframe;
+
+            function onURLChange() {
+                let href = pgIframe.contentDocument.location.href
+                window.parent.postMessage({
+                    type: "location",
+                    value: href
+                }, '*')
+                sendDOMUpdate()
+            }
+
+            function sendDOMUpdate() {
+
+                window.parent.postMessage({
+                    type: "domdiff",
+                    value: pgIframe.contentDocument.documentElement.innerHTML,
+                    // value: new XMLSerializer().serializeToString(pgIframe.contentDocument.documentElement),
+                }, '*')
+            }
+
+            function createClientIframe(event) {
+                pgIframe = document.createElement('iframe')
+                pgIframe.src = "/"
+
+                pgIframe.addEventListener('load', () => {
+                    attachErrorListeners(pgIframe.contentWindow)
+                    attachLogProxy(pgIframe.contentWindow)
+
+                    let domDiffDebounce;
+
+                    var observer = new MutationObserver((mutationsList, observer) => {
+                        if (domDiffDebounce) clearTimeout(domDiffDebounce)
+
+                        domDiffDebounce = setTimeout(() => {
+                            sendDOMUpdate()
+                        }, 100)
+                    });
+
+                    observer.observe(pgIframe.contentDocument.documentElement, {
+                        attributes: true,
+                        childList: true,
+                        subtree: true
+                    });
+
+                    onURLChange()
+                    window.addEventListener('popstate', onURLChange);
+
+                });
+
+                document.body.appendChild(pgIframe)
+            }
+
+            function handleParentMessage(event) {
+                
+                if (window.parent !== event.source) return
+                
+                if (event.data.type == 'fetch-files') {
+                    window.files = event.data.value;
+
+                    let script = document.createElement('script')
+                    script.type = 'module'
+                    script.src = '/server.js'
+
+                    script.addEventListener('load', createClientIframe)
+
+                    document.body.appendChild(script)
+                } else if (event.data.type == 'reload') {
+                    window.location.reload()
+                }
+
+                navigator.serviceWorker.addEventListener('message', handleServiceWorkerRequest);
+
+            }
+
+			let previous = { level: null, args: null };
+
+            function attachLogProxy(window) {
+
+                ['clear', 'log', 'info', 'dir', 'warn', 'error', 'table'].forEach((level) => {
+                    const original = window.console[level];
+                    window.console[level] = (...args) => {
+                        const stringifiedArgs = stringify(args);
+                        if (previous.level === level && previous.args && previous.args === stringifiedArgs) {
+                            parent.postMessage({ type: 'console', level, duplicate: true }, '*');
+                        } else {
+                            previous = { level, args: stringifiedArgs };
+
+                            try {
+                                parent.postMessage({ type: 'console', level, args }, '*');
+                            } catch (err) {
+                                parent.postMessage({ type: 'console', level: 'unclonable' }, '*');
+                            }
+                        }
+
+                        original(...args);
+                    };
+                });
+
+                [
+                    { method: 'group', type: 'console_group' },
+                    { method: 'groupEnd', type: 'console_group_end' },
+                    { method: 'groupCollapsed', type: 'console_group_collapsed' }
+                ].forEach((group_type) => {
+                    const original = window.console[group_type.method];
+                    window.console[group_type.method] = (label) => {
+                        parent.postMessage({ type: group_type.type, label }, '*');
+
+                        original(label);
+                    };
+                });
+
+                const timers = new Map();
+                const original_time = window.console.time;
+                const original_timelog = window.console.timeLog;
+                const original_timeend = window.console.timeEnd;
+
+                window.console.time = (label = 'default') => {
+                    original_time(label);
+                    timers.set(label, performance.now());
+                };
+                window.console.timeLog = (label = 'default') => {
+                    original_timelog(label);
+                    const now = performance.now();
+                    if (timers.has(label)) {
+                        parent.postMessage(
+                            {
+                                type: 'console',
+                                level: 'system-log',
+                                args: [`${label}: ${now - timers.get(label)}ms`]
+                            },
+                            '*'
+                        );
+                    } else {
+                        parent.postMessage(
+                            { type: 'console', level: 'system-warn', args: [`Timer '${label}' does not exist`] },
+                            '*'
+                        );
+                    }
+                };
+                window.console.timeEnd = (label = 'default') => {
+                    original_timeend(label);
+                    const now = performance.now();
+                    if (timers.has(label)) {
+                        parent.postMessage(
+                            {
+                                type: 'console',
+                                level: 'system-log',
+                                args: [`${label}: ${now - timers.get(label)}ms`]
+                            },
+                            '*'
+                        );
+                    } else {
+                        parent.postMessage(
+                            { type: 'console', level: 'system-warn', args: [`Timer '${label}' does not exist`] },
+                            '*'
+                        );
+                    }
+                    timers.delete(label);
+                };
+
+                const original_assert = window.console.assert;
+                window.console.assert = (condition, ...args) => {
+                    if (condition) {
+                        const stack = new Error().stack;
+                        parent.postMessage({ type: 'console', level: 'assert', args, stack }, '*');
+                    }
+                    original_assert(condition, ...args);
+                };
+
+                const counter = new Map();
+                const original_count = window.console.count;
+                const original_countreset = window.console.countReset;
+
+                window.console.count = (label = 'default') => {
+                    counter.set(label, (counter.get(label) || 0) + 1);
+                    parent.postMessage(
+                        { type: 'console', level: 'system-log', args: `${label}: ${counter.get(label)}` },
+                        '*'
+                    );
+                    original_count(label);
+                };
+
+                window.console.countReset = (label = 'default') => {
+                    if (counter.has(label)) {
+                        counter.set(label, 0);
+                    } else {
+                        parent.postMessage(
+                            {
+                                type: 'console',
+                                level: 'system-warn',
+                                args: `Count for '${label}' does not exist`
+                            },
+                            '*'
+                        );
+                    }
+                    original_countreset(label);
+                };
+
+                const original_trace = window.console.trace;
+
+                window.console.trace = (...args) => {
+                    const stack = new Error().stack;
+                    parent.postMessage({ type: 'console', level: 'trace', args, stack }, '*');
+                    original_trace(...args);
+                };
+
+                function stringify(args) {
+                    try {
+                        return JSON.stringify(args);
+                    } catch (error) {
+                        return null;
+                    }
+                }
+            }
+
+            function attachErrorListeners(frame) {
+                frame.onerror = function (msg, url, lineNo, columnNo, error) {
+                    parent.postMessage({ type: 'error', value: error }, '*');
+                };
+
+                frame.addEventListener('unhandledrejection', (event) => {
+                    parent.postMessage({ type: 'unhandledrejection', value: event.reason }, '*');
+                });
+            }
+
+            attachLogProxy(window)
+            attachErrorListeners(window)
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/_sw_v1.js').then(async () => {
+                    // console.log('Service Worker registered');
+                    window.addEventListener('message', handleParentMessage)
+                    window.parent.postMessage({type: "fetch-files"}, '*')
+
+                }).catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+            }
+
+            window.beforeunload = async () => {
+                if ('serviceWorker' in navigator) {
+                    let registrations = await navigator.serviceWorker.getRegistrations();
+                    
+                    for (let registration of registrations) {
+                        // console.log("Unregistered", registration);
+                        registration.unregister();
+                    }
+                }
+            };
+        </script>
+    </head>
+    <body>
+    </body>
+</html>

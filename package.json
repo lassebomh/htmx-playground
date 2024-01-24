@@ -1,36 +1,32 @@
 {
-  "name": "htmx-playground-2",
-  "private": true,
-  "version": "0.0.0",
+  "name": "htmx-playground",
   "type": "module",
+  "version": "1.0.0",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "check": "svelte-check --tsconfig ./tsconfig.json"
-  },
-  "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^1.1.0",
-    "@tsconfig/svelte": "^3.0.0",
-    "svelte": "^3.52.0",
-    "svelte-check": "^2.9.2",
-    "svelte-preprocess": "^4.10.7",
-    "tslib": "^2.4.0",
-    "typescript": "^4.6.4",
-    "vite": "^3.2.3"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
   },
   "dependencies": {
-    "@babel/parser": "^7.20.5",
-    "@babel/traverse": "^7.20.5",
-    "@types/marked": "^4.0.7",
-    "highlight.js": "^11.7.0",
-    "isomorphic-dompurify": "^0.24.0",
-    "lz-string": "^1.5.0",
-    "marked": "^4.2.3",
-    "monaco-editor": "^0.34.1",
-    "monaco-jsx-highlighter": "^2.0.4",
-    "monaco-jsx-syntax-highlight": "^1.2.0",
-    "monaco-themes": "^0.4.3",
-    "svelte-writable-derived": "^2.1.5"
+    "@astrojs/check": "^0.4.1",
+    "@astrojs/svelte": "^5.0.3",
+    "@types/dompurify": "^3.0.5",
+    "@types/js-beautify": "^1.14.3",
+    "@types/mime": "^3.0.4",
+    "@types/uuid": "^9.0.7",
+    "@vscode/codicons": "^0.0.35",
+    "astro": "^4.2.1",
+    "dompurify": "^3.0.8",
+    "js-beautify": "^1.14.11",
+    "mime": "^4.0.1",
+    "monaco-editor": "^0.45.0",
+    "svelte": "^4.2.9",
+    "svelte-json-tree": "^2.2.0",
+    "svelte-splitpanes": "^0.8.0",
+    "typescript": "^5.3.3",
+    "uuid": "^9.0.1",
+    "wunderbaum": "^0.8.0"
   }
 }

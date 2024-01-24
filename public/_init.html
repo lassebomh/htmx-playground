@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+    <script type="module">
+        function init(event) {
+            if (window.parent !== event.source) return // not safe enough
+        
+            if (event.data.type == 'init') {
+                window.removeEventListener('message', init)
+                document.open();
+                document.write(event.data.value);
+                document.close();
+            }
+        }
+        window.addEventListener('message', init)
+        window.parent.postMessage({type: "init"}, '*')
+    </script>
+</html>
