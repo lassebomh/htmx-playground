@@ -80,10 +80,10 @@
 
 <style>
     main {
-        flex-grow: 1;
-        width: 100%;
-        height: 100%;
-        position: relative;
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		position: relative;
     }
 
     .domdiff {
@@ -92,10 +92,9 @@
 
     .prettify-toggler {
         position: absolute;
-        bottom: 0;
+        top: 0;
         right: 0;
         padding: 8px;
-        background-color: #191919;
-        color: #bbb;
+        color: white;
     }
 </style>

@@ -13,6 +13,7 @@
         icon: string,
     }
 
+    export let mobile: boolean;
     
     let tabs: Tab[] = [];
     let openTabId: string | null = null
@@ -63,6 +64,10 @@
     }
 
     export function setOpenTab(path: string | null) {
+        if (mobile && fileTreePaneSize > 0) {
+            fileTreePaneSize = 0
+        }
+
         if (openTabId != null) {
             let oldTab = tabs.find(t => t.id == openTabId)
 
@@ -158,6 +163,7 @@
                 minimap: {
                     enabled: false
                 },
+                lineNumbers: mobile ? 'off' : 'on'
             }
         );
 
@@ -182,15 +188,21 @@
         editor.dispose();
     });
 
-    export let fileTreeHidden = false;
+    export let fileTreePaneSize: number;
+
+    function toggleFileTree() {
+        if (fileTreePaneSize > 5) {
+            fileTreePaneSize = 0
+        } else {
+            fileTreePaneSize = mobile ? 80 : (230 / window.innerWidth * 2) * 100
+        }
+    }
 </script>
 
 <div class="tab-container" bind:this={tabContainer}>
-    {#if fileTreeHidden}
-        <button class="toggle-explorer icon-button" on:click={_ => {fileTreeHidden = !fileTreeHidden}}>
-            <i class="codicon codicon-layout-sidebar-left"></i>
-        </button>
-    {/if}
+    <button class="toggle-explorer icon-button" on:click={_ => toggleFileTree()}>
+        <i class="codicon codicon-layout-sidebar-left"></i>
+    </button>
     {#each tabs as tab, index (tab.id)}
         <button
             class="tab {openTabId == tab.id ? 'open' : ''}"
@@ -238,6 +250,7 @@
         background: #252526;
         display: flex;
         height: 38px;
+        flex-shrink: 0;
     }
 
     .toggle-explorer {
@@ -245,6 +258,8 @@
         justify-content: center;
         align-items: center;
         width: 44px;
+        height: 100%;
+        flex-shrink: 0;
     }
 
     .tab {
@@ -268,7 +283,7 @@
 
     .tab.open {
         color: white;
-        background-color: #1E1E1E;
+        background-color: #fff1;
     }
 
     .ghost {

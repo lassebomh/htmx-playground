@@ -3,8 +3,17 @@ html,body {
     margin: 0;
     padding: 0;
 }
+
+.monaco-editor-background {
+    --vscode-editor-background: #1a1a1a !important;
+}
+
+.monaco-editor .margin {
+    --vscode-editorGutter-background: #1a1a1a !important;
+}
+
 body {
-    background-color: #1e1e1e;
+    background-color: #1a1a1a;
     margin: 0;
     padding: 0;
     width: 100vw;
@@ -19,22 +28,6 @@ body {
 }
 body, #app {
     min-height: 100vh;
-}
-::-webkit-scrollbar {
-    background-color: #ffffff1e;
-    border-radius: 1000px;
-    width: 8px;
-    height: 8px;
-}
-::-webkit-scrollbar-button {
-    display: none;
-}
-::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.233);
-    border-radius: 1000px;
-}
-::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.308);
 }
 
 
@@ -95,7 +88,7 @@ a:visited {
     color: #7657ff;
 }
 
-h1 {
+#header {
     display: flex;
     gap: 0.5em;
     align-items: center;
@@ -129,41 +122,22 @@ blockquote > footer > cite::before {
     content: "‒ ";
 }
 
-.splitpanes__pane {
-    background-color: transparent !important;
-
-    display: flex;
-    flex-direction: column;
-}
-
-.splitpanes__splitter {
-    border-color: transparent !important;
-    background-color: #252526 !important;
-    width: 4px !important;
-}
-.splitpanes--horizontal > .splitpanes__splitter {
-    width: 100% !important;
-    height: 4px !important;
-
-}
-.splitpanes__splitter::before, .splitpanes.default-theme .splitpanes__splitter::after {
-    background-color: transparent !important;
-}
-
 .icon-button {
     background-color: transparent;
     border: none;
-    font-size: inherit;
-    padding: 0.2em;
     border-radius: 3px;
     cursor: pointer;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    width: 1.5em;
+    height: 1.5em;
 }
 .icon-button i {
-    font-size: 16px;
+    font-size: 1em;
     line-height: 1em;
     color: #bebebe;
-    display:inline-block;
 }
 .icon-button:not(:disabled):hover {
     background-color: #fff1;
@@ -181,4 +155,56 @@ blockquote > footer > cite::before {
 }
 .icon-blue {
     color: #519aba;
+}
+
+
+::-webkit-scrollbar {
+    background-color: #ffffff1e;
+    border-radius: 1000px;
+    width: 8px;
+    height: 8px;
+}
+::-webkit-scrollbar-button {
+    display: none;
+}
+::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.233);
+    border-radius: 1000px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.308);
+}
+
+
+.splitpanes__pane {
+    background-color: transparent !important;
+    display: flex;
+    flex-direction: column;
+}
+.splitpanes__splitter {
+    border: none !important;
+    background-color: #1a1a1a !important;
+    width: 0px !important;
+    min-width: 0 !important;
+}
+.splitpanes--horizontal > .splitpanes__splitter {
+    width: 100% !important;
+    height: 0px !important;
+    min-height: 0 !important;
+}
+.splitpanes__splitter::before {
+    background-color: transparent !important;
+    /* background-color: #f002 !important; */
+    height: 100% !important;
+    width: 12px !important;
+    margin-left: -6px !important;
+}
+.splitpanes--horizontal > .splitpanes__splitter::before {
+    /* background-color: #0f02 !important; */
+    width: 100% !important;
+    height: 12px !important;
+    margin-top: -6px !important;
+}
+.splitpanes__splitter::after {
+    display: none;
 }

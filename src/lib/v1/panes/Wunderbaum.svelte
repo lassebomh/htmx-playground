@@ -266,17 +266,10 @@
         await tree.ready
     })
 
-    export let fileTreeHidden = false;
-
 </script>
 
-<main class:hide={fileTreeHidden}>
+<main>
     <div class="explorer-titlebar">
-        <div class='explorer-title'>
-            <button class="toggle-explorer icon-button" on:click={_ => {fileTreeHidden = !fileTreeHidden}}>
-                <i class="codicon codicon-layout-sidebar-left"></i>
-            </button>
-        </div>
         <div class="explorer-buttons">
             <button class="icon-button" on:click={_ => createNode(false)}>
                 <i class="codicon codicon-new-file"></i>
@@ -303,29 +296,8 @@
         flex-direction: column;
         width: 100%;
         height: 100%;
+        background-color: #1e1e1e;
     }
-
-    main.hide {
-        width: min-content;
-        background-color: #2a2a2a;
-    }
-    .hide .explorer-titlebar {
-        background-color: #2a2a2a;
-        width: 100%;
-        height: 100%;
-        padding: 0 0;
-    }
-    .hide .explorer-title {
-        width: 100%;
-        height: 100%;
-    }
-    .hide .toggle-explorer {
-        width: 100%;
-        height: 100%;
-        align-items: start;
-        padding: 11px;
-    }
-
 
     .explorer-titlebar {
         display: flex;
@@ -349,10 +321,6 @@
         gap: 4px;
     }
 
-    main.hide .explorer-buttons {
-        display: none;
-    }
-
     div.wunderbaum:focus {
         --wb-active-color: #03395e;
         --wb-active-cell-color: #7dc6e9;
@@ -367,10 +335,6 @@
         --wb-active-cell-color-grayscale: #b3b3b3;
     }
 
-    main.hide .wunderbaum {
-        display: none;
-    }
-
     div.wunderbaum {
         padding: 0 0;
         outline: none;
@@ -378,7 +342,6 @@
         overflow-y: hidden;
         overflow-x: hidden;
         flex-grow: 1;
-        border-right: 2px solid #252526;
         border-radius: 0;
 
         --wb-font-stack: inherit;

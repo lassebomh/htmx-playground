@@ -3,9 +3,13 @@
     import type { Log } from './console';
 
 	export let logs: Log[];
+	export let clear_logs: CallableFunction;
 </script>
 
 <div class="container">
+	<button disabled={logs.length == 0} on:click={_ => clear_logs()} class="clear-button icon-button">
+		<i class="codicon codicon-circle-slash"></i>
+	</button>
 	{#each logs as log}
 		<ConsoleLine {log} />
 	{/each}
@@ -18,6 +22,15 @@
 		overflow-y: auto;
 		flex-grow: 1;
 		padding-bottom: 8px;
+		position: relative;
+	}
+
+	.clear-button {
+		position: absolute;
+		top: 4px;
+		right: 4px;
+		font-size: 24px;
+		z-index: 10;
 	}
 
 	.container > :global(*) {

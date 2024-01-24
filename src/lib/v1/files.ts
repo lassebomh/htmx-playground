@@ -23,6 +23,8 @@ export let iconMap: any = {
     "html": "codicon codicon-code icon-orange",
     "css": "codicon codicon-symbol-numeric icon-blue",
     "json": "codicon codicon-json icon-yellow",
+    "markdown": "codicon codicon-markdown icon-blue",
+
     "project": "codicon codicon-chevron-down",
 }
 
