@@ -20,6 +20,7 @@
     import DOMPurify from 'dompurify';
     import { marked } from 'marked';
     import NetworkViewer from './tabs/NetworkViewer.svelte';
+    import ConsoleLine from './tabs/console/ConsoleLine.svelte';
     
     let serverUrl = new URL('http://sandbox.localhost:4321/_init.html')
     
@@ -131,6 +132,27 @@
         return [title, type]
     }
 
+    // lower index == newer
+    let networkLogs: any[] = []
+
+    async function push_network_log(request: any, response: any) {
+        networkLogs = [
+            {
+                url: new URL(request.url),
+                method: request.method,
+                requestHeaders: request.headers,
+                requestBody: request.body ? await request.body.text() : null,
+                requestBodyType: request.body ? request.body.type : null,
+                status: response.status,
+                statusN: Math.floor(response.status/100),
+                responseHeaders: response.headers,
+                responseBody: response.body ? await response.body.text() : null,
+                responseBodyType: response.body ? response.body.type : null,
+            },
+            ...networkLogs
+        ]
+    }
+
     document.addEventListener('keydown', e => {
         if (e.ctrlKey && e.key === 's') {
             e.preventDefault();
@@ -145,7 +167,11 @@
         "DOM Diff"
     ]
 
-    let activeTab = 'Sandbox'
+    let activeTab = localStorage.getItem('active_tab') || "Sandbox"
+
+    $: {
+        localStorage.setItem('active_tab', activeTab)
+    }
 
     let domDiff: DOMDiff
     let domDiffHistory: string[] = [];
@@ -202,6 +228,7 @@
                         bind:this={sandboxView}
                         {serverUrl}
                         {sandbox}
+                        {push_network_log}
                         {push_dom_diff}
                         {push_logs}
                         {group_logs}
@@ -224,7 +251,7 @@
                     {:else if activeTab == 'Sandbox'}
                         <About title={sandbox.title} readmeHtml={readmeHtml} />
                     {:else if activeTab == 'Network'}
-                        <NetworkViewer />
+                        <NetworkViewer logs={networkLogs} {mobile} />
                     {/if}
                 </Pane>
             </Splitpanes>
@@ -329,7 +356,7 @@
         border: none;
         display: flex;
         cursor: pointer;
-        background-color: #1e1e1e;
+        background-color: #252526;
         padding: 0;
     }
 

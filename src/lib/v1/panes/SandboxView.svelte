@@ -10,6 +10,7 @@
     export let increment_duplicate_log: CallableFunction;
     export let clear_logs: CallableFunction;
     export let push_dom_diff: (html: any) => void;
+    export let push_network_log: CallableFunction;
 
     let iframe: HTMLIFrameElement;
     let currentLocation: string;
@@ -67,9 +68,6 @@
         currentLocation = event.data.value;
     }
 
-    function on_dom_diff(event: MessageEvent<any>) {
-        push_dom_diff(event.data.value);
-    }
 
     window.addEventListener('message', (event) => {
         if (event.origin !== serverUrl.origin || event.source == null) return
@@ -82,8 +80,10 @@
                 return on_fetch_files(event)
 			case 'location':
                 return on_location_update(event)
-			case 'domdiff':
-                return on_dom_diff(event)
+            case 'domdiff':
+                return push_dom_diff(event.data.value)
+            case 'network':
+                return push_network_log(event.data.request, event.data.response)
 			// case 'cmd_error':
 			// case 'cmd_ok':
 			// 	return handle_command_message(event.data);

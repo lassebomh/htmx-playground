@@ -75,10 +75,16 @@ self.addEventListener('fetch', (event) => {
             request: {
                 url: event.request.url,
                 method: event.request.method,
-                headers: Object.fromEntries(event.request.headers.entries()),
+                headers: Object.fromEntries(event.request.headers.entries())
             }
         };
         
+        let bodyAllowed = event.request.method.toLowerCase() != "get" && event.request.method.toLowerCase() != "head"
+
+        if (bodyAllowed) {
+            serializedRequest.request.body = await event.request.blob()
+        }
+
         server.postMessage(serializedRequest, [messageChannel.port2]);
     }));
 });

@@ -251,6 +251,8 @@
         display: flex;
         height: 38px;
         flex-shrink: 0;
+        width: 100%;
+        overflow-x: auto;
     }
 
     .toggle-explorer {
@@ -260,6 +262,7 @@
         width: 44px;
         height: 100%;
         flex-shrink: 0;
+        border-radius: 0;
     }
 
     .tab {

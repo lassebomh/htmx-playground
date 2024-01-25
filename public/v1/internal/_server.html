@@ -26,8 +26,15 @@
             async function handleServiceWorkerRequest(event) {
                 let response;
 
+                let requestClone = structuredClone(event.data.request)
+
+                let requestUrl = requestClone.url
+                delete requestClone.url
+
+                let request = new Request(requestUrl, requestClone)
+
                 if (event.data.self) {
-                    let url = new URL(event.data.request.url)
+                    let url = new URL(requestUrl)
                     let fileContents = window.files[url.pathname]
 
                     if (fileContents !== undefined) {
@@ -45,7 +52,7 @@
                     if (window.requestHandler == null) {
                         throw new Error("Couldn't handle request, because window.requestHandler is undefined.")
                     } else {
-                        response = await window.requestHandler(event.data.request);
+                        response = await window.requestHandler(request);
                     }
                 }
 
@@ -59,6 +66,14 @@
                     statusText: response.statusText,
                     headers: headers
                 };
+
+                if (!event.data.self) {
+                    window.parent.postMessage({
+                        type: 'network',
+                        request: event.data.request,
+                        response: serializedResponse,
+                    }, '*')
+                }
 
                 event.ports[0].postMessage({ id: event.data.id, response: serializedResponse });
             }
