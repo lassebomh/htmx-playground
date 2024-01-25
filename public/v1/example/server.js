@@ -10,13 +10,6 @@ router.get('/', (request) => {
     return render(request, 'index.html', context)
 })
 
-router.post('/', async (request) => {
-    let context = {
-        text: "Click me!",
-    }
-    return render(request, 'index.html', context)
-})
-
 router.get('/increment', (request) => {
     counter++;
 

@@ -93,7 +93,7 @@
     .prettify-toggler {
         position: absolute;
         top: 0;
-        right: 0;
+        right: 16px;
         padding: 8px;
         color: white;
     }

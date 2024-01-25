@@ -358,6 +358,7 @@
         cursor: pointer;
         background-color: #252526;
         padding: 0;
+        box-shadow: 4px 4px 8px #0002;
     }
 
     .tab {

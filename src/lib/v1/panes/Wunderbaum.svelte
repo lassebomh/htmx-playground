@@ -307,6 +307,7 @@
         height: 38px;
         flex-shrink: 0;
         background-color: #252526;
+        box-shadow: 4px 4px 8px #0002;
     }
 
     .explorer-title {
