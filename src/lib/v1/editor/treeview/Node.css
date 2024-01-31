@@ -1,0 +1,59 @@
+.tree-node {
+    color: #cfcfcf;
+    align-items: center;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    height: 24px;
+    padding-inline-end: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.tree-node#node-__root__ {
+    height: 30px;
+}
+
+.tree-node:not(.visibleInput) .inputWrapper {
+    display: none;
+}
+
+.tree-node.isSelected .inputWrapper, .tree-node#node-__root__ .inputWrapper, .tree-node:hover .inputWrapper {
+    opacity: 0.5;
+    display: flex;
+}
+
+.tree-node .inputWrapper:hover {
+    opacity: 1 !important;
+    display: flex;
+}
+
+.tree-node:hover {
+    background-color: #ffffff0a;
+}
+
+
+.tree-root .tree-node.isSelected {
+    box-shadow: 4px 4px 8px #0001;
+    background-color: #ffffff18;
+}
+
+.labelGridItem {
+    padding-inline-start: 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.inputWrapper {
+    display: flex;
+    align-items: center;
+    /* gap: 4px; */
+    flex-shrink: 0;
+}
+
+.nodeInput {
+    flex-shrink: 1;
+    flex-grow: 1;
+    width: 100%;
+    margin-left: 4px;
+}

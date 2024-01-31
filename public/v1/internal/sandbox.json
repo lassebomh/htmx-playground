@@ -1,0 +1,28 @@
+{
+    "nodes": [
+        {
+            "id": "__root__",
+            "parent": null,
+            "type": "folder",
+            "text": "Internals"
+        },
+        {
+            "id": "1",
+            "parent": "__root__",
+            "type": "javascript",
+            "text": "lib.js"
+        },
+        {
+            "id": "2",
+            "parent": "__root__",
+            "type": "html",
+            "text": "_server.html"
+        }
+    ],
+    "viewNode": "1",
+    "openNodes": ["2", "2"],
+    "nodePaths": {
+        "1": "/lib.js",
+        "2": "/_server.html"
+    }
+}

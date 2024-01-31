@@ -1,4 +1,5 @@
 ---
+import { getHandler } from '../../lib/v1/sandbox';
 import rawStylesCSS from '../../lib/v1/style.css?raw'
 
 ---
@@ -12,7 +13,8 @@ import rawStylesCSS from '../../lib/v1/style.css?raw'
 	<style is:inline set:html={rawStylesCSS}></style>
 	<script>
 		import { parseSandboxLocationFromHref } from '../../lib/location';
-		import { Sandbox } from '../../lib/v1/sandbox';
+import { get } from 'svelte/store';
+		import { Sandbox, getHandler } from '../../lib/v1/sandbox';
 		import DOMPurify from 'dompurify';
 
 
@@ -24,27 +26,32 @@ import rawStylesCSS from '../../lib/v1/style.css?raw'
 			}
 		}
 	
-		var sandbox = await Sandbox.load(loc)
+		let handler = getHandler(loc)
+		var config = await handler.getConfig()
 
-		document.title = sandbox.title + ' - HTMX Playground';
-		document.getElementById('header')!.innerText = sandbox.title;
+		// document.title = config.title + ' - HTMX Playground';
+		// document.getElementById('header')!.innerText = config.title;
 
 		async function loadSandbox() {
-			let filesPromise = sandbox.loadFiles()
+			let sandboxPromise = handler.getSandbox(config)
 			let runtime: any = await import('../../lib/v1/Runtime.svelte');
-			await filesPromise;
+
+			// sandboxPromise.then(async (s) => {
+			// 	console.log(await s.exportFiles());
+			// 	// console.log(get(s.nodeContents));
+			// })
 
 			new runtime.default({
 				target: document.getElementById("app"),
-				props: { sandbox }
+				props: { sandbox: await sandboxPromise }
 			})
 		}
 
 		if (localStorage.getItem('popup-shown') !== 'true') {
 			let readme = document.getElementById('readme')!
 	
-			if (sandbox.readmeHTML) {
-				readme.innerHTML = DOMPurify.sanitize(sandbox.readmeHTML)
+			if (config.readmeHTML) {
+				readme.innerHTML = DOMPurify.sanitize(config.readmeHTML)
 			}
 	
 			let gotoSandboxButton = document.getElementById('goto-button')!

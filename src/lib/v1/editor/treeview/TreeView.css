@@ -1,0 +1,20 @@
+
+.tree-root {
+    height: 100%;
+    padding-left: 0;
+    margin-top: 0;
+    font-size: 14px;
+}
+
+.tree-root ul, .tree-root li {
+    list-style: none;
+    padding-left: 0px;
+}
+
+.draggingSource {
+    opacity: .3;
+}
+
+.dropTarget {
+    background-color: #fff3;
+}

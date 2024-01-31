@@ -50,17 +50,17 @@
     function on_console_group_collapsed(action: any) {
         group_logs(action.label, true);
     }
-    function on_init(event: MessageEvent<any>) {
+    async function on_init(event: MessageEvent<any>) {
         event.source!.postMessage({
             type: 'init',
-            value: sandbox.exportFiles()['/_server.html'],
+            value: (await sandbox.exportFiles())['/_server.html'],
         }, {targetOrigin: event.origin})
     }
 
-    function on_fetch_files(event: MessageEvent<any>) {
+    async function on_fetch_files(event: MessageEvent<any>) {
         event.source!.postMessage({
                 type: 'fetch-files',
-                value: sandbox.exportFiles(),
+                value: await sandbox.exportFiles(),
         }, {targetOrigin: event.origin})
     }
 
@@ -121,7 +121,7 @@
             {currentLocation}
         </div>
     </div>
-    <iframe title={sandbox.title} bind:this={iframe} src={serverUrl.href} frameborder="0"></iframe>
+    <iframe title="" bind:this={iframe} src={serverUrl.href} frameborder="0"></iframe>
 </main>
 
 <style>

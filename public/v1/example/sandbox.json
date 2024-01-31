@@ -1,0 +1,43 @@
+{
+    "nodes": [
+        {
+            "id": "__root__",
+            "parent": null,
+            "type": "folder",
+            "text": "Internals"
+        },
+        {
+            "id": "1",
+            "parent": "__root__",
+            "type": "javascript",
+            "text": "server.js"
+        },
+        {
+            "id": "2",
+            "parent": "__root__",
+            "type": "html",
+            "text": "index.html"
+        },
+        {
+            "id": "3",
+            "parent": "__root__",
+            "type": "html",
+            "text": "button.html"
+        }
+    ],
+    "viewNode": "1",
+    "openNodes": ["1", "2"],
+    "nodePaths": {
+        "1": "/server.js",
+        "2": "/index.html",
+        "3": "/button.html"
+    },
+    "baseLocation": {
+        "method": "fetch",
+        "version": "v1",
+        "params": {
+            "url": "/v1/internal"
+        }
+    },
+    "readmeHTML": "<blockquote onclick=\"console.log('hello world')\" cite=\"https://news.ycombinator.com/item?id=38906989\">\"Finally a way to use HTMX as a SPA framework\"<footer><cite>Hackernews commenter</cite></footer></blockquote>"
+}

@@ -22,6 +22,10 @@
     import NetworkViewer from './tabs/NetworkViewer.svelte';
     import ConsoleLine from './tabs/console/ConsoleLine.svelte';
     
+    import Editor from './editor/index.js'
+    import sample from './editor/tree_data.json'
+    import { writable } from "svelte/store";
+
     let serverUrl = new URL('http://sandbox.localhost:4321/_init.html')
     
     export let sandbox: Sandbox
@@ -75,64 +79,6 @@
 	}
 
 
-    function onProjectRename(oldValue: string, newValue: string) {
-        console.log('projectrename', oldValue, newValue);
-        sandbox.title = newValue
-        // sandbox = sandbox
-    }
-
-    function onFileContentUpdate(path: string, content: string) {
-        sandbox.files![path] = content;
-
-        if (path.toLocaleLowerCase() == '/readme.md') {
-            let tmp = <string>marked.parse(content, {async: false})
-            readmeHtml = DOMPurify.sanitize(tmp)
-            sandbox.readmeHTML = readmeHtml;
-        }
-
-        // sandbox = sandbox
-    }
-
-    function onPathUpdate(diffMap: {[path: string]: string}) {
-        console.log('update', diffMap);
-        for (const [oldPath, newPath] of Object.entries(diffMap)) {
-            fileEditor.updateTab(oldPath, newPath, getFilenameLanguage(newPath))
-            sandbox.files![newPath] = sandbox.files![oldPath]
-            delete sandbox.files![oldPath]
-        }
-    }
-
-    function onFileActive(path: string) {
-        // console.log('active', path);
-        fileEditor.createTab(path, sandbox.files![path], getFilenameLanguage(path))
-        fileEditor.setOpenTab(path)
-    }
-
-    function onFileDelete(path: string) {
-        // console.log('delete', path);
-        fileEditor.closeTab(path)
-
-        if (path.toLocaleLowerCase() == '/readme.md') {
-            sandbox.readmeHTML = undefined;
-            readmeHtml = null;
-        }
-
-        delete sandbox.files![path]
-    }
-
-    function onFileCreate(parentPath: string) {
-        let [title, type, content] = ['partial.html', 'html', '<div><\/div>'];
-        let path = `${parentPath}/${title}`;
-            
-        sandbox.files![path] = content
-
-        fileEditor.createTab(path, content, type)
-        fileEditor.setOpenTab(path)
-
-        return [title, type]
-    }
-
-    // lower index == newer
     let networkLogs: any[] = []
 
     async function push_network_log(request: any, response: any) {
@@ -201,24 +147,7 @@
 <main class="{showView}" class:mobile={mobile}>
     <Splitpanes class="main-split-pane">
         <Pane class="editor-pane">
-            <Splitpanes class="editor-split-pane">
-                <Pane bind:size={fileTreePaneSize} class="file-tree-pane" minSize={fileTreePaneSizeMin}>
-                    <Wunderbaum
-                        bind:this={fileTree}
-                        initPaths={Object.keys(sandbox.files)}
-                        rootName={sandbox.title}
-                        {onPathUpdate} {onFileActive} {onFileDelete} {onFileCreate} {onProjectRename}
-                    />
-                </Pane>
-                <Pane minSize={15}>
-                    <Monaco
-                        bind:this={fileEditor}
-                        bind:fileTreePaneSize={fileTreePaneSize}
-                        {mobile}
-                        {onFileContentUpdate}
-                    />
-                </Pane>
-            </Splitpanes>
+            <Editor nodes={sandbox.nodes} openNodes={sandbox.openNodes} viewNode={sandbox.viewNode} nodeContents={sandbox.nodeContents} />
         </Pane>
 
         <Pane class="sandbox-pane">
@@ -249,7 +178,7 @@
                     {:else if activeTab == 'DOM Diff'}
                         <DOMDiff bind:this={domDiff} bind:domDiffHistory={domDiffHistory} />
                     {:else if activeTab == 'Sandbox'}
-                        <About title={sandbox.title} readmeHtml={readmeHtml} />
+                        <About title="" readmeHtml={readmeHtml} />
                     {:else if activeTab == 'Network'}
                         <NetworkViewer logs={networkLogs} {mobile} />
                     {/if}
