@@ -13,7 +13,6 @@ import rawStylesCSS from '../../lib/v1/style.css?raw'
 	<style is:inline set:html={rawStylesCSS}></style>
 	<script>
 		import { parseSandboxLocationFromHref } from '../../lib/location';
-import { get } from 'svelte/store';
 		import { Sandbox, getHandler } from '../../lib/v1/sandbox';
 		import DOMPurify from 'dompurify';
 
@@ -22,7 +21,7 @@ import { get } from 'svelte/store';
 			method: "fetch",
 			version: "v1",
 			params: {
-				  url: "/v1/example"
+				  url: "/v1/python"
 			}
 		}
 	

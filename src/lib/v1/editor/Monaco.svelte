@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
-    import monaco from './monaco'
+    import monaco from '../monaco'
     import {typeIcons} from './icons'
 
     export let nodes;

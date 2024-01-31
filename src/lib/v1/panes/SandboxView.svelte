@@ -15,8 +15,11 @@
     let iframe: HTMLIFrameElement;
     let currentLocation: string;
     
-    export function reloadSandbox(){
-        iframe.contentWindow!.postMessage({type: 'reload'}, serverUrl.origin)
+    export async function reloadSandbox(){
+        iframe.contentWindow!.postMessage({
+            type: 'reload',
+            value: await sandbox.exportFiles(),
+        }, serverUrl.origin)
     }
 
     // function on_fetch_progress(progress) {

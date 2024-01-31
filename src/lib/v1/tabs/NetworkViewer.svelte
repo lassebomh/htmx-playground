@@ -1,5 +1,5 @@
 <script lang='ts'>
-    import monaco from '../editor';
+    import monaco from '../monaco';
 	import JSONNode from 'svelte-json-tree';
 
     export let logs: any[];

@@ -1,6 +1,6 @@
 <script lang='ts'>
     import { onMount } from 'svelte';
-    import monaco from '../editor'
+    import monaco from '../monaco'
 
     import { html_beautify } from 'js-beautify'
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { onDestroy, onMount } from 'svelte';
     import { get, type Readable, type Writable } from 'svelte/store';
-    import monaco from '../editor'
+    import monaco from '../monaco'
     import { getFilenameLanguage, getPathFilename, iconMap } from '../files';
     import { v4 as uuidv4 } from 'uuid'
 
