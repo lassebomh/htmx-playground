@@ -1,8 +1,14 @@
 {
     "files": {
-        "/server.js": null,
-        "/index.html": null,
-        "/button.html": null
+        "/server.js": {
+
+        },
+        "/index.html": {
+
+        },
+        "/button.html": {
+
+        }
     },
     "title": "Example",
     "baseLocation": {

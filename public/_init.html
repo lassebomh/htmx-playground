@@ -2,7 +2,7 @@
 <html>
     <script type="module">
         function init(event) {
-            if (window.parent !== event.source) return // not safe enough
+            if (window.parent !== event.source) return
         
             if (event.data.type == 'init') {
                 window.removeEventListener('message', init)

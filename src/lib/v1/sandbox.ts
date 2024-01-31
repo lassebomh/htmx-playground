@@ -8,6 +8,16 @@ interface ISandboxHandler {
     save(sandbox: Sandbox): Promise<void>
 }
 
+type FileMetadata = {
+    type: string,
+    droppable: boolean,
+    text: string,
+    id: string,
+    parent: string,
+    view: any,
+    open: boolean,
+}
+
 export class LocalSandboxHandler implements ISandboxHandler {
     constructor(public params: {[key: string]: string}) {
         this.params.key = this.params.key || uuidv4()
@@ -20,7 +30,7 @@ export class LocalSandboxHandler implements ISandboxHandler {
     }
 
     async getFiles(sandbox: Sandbox): Promise<{[path: string]: string}> {
-        return <{[path: string]: string}>sandbox.tempFiles;
+        return <{[path: string]: string}>sandbox.fileMetadata;
     }
 
     async getLocation(): Promise<SandboxLocation> {
@@ -62,7 +72,7 @@ export class FetchSandboxHandler implements ISandboxHandler {
     }
 
     async getFiles(sandbox: Sandbox): Promise<{[path: string]: string}> {
-        return Object.fromEntries(await Promise.all(Object.keys(sandbox.tempFiles).map(async url =>
+        return Object.fromEntries(await Promise.all(Object.keys(sandbox.fileMetadata).map(async url =>
             [url, await (await fetch(this.params.url + url)).text()]
         )))
     }
@@ -96,10 +106,11 @@ export class FetchSandboxHandler implements ISandboxHandler {
 export class Sandbox {
     private baseFiles: {[path: string]: string} = {}
     public files?: {[path: string]: string}
+    private loaded: boolean = false
 
     constructor(
         public handler: ISandboxHandler,
-        public tempFiles: {[path: string]: string | null},
+        public fileMetadata: {[path: string]: string | null},
         public title: string,
         public baseLocation?: SandboxLocation,
         public readmeHTML?: string
@@ -114,7 +125,7 @@ export class Sandbox {
     }
 
     async loadFiles(): Promise<void> {
-        if (this.files != null) return
+        if (this.loaded) return
 
         this.files = await this.handler.getFiles(this)
 
@@ -123,6 +134,8 @@ export class Sandbox {
             await base.loadFiles()
             this.baseFiles = base.exportFiles()
         }
+
+        this.loaded = true
     }
 
     exportFiles(): {[path: string]: string} {
