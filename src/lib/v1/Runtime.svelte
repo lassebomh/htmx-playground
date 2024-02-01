@@ -147,7 +147,7 @@
 <main class="{showView}" class:mobile={mobile}>
     <Splitpanes class="main-split-pane">
         <Pane class="editor-pane">
-            <Editor nodes={sandbox.nodes} openNodes={sandbox.openNodes} viewNode={sandbox.viewNode} nodeContents={sandbox.nodeContents} />
+            <Editor nodes={sandbox.nodes} nodeIndexer={sandbox.nodeIndexer} openNodes={sandbox.openNodes} viewNode={sandbox.viewNode} nodeContents={sandbox.nodeContents} />
         </Pane>
 
         <Pane class="sandbox-pane">

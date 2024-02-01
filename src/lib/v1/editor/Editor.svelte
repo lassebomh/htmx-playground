@@ -3,25 +3,39 @@
   import Monaco from "./Monaco.svelte";
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
 
+  import { sveltify } from "svelte-preprocess-react";
+  import { createPortal } from "react-dom";
+  import ReactDOM from "react-dom/client";
+  import { renderToString } from "react-dom/server";
+
   export let nodes;
   export let openNodes;
   export let viewNode;
   export let nodeContents;
+  export let nodeIndexer;
+
+  
+  const ReactTreeView = sveltify(
+    TreeView,
+    createPortal,
+    ReactDOM,
+    renderToString,
+  );
 
   let mobile = window.innerWidth < 800;
 
-  let nodeIndexer;
+  // let nodeIndexer;
   let monacoComponent;
 
-  $: {
-    let newNodeIndexer = {}
+  // $: {
+  //   let newNodeIndexer = {}
 
-    $nodes.forEach((node, i) => {
-      newNodeIndexer[node.id] = i
-    });
+  //   $nodes.forEach((node, i) => {
+  //     newNodeIndexer[node.id] = i
+  //   });
 
-    nodeIndexer = newNodeIndexer;
-  }
+  //   nodeIndexer = newNodeIndexer;
+  // }
 
   function onNodeSelect(node) {
     if (node.type !== 'folder') {
@@ -83,7 +97,7 @@
         <div class="topbar">
           HTMX Playground
         </div>
-        <react:TreeView treeStore={nodes} {onNodeSelect} {onNodeDelete} />
+        <ReactTreeView treeStore={nodes} {onNodeSelect} {onNodeDelete} />
       </div>
     </Pane>
     <Pane minSize={15}>

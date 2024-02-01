@@ -27,6 +27,7 @@
     "monaco-editor": "^0.45.0",
     "react": "^18.2.0",
     "react-dnd": "^16.0.1",
+    "react-dom": "^18.2.0",
     "svelte": "^4.2.9",
     "svelte-json-tree": "^2.2.0",
     "svelte-preprocess-react": "^0.16.0",

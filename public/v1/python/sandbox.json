@@ -47,6 +47,24 @@
             "parent": "__root__",
             "type": "python",
             "text": "__init__.py"
+        },
+        {
+            "id": "6",
+            "parent": "__root__",
+            "type": "html",
+            "text": "index.html"
+        },
+        {
+            "id": "7",
+            "parent": "__root__",
+            "type": "folder",
+            "text": "public"
+        },
+        {
+            "id": "8",
+            "parent": "7",
+            "type": "css",
+            "text": "style.css"
         }
     ],
     "viewNode": "1",
@@ -57,6 +75,8 @@
         "libreq": "/lib/requirements.txt",
         "3": "/_server.html",
         "4": "/requirements.txt",
-        "5": "/__init__.py"
+        "5": "/__init__.py",
+        "6": "/index.html",
+        "8": "/public/style.css"
     }
 }

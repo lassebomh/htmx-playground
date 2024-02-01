@@ -17,12 +17,10 @@
                 border: none;
             }
         </style>
-        <script src="https://cdn.jsdelivr.net/npm/nunjucks@3.2.4/browser/nunjucks.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script> -->
         <script type="module">
-            import mime from 'https://esm.sh/mime@4.0.1/lite';
-
-            window.mime = mime;
+            const pyodidePromise = import("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js")
+            const mimePromise = import("https://esm.sh/mime@4.0.1/lite");
 
             async function handleServiceWorkerRequest(event) {
                 let response;
@@ -39,6 +37,8 @@
                     let fileContents = window.files[url.pathname]
 
                     if (fileContents !== undefined) {
+                        let mime = await mimePromise;
+                        
                         response = new Response(fileContents, {
                             status: 200,
                             headers: {
@@ -53,7 +53,9 @@
                     if (window.requestHandler == null) {
                         throw new Error("Couldn't handle request, because window.requestHandler is undefined.")
                     } else {
-                        response = await window.requestHandler(request);
+                        let args = await window.requestHandler(request);
+                        let [body, options] = args
+                        response = new Response(body, Object.fromEntries(options))
                     }
                 }
 
@@ -99,8 +101,10 @@
                 }, '*')
             }
 
-            window.startclient = (event) => {
+            const control = {'stop': false};
+            let mainPromise;
 
+            window.startclient = () => {
                 if (!pgIframe) {
                     pgIframe = document.createElement('iframe')
                     pgIframe.src = "/"
@@ -127,61 +131,143 @@
     
                         onURLChange()
                         window.addEventListener('popstate', onURLChange);
-    
                     });
                     
                     document.body.appendChild(pgIframe)
                 } else {
                     pgIframe.contentDocument.location.reload()
                 }
-
             }
+
+            function writeFiles(basePath, files) {
+                let folders = {}
+
+                Object.entries(files).forEach(([path, contents]) => {
+                    let matches = [...path.matchAll(/\//g)]
+
+                    for (let i = 1; i < matches.length; i++) {
+                        let match = matches[i]
+                        let _path = path.substring(0, match.index)
+
+                        if (!(_path in folders)) {
+                            pyodide.FS.mkdir(basePath+_path);
+                            folders[_path] = "";
+                        }
+                    }
+                    pyodide.FS.writeFile(basePath+path, contents, { encoding: "utf8" });
+                })
+            }
+
+            function deleteFolderRecursive(path) {
+                let stats;
+
+                try {
+                    stats = pyodide.FS.stat(path);
+                } catch (e) {
+                    if (e.errno === 44) {
+                        return;
+                    } else {
+                        throw e;
+                    }
+                }
+                
+                if (pyodide.FS.isDir(stats.mode)) {
+                    const files = pyodide.FS.readdir(path);
+                    
+                    for (const file of files) {
+                        if (file === '.' || file === '..') continue;
+
+                        const curPath = path + '/' + file;
+                        if (pyodide.FS.isDir(pyodide.FS.stat(curPath).mode)) {
+                            deleteFolderRecursive(curPath);
+                        } else {
+                            pyodide.FS.unlink(curPath);
+                        }
+                    }
+                    pyodide.FS.rmdir(path);
+                } else {
+                    console.error("The path provided is not a directory:", path);
+                }
+            }
+
 
             async function runMain() {
 
-                if (!pyodide) {
-                    pyodide = await loadPyodide();
-                    window.FS = pyodide.FS
+                if (mainPromise) {
+                    control['stop'] = true
+                    await mainPromise;
+                    mainPromise = null;
+                    control['stop'] = false
                 }
+
+                if (!pyodide) {
+                    await pyodidePromise;
+
+                    pyodide = await loadPyodide({
+                        packages: ['micropip']
+                    });
+                    pyodide.globals.set("control", control);
+                    pyodide.setStdout = () => {}
+                }
+
+                let setupFilesPromise = (async ()=> {
+                    pyodide.FS.chdir('/home')
+                    
+                    deleteFolderRecursive('/home/pyodide')
+                    
+                    pyodide.FS.mkdir('/home/pyodide')
+                    pyodide.FS.chdir('/home/pyodide')
+    
+                    writeFiles('.', files)
+    
+                })();
                 
-                await pyodide.loadPackage("micropip");
-
-                let folders = {}
                 let installPackages = []
-
-                Object.entries(files).forEach(async ([path, contents]) => {
+                
+                Object.entries(files).forEach(([path, contents]) => {
 
                     if (path.endsWith('/requirements.txt') && contents.trim()) {
                         let packages = contents.trim().split(/\s+/)
                         installPackages = [...installPackages, ...packages.filter(name => !(name in pyodide.loadedPackages))]
                     }
-
-                    let fsPath = "."+path
-
-                    let matches = [...fsPath.matchAll(/\//g)]
-
-                    for (let i = 1; i < matches.length; i++) {
-                        let match = matches[i]
-                        let _path = fsPath.substring(0, match.index)
-
-                        if (!(_path in folders)) {
-                            // console.log('mkdir', _path);
-                            pyodide.FS.mkdir(_path);
-                            folders[_path] = "";
-                        }
-                    }
-
-                    // console.log('mkfile', fsPath);
-                    pyodide.FS.writeFile(fsPath, contents, { encoding: "utf8" });
                 })
 
-                let script = `
-                    import micropip
-                    await micropip.install([${installPackages.map(x => '"' + x + '"').join(', ')}])
-                    import main
-                `
+                if (installPackages.length) {
+                    await pyodide.runPythonAsync(`
+                        import micropip
+                        await micropip.install([${installPackages.map(x => '"' + x + '"').join(', ')}])
+                    `)
+                }
 
-                pyodide.runPythonAsync(script)
+
+                await setupFilesPromise;
+
+                mainPromise = pyodide.runPythonAsync(`
+                    import asyncio
+                    import importlib
+                    import sys
+
+                    async def check_interrupt():
+                        reload = 'main' in sys.modules
+                        import main
+                        
+                        if reload:
+                            importlib.reload(main)
+                        
+                        while True:
+                            await asyncio.sleep(.1)
+                            # print('slept')
+                            if control.stop == True:
+                                return
+
+                    await check_interrupt()
+                `)
+
+                // try {
+                // let main = pyodide.pyimport('main')
+                // } catch (error) {
+                //     console.log('catch error');
+                // }
             }
 
             async function handleParentMessage(event) {
@@ -190,14 +276,10 @@
                 
                 if (event.data.type == 'fetch-files') {
                     window.files = event.data.value;
-
                     runMain()
                 } else if (event.data.type == 'reload') {
                     window.files = event.data.value;
                     runMain()
-                    // window.location.reload()
-                    // console.log(pgIframe);
-                    // pgIframe.contentDocument.location.reload()
                 }
 
                 navigator.serviceWorker.addEventListener('message', handleServiceWorkerRequest);

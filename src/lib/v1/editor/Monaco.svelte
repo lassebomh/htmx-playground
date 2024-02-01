@@ -7,7 +7,7 @@
     export let openNodes;
     export let viewNode;
     export let nodeIndexer;
-    export let nodeContents;
+    export let nodeContents;    
 
     export let mobile: boolean;
 
@@ -106,7 +106,7 @@
     <div class="topbar">
         <slot></slot>
         {#each $openNodes as nodeId, i (nodeId)}
-            {@const node = $nodes[nodeIndexer[nodeId]]}
+            {@const node = $nodes[$nodeIndexer[nodeId]]}
             {#if node}
                 <button
                     bind:this={tabs[i]}

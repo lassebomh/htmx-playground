@@ -1,12 +1,16 @@
 import asyncio
 import js
-from lib import Request, Response
+from lib import Request, Response, render, on
 
-async def handler(request):
-    response = Response("hello world", {
-        "status": 200,
-    })
-    return response
+@on.get('/')
+async def index(request):
+    context = {
+        'title': "hello world!"
+    }
+    # await on.request(request)
 
-js.requestHandler = handler
-js.startclient()
+    return render(request, 'index.html', context)
+
+on.static('./public', '/')
+
+on.listen()
