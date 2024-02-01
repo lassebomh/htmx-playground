@@ -9,5 +9,4 @@ async def handler(request):
     return response
 
 js.requestHandler = handler
-
 js.startclient()
