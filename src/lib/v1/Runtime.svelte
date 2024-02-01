@@ -9,33 +9,23 @@
     import { getFilenameLanguage } from "./files";
     import { Sandbox } from "./sandbox";
 
-    import Monaco from "./panes/Monaco.svelte";
-    import Wunderbaum from "./panes/Wunderbaum.svelte";
     import SandboxView from "./panes/SandboxView.svelte";
     
     import About from './tabs/About.svelte';
     import DOMDiff from './tabs/DOMDiff.svelte'
     import Console from "./tabs/console/Console.svelte";
     import type { Log } from "./tabs/console/console";
-    import DOMPurify from 'dompurify';
-    import { marked } from 'marked';
     import NetworkViewer from './tabs/NetworkViewer.svelte';
-    import ConsoleLine from './tabs/console/ConsoleLine.svelte';
-    
     import Editor from './editor/index.js'
-    import sample from './editor/tree_data.json'
-    import { writable } from "svelte/store";
-
-    let serverUrl = new URL('http://sandbox.localhost:4321/_init.html')
     
+    // import DOMPurify from 'dompurify';
+    // import { marked } from 'marked';
+
     export let sandbox: Sandbox
-
+    
+    let serverUrl = new URL('http://sandbox.localhost:4321/_init.html')
     let mobile = window.innerWidth < 800;
-
-    let fileEditor: Monaco;
-    let fileTree: Wunderbaum;
     let sandboxView: SandboxView;
-
     let readmeHtml: string | null = null;
 
 	let logs: Log[] = [];

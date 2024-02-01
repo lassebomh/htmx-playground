@@ -78,7 +78,7 @@ class Server(HttpRouter):
 
     def request_handler(self, request):
         url = urlparse(request.url)
-        match = self(url.path)
+        match = self(url.path, method=request.method)
         
         return match.target(
             request,
@@ -89,4 +89,4 @@ class Server(HttpRouter):
         js.requestHandler = self.request_handler
         js.startclient()
 
-on = Server()
+server = Server()

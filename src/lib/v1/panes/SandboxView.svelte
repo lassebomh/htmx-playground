@@ -20,6 +20,8 @@
             type: 'reload',
             value: await sandbox.exportFiles(),
         }, serverUrl.origin)
+        // console.log(await sandbox.exportFiles());
+        
     }
 
     // function on_fetch_progress(progress) {

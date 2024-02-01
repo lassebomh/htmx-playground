@@ -1,0 +1,27 @@
+<div id="rolls">
+    <div class="dice">
+        {% for pips in rolls %}
+            <div class="face">
+                {% for _ in range(pips) %}
+                    <div class="pip"></div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+    {% if rolls|sum == rolls|length %}
+        <button class="win">
+            {% for _ in range(rolls|length*5) %}
+                <div class="line"></div>
+            {% endfor %}
+        </button>
+    {% else %}
+        <button hx-post="/roll" hx-target="#rolls" hx-swap="outerHTML">
+            Click to roll!
+        </button>
+    {% endif %}
+</div>
+
+
+<p class="score">
+    Score: {{ rolls|sum }}
+</p>

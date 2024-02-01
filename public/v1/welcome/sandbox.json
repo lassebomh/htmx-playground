@@ -1,0 +1,49 @@
+{
+    "nodes": [
+        {
+            "id": "__root__",
+            "parent": null,
+            "type": "folder",
+            "text": "Welcome!"
+        },
+        {
+            "id": "1",
+            "parent": "__root__",
+            "type": "python",
+            "text": "main.py"
+        },
+        {
+            "id": "6",
+            "parent": "__root__",
+            "type": "html",
+            "text": "index.html"
+        },
+        {
+            "id": "2",
+            "parent": "__root__",
+            "type": "html",
+            "text": "dice.html"
+        },
+        {
+            "id": "3",
+            "parent": "__root__",
+            "type": "css",
+            "text": "style.css"
+        }
+    ],
+    "viewNode": "1",
+    "openNodes": ["1"],
+    "nodePaths": {
+        "1": "/main.py",
+        "6": "/index.html",
+        "2": "/dice.html",
+        "3": "/style.css"
+    },
+    "baseLocation": {
+        "method": "fetch",
+        "version": "v1",
+        "params": {
+            "url": "/v1/python"
+        }
+    }
+}
