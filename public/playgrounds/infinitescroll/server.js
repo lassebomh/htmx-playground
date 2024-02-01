@@ -1,5 +1,5 @@
 
-import { faker } from 'https://cdn.skypack.dev/@faker-js/faker';
+import { faker } from 'https://cdn.skypack.dev/@faker-js/faker@v7.4.0';
 
 function getContacts(page) {
     faker.seed(page)
@@ -8,7 +8,7 @@ function getContacts(page) {
 
     for (let i = 0; i < 5; i++) {
         contacts.push({
-            name: faker.person.fullName(),
+            name: faker.name.fullName(),
             phoneNr: faker.phone.number(),
         })
     }

@@ -7,8 +7,8 @@ let contacts = []
 
 for (let i = 0; i < 300; i++) {
     contacts.push({
-        firstName: faker.person.firstName(),
-        lastName: faker.person.lastName(),
+        firstName: faker.name.firstName(),
+        lastName: faker.name.lastName(),
     })
 }
 
