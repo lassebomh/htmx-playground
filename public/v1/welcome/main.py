@@ -1,4 +1,4 @@
-from lib import server as on, Request, Response, render
+from lib import server as on, render
 
 from random import randint
 

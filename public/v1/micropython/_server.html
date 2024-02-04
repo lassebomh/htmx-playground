@@ -17,9 +17,8 @@
                 border: none;
             }
         </style>
-        <!-- <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script> -->
+        <script type="module" src="https://cdn.jsdelivr.net/npm/polyscript"></script>
         <script type="module">
-            const pyodidePromise = import("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js")
             const mimePromise = import("https://esm.sh/mime@4.0.1/lite");
 
             async function handleServiceWorkerRequest(event) {
@@ -52,21 +51,17 @@
                         requestClone.headers = Object.entries(requestClone.headers)
                         requestClone.hasBody = requestClone.body != undefined
 
-                        let responseData = await window.requestHandler(requestClone)
+                        let responseData = JSON.parse(window.requestHandler(requestClone))
 
-                        let [body, options] = responseData
-
-                        options = Object.fromEntries(options);
-                        options.headers = Object.fromEntries(options.headers);
-
-                        response = new Response(body, options)
+                        response = new Response(...responseData)
                     }
                 }
+
                 const clonedResponse = response.clone();
                 const body = await clonedResponse.blob();
                 const headers = Object.fromEntries(response.headers.entries());
 
-                const serializedResponse = {
+                const responseData = {
                     body: body,
                     status: response.status,
                     statusText: response.statusText,
@@ -76,16 +71,16 @@
                 if (!event.data.self) {
                     window.parent.postMessage({
                         type: 'network',
-                        request: event.data.request,
-                        response: serializedResponse,
+                        request: requestData,
+                        response: responseData,
                     }, '*')
                 }
 
-                event.ports[0].postMessage({ id: event.data.id, response: serializedResponse });
+                event.ports[0].postMessage({ id: event.data.id, response: responseData });
             }
 
             var pgIframe;
-            var pyodide;
+            // var pyodide;
 
             function onURLChange() {
                 let href = pgIframe.contentDocument.location.href
@@ -104,8 +99,8 @@
                 }, '*')
             }
 
-            const control = {'stop': false};
-            let mainPromise;
+            // const control = {'stop': false};
+            // let mainPromise;
 
             window.startclient = () => {
                 if (!pgIframe) {
@@ -142,150 +137,44 @@
                 }
             }
 
-            function writeFiles(basePath, files) {
-                let folders = {}
-
-                Object.entries(files).forEach(([path, contents]) => {
-                    let matches = [...path.matchAll(/\//g)]
-
-                    for (let i = 1; i < matches.length; i++) {
-                        let match = matches[i]
-                        let _path = path.substring(0, match.index)
-
-                        if (!(_path in folders)) {
-                            pyodide.FS.mkdir(basePath+_path);
-                            folders[_path] = "";
-                        }
-                    }
-                    pyodide.FS.writeFile(basePath+path, contents, { encoding: "utf8" });
-                })
-            }
-
-            function deleteFolderRecursive(path) {
-                let stats;
-
-                try {
-                    stats = pyodide.FS.stat(path);
-                } catch (e) {
-                    if (e.errno === 44) {
-                        return;
-                    } else {
-                        throw e;
-                    }
-                }
-                
-                if (pyodide.FS.isDir(stats.mode)) {
-                    const files = pyodide.FS.readdir(path);
-                    
-                    for (const file of files) {
-                        if (file === '.' || file === '..') continue;
-
-                        const curPath = path + '/' + file;
-                        if (pyodide.FS.isDir(pyodide.FS.stat(curPath).mode)) {
-                            deleteFolderRecursive(curPath);
-                        } else {
-                            pyodide.FS.unlink(curPath);
-                        }
-                    }
-                    pyodide.FS.rmdir(path);
-                } else {
-                    console.error("The path provided is not a directory:", path);
-                }
-            }
-
-
             async function runMain() {
 
-                if (mainPromise) {
-                    control['stop'] = true
-                    await mainPromise;
-                    mainPromise = null;
-                    control['stop'] = false
+                const config = {
+                    files: Object.fromEntries(Object.keys(files).map(f => ["."+f, f])),
+                    // plugins: '!error'
                 }
 
-                if (!pyodide) {
-                    await pyodidePromise;
+                let script = document.createElement('script')
+                script.setAttribute('id', 'main')
+                script.setAttribute('type', 'micropython')
+                script.setAttribute('src', '/main.py')
+                // script.setAttribute('async', 'true')
+                script.setAttribute('config', JSON.stringify(config))
 
-                    pyodide = await loadPyodide({
-                        packages: ['micropip']
-                    });
-                    pyodide.globals.set("control", control);
-                }
+                console.log('runMain')
 
-                let setupFilesPromise = (async ()=> {
-                    pyodide.FS.chdir('/home')
-                    
-                    deleteFolderRecursive('/home/pyodide')
-                    
-                    pyodide.FS.mkdir('/home/pyodide')
-                    pyodide.FS.chdir('/home/pyodide')
-    
-                    writeFiles('.', files)
-    
-                })();
-                
-                let installPackages = []
-                
-                Object.entries(files).forEach(([path, contents]) => {
+                document.body.appendChild(script)
 
-                    if (path.endsWith('/requirements.txt') && contents.trim()) {
-                        let packages = contents.trim().split(/\s+/)
-                        installPackages = [...installPackages, ...packages.filter(name => !(name in pyodide.loadedPackages))]
-                    }
-                })
-
-                if (installPackages.length) {
-                    await pyodide.runPythonAsync(`
-                        import micropip
-                        await micropip.install([${installPackages.map(x => '"' + x + '"').join(', ')}])
-                    `)
-                }
-
-
-                await setupFilesPromise;
-
-                mainPromise = pyodide.runPythonAsync(`
-                    import asyncio
-                    import importlib
-                    import sys
-
-                    async def check_interrupt():
-                        for m in list(sys.modules.values()):
-                            if hasattr(m, '__file__') and m.__file__ is not None and not m.__file__.startswith('/lib/'):
-                                print(m.__file__)
-                                importlib.reload(m)
-                        
-                        import main
-                        
-                        while True:
-                            await asyncio.sleep(.1)
-                            print('sleeping')
-                            if control.stop == True:
-                                import js
-                                js.requestHandler = None
-                                print('stopping')
-                                return
-
-                    await check_interrupt()
-                `)
-
-                // try {
-                // let main = pyodide.pyimport('main')
-                // } catch (error) {
-                //     console.log('catch error');
-                // }
+                // setTimeout(async () => {
+                //     await window.trigger(["https://google.com/", Object.entries({
+                //         headers: {
+                //             'content-type': 'asdf'
+                //         }
+                //     })])
+                // }, 1000)
             }
 
+
             async function handleParentMessage(event) {
-                
                 if (window.parent !== event.source) return
                 
                 if (event.data.type == 'fetch-files') {
                     window.files = event.data.value;
                     runMain()
                 } else if (event.data.type == 'reload') {
-                    window.files = event.data.value;
-                    runMain()
+                    // window.files = event.data.value;
+                    // runMain()
+                    window.location.reload()
                 }
 
                 navigator.serviceWorker.addEventListener('message', handleServiceWorkerRequest);

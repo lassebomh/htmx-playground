@@ -19,12 +19,6 @@
             "text": "__init__.py"
         },
         {
-            "id": "libtypes",
-            "parent": "2",
-            "type": "python",
-            "text": "types.py"
-        },
-        {
             "id": "libreq",
             "parent": "2",
             "type": "plaintext",
@@ -35,14 +29,34 @@
             "parent": "__root__",
             "type": "html",
             "text": "_server.html"
+        },
+        {
+            "id": "4",
+            "parent": "__root__",
+            "type": "python",
+            "text": "main.py"
+        },
+        {
+            "id": "888",
+            "parent": "2",
+            "type": "python",
+            "text": "http_router.py"
+        },
+        {
+            "id": "8888",
+            "parent": "2",
+            "type": "python",
+            "text": "urllib.py"
         }
     ],
     "viewNode": null,
     "openNodes": [],
     "nodePaths": {
         "libinit": "/lib/__init__.py",
-        "libtypes": "/lib/types.py",
         "libreq": "/lib/requirements.txt",
-        "3": "/_server.html"
+        "3": "/_server.html",
+        "4": "/main.py",
+        "888": "/lib/http_router.py",
+        "8888": "/lib/urllib.py"
     }
 }

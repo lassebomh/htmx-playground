@@ -75,7 +75,14 @@ self.addEventListener('fetch', (event) => {
             request: {
                 url: event.request.url,
                 method: event.request.method,
-                headers: Object.fromEntries(event.request.headers.entries())
+                headers: Object.fromEntries(event.request.headers.entries()),
+                // mode: event.request.mode,
+                cache: event.request.cache,
+                redirect: event.request.redirect,
+                referrer: event.request.referrer,
+                referrerPolicy: event.request.referrerPolicy,
+                integrity: event.request.integrity,
+                keepalive: event.request.keepalive,
             }
         };
         

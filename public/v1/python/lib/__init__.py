@@ -1,38 +1,32 @@
 import js
-from js import Object
-from pyodide.ffi import to_js, create_once_callable
+from pyodide.ffi import to_js
 
-import asyncio
 from os.path import join, abspath, normpath
 from mimetypes import guess_type as guess_mimetype
-from urllib.parse import urlparse
 
 from http_router import Router as HttpRouter
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-
-
-Request = js.Request.new
-
-def Response(body, options={}):
-    return to_js([body, options])
+from .types import Response, Request
 
 env = Environment(
     loader=FileSystemLoader("./"),
     autoescape=select_autoescape()
 )
 
-def render(request, template_path, context={}):
+def render(request, template_path, context={}, status=200, statusText="", headers={}):
     template = env.get_template(template_path)
     output = template.render(request=request, **context)
-    mimetype, encoding = guess_mimetype(template_path)
 
-    return Response(output, {
-        'status': 200,
-        'headers': {
-            'Content-Type': mimetype
-        }
-    })
+    if 'headers' not in headers:
+        mimetype, encoding = guess_mimetype(template_path)
+        headers['Content-Type'] = mimetype
+
+    return Response(output,
+        status=status,
+        statusText=statusText,
+        headers=headers
+    )
 
 class Server(HttpRouter):
     def __init__(self):
@@ -54,7 +48,6 @@ class Server(HttpRouter):
     def static(self, base_dir, path_prefix):
         base_dir = abspath(base_dir)
         
-        @self.get('/{path:path}')
         async def static_handler(request, path):
             full_path = normpath(join(base_dir, path))
             if not full_path.startswith(base_dir):
@@ -67,23 +60,44 @@ class Server(HttpRouter):
 
             mimetype, encoding = guess_mimetype(full_path)
 
-            return Response(content, {
-                'status': 200,
-                'headers': {
+            return Response(content,
+                status=200,
+                headers={
                     'Content-Type': mimetype
                 }
-            })
+            )
 
+        self.get('/{path:path}')(static_handler)
         # (static_handler)
 
-    def request_handler(self, request):
-        url = urlparse(request.url)
-        match = self(url.path, method=request.method)
+    async def request_handler(self, _request):
+        request = Request(
+            _request.url,
+            _request.method,
+            {k: v for k,v in _request.headers},
+            _request.body if _request.hasBody else None,
+            _request.cache,
+            _request.redirect,
+            _request.referrer,
+            _request.referrerPolicy,
+            _request.integrity,
+            _request.keepalive,
+        )
+
+        match = self(request.url.path, method=request.method)
         
-        return match.target(
+        res = match.target(
             request,
             **(match.path_params or {})
         )
+
+        # print(res.headers)
+
+        return to_js([res.body, {
+            "status": res.status,
+            "statusText": res.statusText,
+            "headers": res.headers,
+        }])
 
     def listen(self):
         js.requestHandler = self.request_handler

@@ -20,7 +20,8 @@
             type: 'reload',
             value: await sandbox.exportFiles(),
         }, serverUrl.origin)
-        // console.log(await sandbox.exportFiles());
+        // // console.log(await sandbox.exportFiles());
+        // iframe.contentWindow?.document.location.reload()
         
     }
 
