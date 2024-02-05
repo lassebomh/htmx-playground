@@ -17,7 +17,7 @@
     display: none;
 }
 
-.tree-node.isSelected .inputWrapper, .tree-node#node-__root__ .inputWrapper, .tree-node:hover .inputWrapper {
+.tree-node.isSelected .inputWrapper, .tree-node:hover .inputWrapper {
     opacity: 0.5;
     display: flex;
 }

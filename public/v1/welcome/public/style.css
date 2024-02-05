@@ -1,31 +1,35 @@
 
 #dice {
-  display: flex;
-  gap: 1em;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: max-content;
+  gap: 12px;
 }
 
-.score {
-  color: #aaa;
-}
-
-/* Based on https://codepen.io/LandonSchropp/pen/KpzzGo */
+/* Die styles are based on https://codepen.io/LandonSchropp/pen/KpzzGo */
 .face {
   display: grid;
-  grid-template-areas: "a . c" "e g f" "d . b";
+  grid-template-areas: "a . c"
+                       "e g f"
+                       "d . b";
   flex: 0 0 auto;
-  padding: 10px;
-  width: 100px;
-  height: 100px;
+  padding: 4px;
+  width: 75px;
+  height: 75px;
   background-color: #e7e7e7;
   border-radius: 10%;
+}
+.face:hover {
+  background-color: #e7e7e7;
+  outline: 3px solid #0af9;
 }
 
 .pip {
   display: block;
   align-self: center;
   justify-self: center;
-  width: 24px;
-  height: 24px;
+  width: 17px;
+  height: 17px;
   border-radius: 50%;
   background-color: #333;
 }

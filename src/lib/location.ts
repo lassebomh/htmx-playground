@@ -2,6 +2,7 @@
 export type SandboxLocation = {
     version: string,
     method: string,
+    title: string | null,
     params: {[name: string]: string}
 }
 
@@ -19,6 +20,9 @@ export function parseSandboxLocationFromHref(href: string): SandboxLocation | nu
     let method = url.searchParams.get('method')
     url.searchParams.delete('method')
     
+    let title = url.searchParams.get('title')
+    url.searchParams.delete('title')
+    
     if (!version || !method) {
         return null
     }
@@ -28,7 +32,8 @@ export function parseSandboxLocationFromHref(href: string): SandboxLocation | nu
     let location: SandboxLocation = {
         version,
         method,
-        params,            
+        params,
+        title: title ?? null,
     }
 
     return location

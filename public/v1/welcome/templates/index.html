@@ -10,13 +10,11 @@
 <body>
   <h1>{{ title }}</h1>
 
-  <p>
-    <button hx-post="/roll" hx-target="#dice" hx-swap="outerHTML">
-      Click to roll!
-    </button>
-  </p>
-
-  <div id="dice"></div>
+  <div id="dice">
+    {%- for pips in rolls %}
+        {% include 'die.html' %}
+    {%- endfor %}
+  </div>
 
 </body>
 </html>

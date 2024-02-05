@@ -1,0 +1,28 @@
+{
+    "nodes": [
+        {
+            "id": "__root__",
+            "parent": null,
+            "type": "folder",
+            "text": "Minimal"
+        },
+        {
+            "id": "1",
+            "parent": "__root__",
+            "type": "python",
+            "text": "main.py"
+        }
+    ],
+    "viewNode": "1",
+    "openNodes": ["1"],
+    "nodePaths": {
+        "1": "/main.py"
+    },
+    "baseLocation": {
+        "method": "fetch",
+        "version": "v1",
+        "params": {
+            "url": "/v1/python"
+        }
+    }
+}

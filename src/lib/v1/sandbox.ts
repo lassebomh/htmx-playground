@@ -2,63 +2,90 @@ import { v4 as uuidv4 } from "uuid"
 import { sandboxLocationToURLParams, type SandboxLocation } from "../location"
 import { get, writable, type Writable } from "svelte/store"
 
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
+
 interface ISandboxHandler {
     getConfig(): Promise<any>
-    getLocation(): Promise<SandboxLocation>
+    getLocation(title: string | null): Promise<SandboxLocation>
     getSandbox(sandbox: Sandbox): Promise<Sandbox>
-    save(sandbox: Sandbox): Promise<void>
+    save(sandbox: Sandbox): Promise<boolean>
 }
 
-// export class LocalSandboxHandler implements ISandboxHandler {
-//     constructor(public params: {[key: string]: string}) {
-//         this.params.key = this.params.key || uuidv4()
-//     }
+export class LocalSandboxHandler implements ISandboxHandler {
+    constructor(public params: {id: string}) {}
 
-//     async get(): Promise<Sandbox> {
-//         let data = JSON.parse(<any>localStorage.getItem(this.params.key))
-//         let sandbox = new Sandbox(this, data.files, data.title, data.readmeHTML)
-//         return sandbox
-//     }
+    async getConfig(): Promise<any> {
+        let data = JSON.parse(<any>localStorage.getItem(this.params.id))
+        // let sandbox = new Sandbox(this, data.files, data.title, data.readmeHTML)
+        return data
+    }
 
-//     async getFiles(sandbox: Sandbox): Promise<{[path: string]: string}> {
-//         return <{[path: string]: string}>sandbox.fileMetadata;
-//     }
+    async getSandbox(config: any): Promise<Sandbox> {
+        // return <{[path: string]: string}>sandbox.fileMetadata;
 
-//     async getLocation(): Promise<SandboxLocation> {
-//         return {
-//             version: 'v1',
-//             method: 'local',
-//             params: this.params
-//         }
-//     }
+        return new Sandbox(
+            this,
+            writable(config.nodes),
+            writable(config.openNodes),
+            writable(config.viewNode),
+            writable(config.nodeContents),
+            writable(config.readmeHTML ?? null),
+            config.baseLocation
+        )
+    }
 
-//     async save(sandbox: Sandbox): Promise<void> {
-//         let repository: {[id: string]: null} = JSON.parse(<any>localStorage.getItem('repository') ?? "{}")
+    async getLocation(title: string | null): Promise<SandboxLocation> {
+        return {
+            version: 'v1',
+            method: 'local',
+            params: this.params,
+            title: title,
+        }
+    }
 
-//         let serialized = JSON.stringify({
-//             baseLocation: sandbox.baseLocation,
-//             files: sandbox.files,
-//             title: sandbox.title,
-//             readmeHTML: sandbox.readmeHTML,
-//         })
+    async save(sandbox: Sandbox): Promise<boolean> {
+        let repository: SandboxLocation[] = JSON.parse(<any>localStorage.getItem('repository') ?? "[]")
 
-//         console.log(serialized);
+        // let existingIndex = repository.findIndex((loc) => )
 
-//         localStorage.setItem(this.params.key, serialized)
-//         repository[this.params.key] = null;
-//         localStorage.setItem('repository', JSON.stringify(repository))
-//     }
-// }
+        repository = repository.filter((loc) => !(loc.method == 'local' && loc.params.id == this.params.id))
 
-// http://localhost:5173/?key=32fb95a2-517e-4487-bc1e-c411b437a77a&version=v1&method=local
-// http://localhost:5173/?path=%2Fv1%2Fv1example&version=v1&method=fetch
+        // if (existingIndex !== -1) {
+        //     console.log(repository);
+            
+        //     delete repository[existingIndex]
+         
+        //     console.log(repository);
+        // }
+
+        let title = sandbox.getTitle()
+
+        let serialized = JSON.stringify({
+            baseLocation: sandbox.baseLocation,
+            nodes: get(sandbox.nodes),
+            viewNode: get(sandbox.viewNode),
+            openNodes: get(sandbox.openNodes),
+            nodeContents: get(sandbox.nodeContents),
+            readmeHTML: sandbox.readmeHTML,
+            // title: title,
+        })
+
+        localStorage.setItem(this.params.id, serialized)
+        repository.push(await this.getLocation(title))
+        localStorage.setItem('repository', JSON.stringify(repository))
+
+        return true
+    }
+}
+
+// http://localhost:4321/v1/?id=5d9bb788-0a20-4ee3-ba2a-cae5dca38be5&method=local
 
 export class FetchSandboxHandler implements ISandboxHandler {
     constructor(public params: {[url: string]: string}) {}
 
     async getConfig(): Promise<any> {
         let data = await (await fetch(this.params.url + "/sandbox.json")).json()
-        // let sandbox = new Sandbox(this, data.files, data.title, data.baseLocation, data.readmeHTML)
         return data
     }
 
@@ -76,38 +103,24 @@ export class FetchSandboxHandler implements ISandboxHandler {
             writable(config.openNodes),
             writable(config.viewNode),
             writable(nodeContents),
-            config.readmeHTML,
+            writable(config.readmeHTML ?? null),
             config.baseLocation
         )
     }
 
-    async getLocation(): Promise<SandboxLocation> {
+    async getLocation(title: string | null): Promise<SandboxLocation> {
         return {
             version: 'v1',
             method: 'fetch',
-            params: this.params
+            params: this.params,
+            title: title,
         }
     }
 
-    async save(sandbox: Sandbox): Promise<void> {
-        // let repository: {[id: string]: null} = JSON.parse(<any>localStorage.getItem('repository') ?? "{}")
-
-        // let serialized = JSON.stringify({
-        //     baseLocation: sandbox.baseLocation,
-        //     files: sandbox.files,
-        //     title: sandbox.title,
-        //     readmeHTML: sandbox.readmeHTML,
-        // })
-
-        // console.log(serialized);
-
-        // localStorage.setItem(this.params.key, serialized)
-        // repository[this.params.key] = null;
-        // localStorage.setItem('repository', JSON.stringify(repository))
+    async save(sandbox: Sandbox): Promise<boolean> {
+        return false;
     }
 }
-
-
 
 export class Sandbox {
     private baseFiles?: {[path: string]: string}
@@ -119,7 +132,7 @@ export class Sandbox {
         public openNodes: Writable<any[]>,
         public viewNode: Writable<string | null>,
         public nodeContents: Writable<{[path: string]: string}>,
-        public readmeHTML?: string,
+        public readmeHTML: Writable<string | null>,
         public baseLocation?: SandboxLocation,
     ) {
         this.nodeIndexer = writable(this.createIndex(get(this.nodes)))
@@ -127,7 +140,29 @@ export class Sandbox {
         nodes.subscribe((nodes) => {
             this.nodeIndexer.set(this.createIndex(nodes))
         })
+        this.updateReadme()
         // this.updateIndex(get(this.nodes))
+    }
+
+    getTitle(): string {
+        return get(this.nodes).find((node) => node.id == '__root__').text
+    }
+
+    updateReadme() {
+        let readmeNode = get(this.nodes).find(node => node.text.toLowerCase() == 'readme.md')
+
+        let markdown = null;
+
+        if (readmeNode != null) {
+            markdown = get(this.nodeContents)[readmeNode.id]
+        }
+
+        if (markdown != null) {
+            let unsanitized = <string>marked(markdown, {async: false})
+            this.readmeHTML.set(DOMPurify.sanitize(unsanitized))
+        } else {
+            this.readmeHTML.set(null);
+        }
     }
 
     createIndex(nodes: any[]) {
@@ -140,12 +175,29 @@ export class Sandbox {
         return newNodeIndexer
     }
 
-    async save() {
-        await this.handler.save(this)
-        let sandboxLocation = await this.handler.getLocation();
+    async setWindowLocation() {
+        let title = this.getTitle()
+        let sandboxLocation = await this.handler.getLocation(title);
         let href = location.origin + sandboxLocationToURLParams(sandboxLocation)
         window.history.pushState(null, '', href);
-        return
+    }
+
+    async save() {
+        let title = this.getTitle()
+        this.updateReadme()
+        let saved = await this.handler.save(this);
+        if (!saved) {
+            this.handler = getHandler({
+                method: "local",
+                version: "v1",
+                params: {
+                    id: uuidv4()
+                },
+                title: title
+            })
+            await this.handler.save(this);
+        }
+        await this.setWindowLocation()
     }
 
     getFiles(): {[path: string]: string} {
@@ -183,25 +235,18 @@ export class Sandbox {
             return files
         }
     }
-
-    // static async getConfig(location: SandboxLocation): Promise<any> {
-
-    //     let handler = 
-        
-    //     return handler.getConfig()
-    // }
 }
 
 export function getHandler(location: SandboxLocation): ISandboxHandler {
     let Handler = (() => {
         switch (location.method) {
-            // case "local":
-            //     return LocalSandboxHandler
+            case "local":
+                return LocalSandboxHandler
             case "fetch":
                 return FetchSandboxHandler
             default:
                 throw new Error("Unknown method")
     }})()
 
-    return new Handler(location.params)
+    return new Handler(<any>location.params)
 }

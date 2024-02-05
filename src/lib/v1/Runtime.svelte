@@ -17,16 +17,14 @@
     import type { Log } from "./tabs/console/console";
     import NetworkViewer from './tabs/NetworkViewer.svelte';
     import Editor from './editor/index.js'
+    import { get } from 'svelte/store';
     
-    // import DOMPurify from 'dompurify';
-    // import { marked } from 'marked';
-
     export let sandbox: Sandbox
-    
+
     let serverUrl = new URL('http://sandbox.localhost:4321/_init.html')
     let mobile = window.innerWidth < 800;
     let sandboxView: SandboxView;
-    let readmeHtml: string | null = null;
+
 
 	let logs: Log[] = [];
     let last_console_event: Log;
@@ -89,24 +87,33 @@
         ]
     }
 
+    function onSandboxReload() {
+        sandbox.updateReadme()
+    }
+
     document.addEventListener('keydown', e => {
         if (e.ctrlKey && e.key === 's') {
             e.preventDefault();
-            sandboxView.reloadSandbox() // this is async
+            if (sandboxView) sandboxView.reloadSandbox() // this is async
         }
     });
 
+    let readmeHTML = sandbox.readmeHTML
+
     let tabs = [
-        'Sandbox',
+        'README',
+        "DOM Diff",
         'Console',
         'Network',
-        "DOM Diff"
     ]
+    let activeTab = $readmeHTML ? "README" : 'DOM Diff'
 
-    let activeTab = localStorage.getItem('active_tab') || "Sandbox"
 
     $: {
-        localStorage.setItem('active_tab', activeTab)
+        readmeHTML = sandbox.readmeHTML
+        if (!readmeHTML && activeTab == 'README') {
+            activeTab = 'DOM Diff';
+        }
     }
 
     let domDiff: DOMDiff
@@ -132,6 +139,7 @@
     let fileTreePaneSizeMin = (150 / window.innerWidth * 2) * 100;
 
     let showView: 'show-editor' | 'show-sandbox' | 'show-all' = mobile ? 'show-sandbox' : 'show-all'
+
 </script>
 
 <main class="{showView}" class:mobile={mobile}>
@@ -146,7 +154,8 @@
                     <SandboxView
                         bind:this={sandboxView}
                         {serverUrl}
-                        {sandbox}
+                        bind:sandbox={sandbox}
+                        {onSandboxReload}
                         {push_network_log}
                         {push_dom_diff}
                         {push_logs}
@@ -158,17 +167,24 @@
                 <Pane class="debugger-pane" bind:size={debuggerPaneSize}>
                     <button class='tabs' bind:this={debuggerTabs} on:click={toggleDebuggerPane}>
                         {#each tabs as tab}
-                            <button on:click={_ => {activeTab = tab; if (debuggerPaneSize < 10) debuggerPaneSize = 50} } class='tab' class:active={activeTab == tab}>
-                                {tab}
-                            </button>
+                            {#if tab != 'README' || $readmeHTML}
+                                <button on:click={_ => {activeTab = tab; if (debuggerPaneSize < 10) debuggerPaneSize = 50} } class='tab' class:active={activeTab == tab}>
+                                    {tab}
+                                </button>
+                            {/if}
                         {/each}
                     </button>
                     {#if activeTab == 'Console'}
                         <Console logs={logs} {clear_logs} />
                     {:else if activeTab == 'DOM Diff'}
                         <DOMDiff bind:this={domDiff} bind:domDiffHistory={domDiffHistory} />
-                    {:else if activeTab == 'Sandbox'}
-                        <About title="" readmeHtml={readmeHtml} />
+                    {:else if activeTab == 'README'}
+                        {#if $readmeHTML}
+                            <article>
+                                <h1>{sandbox.getTitle()}</h1>
+                                {@html $readmeHTML}
+                            </article>
+                        {/if}
                     {:else if activeTab == 'Network'}
                         <NetworkViewer logs={networkLogs} {mobile} />
                     {/if}

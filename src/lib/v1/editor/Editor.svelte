@@ -104,7 +104,7 @@
       <div class="editor">
         <Monaco bind:this={monacoComponent} mobile={false} {nodes} {viewNode} {openNodes} {nodeIndexer} {nodeContents}>
           <button class="toggle-explorer icon-button" on:click={_ => toggleFileTree()}>
-            <i class="codicon codicon-layout-sidebar-left"></i>
+            <i class="codicon {fileTreePaneSize < 5 ? 'codicon-folder-opened' : 'codicon-triangle-left'}"></i>
           </button>
         </Monaco>
       </div>

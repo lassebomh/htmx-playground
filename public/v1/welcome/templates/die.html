@@ -1,0 +1,5 @@
+<button class="face" hx-post="/roll" hx-swap="outerHTML">
+    {%- for _ in range(pips) %}
+        <div class="pip"></div>
+    {%- endfor %}
+</button>

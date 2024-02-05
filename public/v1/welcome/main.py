@@ -8,13 +8,14 @@ static('./public')
 @GET('/')
 def index(request):
     context = {
-        'title': "Snake eyes!"
+        'title': "Snake eyes!",
+        "rolls": [1, 1, 1, 1, 1, 1]
     }
     return render(request, 'index.html', context)
 
 @POST('/roll')
 def roll(request):
     context = {
-        "rolls": [randint(1, 6) for _ in range(2)]
+        "pips": randint(1, 6)
     }
-    return render(request, 'dice.html', context)
+    return render(request, 'die.html', context)

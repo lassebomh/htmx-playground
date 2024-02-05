@@ -22,7 +22,7 @@
             "id": "2",
             "parent": "9",
             "type": "html",
-            "text": "dice.html"
+            "text": "die.html"
         },
         {
             "id": "3",
@@ -43,12 +43,12 @@
             "text": "public"
         }
     ],
-    "viewNode": "1",
-    "openNodes": ["1"],
+    "viewNode": "6",
+    "openNodes": ["6"],
     "nodePaths": {
         "1": "/main.py",
         "6": "/templates/index.html",
-        "2": "/templates/dice.html",
+        "2": "/templates/die.html",
         "3": "/public/style.css"
     },
     "baseLocation": {
