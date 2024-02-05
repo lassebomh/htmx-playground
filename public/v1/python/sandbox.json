@@ -7,42 +7,76 @@
             "text": "Python Lib"
         },
         {
-            "id": "2",
+            "id": "0",
+            "parent": "__root__",
+            "type": "html",
+            "text": "_server.html"
+        },
+        {
+            "id": "1",
             "parent": "__root__",
             "type": "folder",
             "text": "lib"
         },
         {
-            "id": "libinit",
-            "parent": "2",
+            "id": "2",
+            "parent": "1",
             "type": "python",
             "text": "__init__.py"
         },
         {
-            "id": "libtypes",
-            "parent": "2",
+            "id": "3",
+            "parent": "1",
             "type": "python",
-            "text": "types.py"
+            "text": "http.py"
         },
         {
-            "id": "libreq",
-            "parent": "2",
+            "id": "4",
+            "parent": "1",
+            "type": "python",
+            "text": "templates.py"
+        },
+        {
+            "id": "5",
+            "parent": "1",
             "type": "plaintext",
             "text": "requirements.txt"
         },
         {
-            "id": "3",
+            "id": "6",
             "parent": "__root__",
-            "type": "html",
-            "text": "_server.html"
+            "type": "folder",
+            "text": "router"
+        },
+        {
+            "id": "7",
+            "parent": "6",
+            "type": "python",
+            "text": "__init__.py"
+        },
+        {
+            "id": "8",
+            "parent": "6",
+            "type": "python",
+            "text": "router.py"
+        },
+        {
+            "id": "9",
+            "parent": "6",
+            "type": "plaintext",
+            "text": "requirements.txt"
         }
     ],
     "viewNode": null,
     "openNodes": [],
     "nodePaths": {
-        "libinit": "/lib/__init__.py",
-        "libtypes": "/lib/types.py",
-        "libreq": "/lib/requirements.txt",
-        "3": "/_server.html"
+        "0": "/_server.html",
+        "2": "/lib/__init__.py",
+        "3": "/lib/http.py",
+        "4": "/lib/templates.py",
+        "5": "/lib/requirements.txt",
+        "7": "/router/__init__.py",
+        "8": "/router/router.py",
+        "9": "/router/requirements.txt"
     }
 }

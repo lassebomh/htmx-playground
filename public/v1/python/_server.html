@@ -252,18 +252,18 @@
                     async def check_interrupt():
                         for m in list(sys.modules.values()):
                             if hasattr(m, '__file__') and m.__file__ is not None and not m.__file__.startswith('/lib/'):
-                                print(m.__file__)
                                 importlib.reload(m)
                         
                         import main
+                        from router import listen
+
+                        listen()
                         
                         while True:
                             await asyncio.sleep(.1)
-                            print('sleeping')
                             if control.stop == True:
                                 import js
                                 js.requestHandler = None
-                                print('stopping')
                                 return
 
                     await check_interrupt()

@@ -1,8 +1,9 @@
-from lib import server as on, render
+from router import GET, POST
+from lib.templates import render
 
 from random import randint
 
-@on.get('/')
+@GET('/')
 def index(request):
     context = {
         'title': "Snake eyes!",
@@ -10,7 +11,7 @@ def index(request):
     }
     return render(request, 'index.html', context)
 
-@on.post('/roll')
+@POST('/roll')
 def roll(request):
     context = {
         "rolls": [randint(1, 6) for _ in range(2)]
@@ -18,5 +19,3 @@ def roll(request):
     return render(request, 'dice.html', context)
 
 # on.static('./public', '/')
-
-on.listen()
