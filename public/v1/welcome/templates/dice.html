@@ -1,0 +1,12 @@
+<div id="dice">
+    {%- for pips in rolls %}
+        <div class="face">
+            {%- for _ in range(pips) %}
+                <div class="pip"></div>
+            {%- endfor %}
+        </div>
+    {%- endfor %}
+</div>
+<p class="score">
+    Score: {{ rolls|sum }}
+</p>

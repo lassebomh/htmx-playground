@@ -1,7 +1,7 @@
 import js
 from pyodide.ffi import to_js
 
-from os.path import join, abspath, normpath
+from os.path import join, abspath, normpath, exists
 from mimetypes import guess_type as guess_mimetype
 
 from http_router import Router as HttpRouter
@@ -25,29 +25,31 @@ class Router(HttpRouter):
             return wrapper
         return decorator
 
-    def static(self, base_dir, path_prefix):
+    def static(self, base_dir):
         base_dir = abspath(base_dir)
-        
-        async def static_handler(request, path):
+
+        def static_handler(request, path):
+
             full_path = normpath(join(base_dir, path))
-            if not full_path.startswith(base_dir):
-                raise ValueError("Invalid path")
 
-            file = open(full_path, 'r')
-            content = file.read()
-            
-            file.close()
+            if exists(full_path):
 
-            mimetype, _ = guess_mimetype(full_path)
+                file = open(full_path, 'r')
+                content = file.read()
+                file.close()
 
-            return Response(content,
-                status=200,
-                headers={
-                    'Content-Type': mimetype
-                }
-            )
+                mimetype, _ = guess_mimetype(full_path)
 
-        self.get('/{path:path}')(static_handler)
+                return Response(content,
+                    status=200,
+                    headers={
+                        'Content-Type': mimetype
+                    }
+                )
+            else:
+                return Response(status=404)
+
+        self.get('/{path:path}')(static_handler)        
 
     async def request_handler(self, _request):
         request = Request(
@@ -63,14 +65,12 @@ class Router(HttpRouter):
             _request.keepalive,
         )
 
-        match = self(request.url.path, method=request.method)
+        match = self(request.path, method=request.method)
         
         res = match.target(
             request,
             **(match.path_params or {})
         )
-
-        # print(res.headers)
 
         return to_js([res.body, {
             "status": res.status,

@@ -1,0 +1,38 @@
+
+#dice {
+  display: flex;
+  gap: 1em;
+}
+
+.score {
+  color: #aaa;
+}
+
+/* Based on https://codepen.io/LandonSchropp/pen/KpzzGo */
+.face {
+  display: grid;
+  grid-template-areas: "a . c" "e g f" "d . b";
+  flex: 0 0 auto;
+  padding: 10px;
+  width: 100px;
+  height: 100px;
+  background-color: #e7e7e7;
+  border-radius: 10%;
+}
+
+.pip {
+  display: block;
+  align-self: center;
+  justify-self: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #333;
+}
+
+.pip:nth-child(2) { grid-area: b; }
+.pip:nth-child(3) { grid-area: c; }
+.pip:nth-child(4) { grid-area: d; }
+.pip:nth-child(5) { grid-area: e; }
+.pip:nth-child(6) { grid-area: f; }
+.pip:nth-child(odd):last-child { grid-area: g; }
