@@ -1,29 +1,39 @@
 import { v4 as uuidv4 } from "uuid"
-import { sandboxLocationToURLParams, type SandboxLocation } from "../location"
+import { sandboxLocationToURLParams, type SandboxLocation, compareSandboxLocations, setWindowLocation } from "../location"
 import { get, writable, type Writable } from "svelte/store"
 
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
+import { directoryAdd, directoryContainsHandler, directoryDelete } from "./directory";
 
-interface ISandboxHandler {
-    getConfig(): Promise<any>
-    getLocation(title: string | null): Promise<SandboxLocation>
-    getSandbox(sandbox: Sandbox): Promise<Sandbox>
-    save(sandbox: Sandbox): Promise<boolean>
-}
+export abstract class AbstractSandboxHandler {
+    
+    version = 'v1';
 
-export class LocalSandboxHandler implements ISandboxHandler {
-    constructor(public params: {id: string}) {}
+    abstract method: string;
+    abstract savable: boolean;
 
-    async getConfig(): Promise<any> {
-        let data = JSON.parse(<any>localStorage.getItem(this.params.id))
-        // let sandbox = new Sandbox(this, data.files, data.title, data.readmeHTML)
-        return data
+    abstract getConfig(): Promise<any>
+    abstract getSandbox(config: any): Promise<Sandbox>
+    abstract save(sandbox: Sandbox): Promise<void>
+    abstract delete(): Promise<void>
+
+    constructor(public params: {[key: string]: string}) {}
+
+    serialize(sandbox: Sandbox): any {
+        let serialized = {
+            baseLocation: sandbox.baseLocation,
+            nodes: get(sandbox.nodes),
+            viewNode: get(sandbox.viewNode),
+            openNodes: get(sandbox.openNodes),
+            nodeContents: get(sandbox.nodeContents),
+            readmeHTML: sandbox.readmeHTML,
+        }
+    
+        return serialized
     }
-
-    async getSandbox(config: any): Promise<Sandbox> {
-        // return <{[path: string]: string}>sandbox.fileMetadata;
-
+    
+    unserialize(config: any): Sandbox {
         return new Sandbox(
             this,
             writable(config.nodes),
@@ -35,54 +45,57 @@ export class LocalSandboxHandler implements ISandboxHandler {
         )
     }
 
-    async getLocation(title: string | null): Promise<SandboxLocation> {
+    getLocation(title: string | null): SandboxLocation {
         return {
-            version: 'v1',
-            method: 'local',
+            version: this.version,
+            method: this.method,
             params: this.params,
             title: title,
         }
     }
+}
 
-    async save(sandbox: Sandbox): Promise<boolean> {
-        let repository: SandboxLocation[] = JSON.parse(<any>localStorage.getItem('repository') ?? "[]")
+export class LocalSandboxHandler extends AbstractSandboxHandler {
+    method = 'local';
+    savable = true;
 
-        // let existingIndex = repository.findIndex((loc) => )
+    async getConfig(): Promise<any> {
+        let data = JSON.parse(<any>localStorage.getItem(this.params.id))
+        // let sandbox = new Sandbox(this, data.files, data.title, data.readmeHTML)
+        return data
+    }
 
-        repository = repository.filter((loc) => !(loc.method == 'local' && loc.params.id == this.params.id))
+    async getSandbox(config: any): Promise<Sandbox> {
+        return this.unserialize(config)
+    }
 
-        // if (existingIndex !== -1) {
-        //     console.log(repository);
-            
-        //     delete repository[existingIndex]
-         
-        //     console.log(repository);
-        // }
+    async save(sandbox: Sandbox): Promise<void> {
+        if (!this.params.id) {
+            let uuid = uuidv4().replaceAll('-', '')
+            let end = 4;
+            this.params.id=uuid.substring(0, end)
+
+            while (directoryContainsHandler(this)) {
+                end += 2
+                this.params.id=uuid.substring(0, end)
+            }
+        }
 
         let title = sandbox.getTitle()
+        directoryAdd(this, title)
 
-        let serialized = JSON.stringify({
-            baseLocation: sandbox.baseLocation,
-            nodes: get(sandbox.nodes),
-            viewNode: get(sandbox.viewNode),
-            openNodes: get(sandbox.openNodes),
-            nodeContents: get(sandbox.nodeContents),
-            readmeHTML: sandbox.readmeHTML,
-            // title: title,
-        })
-
+        let serialized = JSON.stringify(this.serialize(sandbox))
         localStorage.setItem(this.params.id, serialized)
-        repository.push(await this.getLocation(title))
-        localStorage.setItem('repository', JSON.stringify(repository))
-
-        return true
+    }
+    async delete(): Promise<void> {
+        directoryDelete(this)
+        localStorage.removeItem(this.params.id)
     }
 }
 
-// http://localhost:4321/v1/?id=5d9bb788-0a20-4ee3-ba2a-cae5dca38be5&method=local
-
-export class FetchSandboxHandler implements ISandboxHandler {
-    constructor(public params: {[url: string]: string}) {}
+export class FetchSandboxHandler extends AbstractSandboxHandler {
+    method = 'fetch';
+    savable = false;
 
     async getConfig(): Promise<any> {
         let data = await (await fetch(this.params.url + "/sandbox.json")).json()
@@ -90,35 +103,21 @@ export class FetchSandboxHandler implements ISandboxHandler {
     }
 
     async getSandbox(config: any): Promise<Sandbox> {
-
         let fileNodes = config.nodes.filter((node: any) => node.type != 'folder')
-
         let nodeContents = Object.fromEntries(await Promise.all(fileNodes.map(async (node: any) =>
             [node.id, await (await fetch(this.params.url + config.nodePaths[node.id])).text()]
         )))
 
-        return new Sandbox(
-            this,
-            writable(config.nodes),
-            writable(config.openNodes),
-            writable(config.viewNode),
-            writable(nodeContents),
-            writable(config.readmeHTML ?? null),
-            config.baseLocation
-        )
+        config.nodeContents = nodeContents;
+
+        return this.unserialize(config)
     }
 
-    async getLocation(title: string | null): Promise<SandboxLocation> {
-        return {
-            version: 'v1',
-            method: 'fetch',
-            params: this.params,
-            title: title,
-        }
+    async save(sandbox: Sandbox): Promise<void> {
+        directoryAdd(this, sandbox.getTitle())
     }
-
-    async save(sandbox: Sandbox): Promise<boolean> {
-        return false;
+    async delete(): Promise<void> {
+        directoryDelete(this)
     }
 }
 
@@ -127,7 +126,7 @@ export class Sandbox {
     public nodeIndexer: Writable<{[path: string]: number}>
 
     constructor(
-        public handler: ISandboxHandler,
+        public handler: AbstractSandboxHandler,
         public nodes: Writable<any[]>,
         public openNodes: Writable<any[]>,
         public viewNode: Writable<string | null>,
@@ -141,7 +140,6 @@ export class Sandbox {
             this.nodeIndexer.set(this.createIndex(nodes))
         })
         this.updateReadme()
-        // this.updateIndex(get(this.nodes))
     }
 
     getTitle(): string {
@@ -175,29 +173,10 @@ export class Sandbox {
         return newNodeIndexer
     }
 
-    async setWindowLocation() {
-        let title = this.getTitle()
-        let sandboxLocation = await this.handler.getLocation(title);
-        let href = location.origin + sandboxLocationToURLParams(sandboxLocation)
-        window.history.pushState(null, '', href);
-    }
-
     async save() {
-        let title = this.getTitle()
         this.updateReadme()
-        let saved = await this.handler.save(this);
-        if (!saved) {
-            this.handler = getHandler({
-                method: "local",
-                version: "v1",
-                params: {
-                    id: uuidv4()
-                },
-                title: title
-            })
-            await this.handler.save(this);
-        }
-        await this.setWindowLocation()
+        await this.handler.save(this);
+        setWindowLocation(this.handler.getLocation(this.getTitle()))
     }
 
     getFiles(): {[path: string]: string} {
@@ -237,7 +216,7 @@ export class Sandbox {
     }
 }
 
-export function getHandler(location: SandboxLocation): ISandboxHandler {
+export function getHandler(location: SandboxLocation): AbstractSandboxHandler {
     let Handler = (() => {
         switch (location.method) {
             case "local":

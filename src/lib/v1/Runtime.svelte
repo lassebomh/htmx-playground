@@ -11,7 +11,6 @@
 
     import SandboxView from "./panes/SandboxView.svelte";
     
-    import About from './tabs/About.svelte';
     import DOMDiff from './tabs/DOMDiff.svelte'
     import Console from "./tabs/console/Console.svelte";
     import type { Log } from "./tabs/console/console";

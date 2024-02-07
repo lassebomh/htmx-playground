@@ -1,7 +1,8 @@
 <script lang="ts">
     import { get } from "svelte/store";
-    import type { SandboxLocation } from "../../location";
+    import { setWindowLocation, type SandboxLocation } from "../../location";
     import { Sandbox, getHandler } from "../sandbox";
+    import { directoryContainsHandler, getDirectory } from "../directory";
 
     export let sandbox: Sandbox
     export let serverUrl: URL;
@@ -113,7 +114,7 @@
 		}
     })
 
-    async function loadSandbox(location: SandboxLocation) {
+    async function handleLoad(location: SandboxLocation) {
         sandbox.viewNode.set(null)
         sandbox.openNodes.set([])
 
@@ -123,23 +124,49 @@
 
         sandbox = newSandbox;
 
-        await sandbox.setWindowLocation()
-
-        await reloadSandbox()
-    }
-
-    async function deleteSandbox(location: SandboxLocation) {
-        let handler = getHandler(location)
-        console.log('delete');
+        setWindowLocation(sandbox.handler.getLocation(sandbox.getTitle()))
         
-        // var config = await handler.getConfig()
-        // sandbox = await handler.getSandbox(config)
-        // await reloadSandbox()
+        await reloadSandbox()
+
+        popupView = null
     }
 
-    let popupView: 'share' | 'load' | 'examples' | null = null
+    async function handleDelete(location: SandboxLocation) {
+        let handler = getHandler(location)
+        if (handler.savable && !confirm("Are you sure you want to delete this sandbox?")) {
+            return
+        }
+        await handler.delete()
+        directory = getDirectory()
+    }
 
-    let repository = JSON.parse(localStorage.getItem('repository') || '[]')
+    async function handleSave(local: boolean) {
+
+        if (local) {
+            sandbox.handler = getHandler({
+                method: "local",
+                version: "v1",
+                params: {},
+                title: sandbox.getTitle(),
+            })
+        }
+
+        await sandbox.save()
+        directory = getDirectory()
+    }
+
+    let popupView: 'examples' | 'sandbox' | null = null
+
+    function handleButtonClick(viewName: any) {
+        if (popupView == viewName) {
+            popupView = null
+        } else {
+            popupView = viewName
+        }
+    }
+
+
+    let directory = getDirectory()
 
 </script>
 
@@ -155,14 +182,11 @@
         </div>
         <div>
             <div class="button-group">
-                <button class='button' class:active={popupView == 'load'} on:click={_ => {if (popupView == 'load') {popupView = null} else {popupView = 'load'}}}>
-                    {repository.length ? 'Load' : 'Find examples'}
+                <button class='button' class:active={popupView == 'examples'} on:click={_ => {handleButtonClick('examples')}}>
+                    Find examples
                 </button>
-                <button class='button' on:click={async _ => await sandbox.save()}>
-                    Save
-                </button>
-                <button class='button' class:active={popupView == 'share'} on:click={_ => {if (popupView == 'share') {popupView = null} else {popupView = 'share'}}}>
-                    Share
+                <button class='button' class:active={popupView == 'sandbox'} on:click={_ => {handleButtonClick('sandbox')}}>
+                    Sandbox
                 </button>
             </div>
         </div>
@@ -170,21 +194,21 @@
     <iframe title="" bind:this={iframe} src={serverUrl.href} frameborder="0"></iframe>
     {#if popupView}
         <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="popup" on:mouseleave={_ => popupView = null}>
-            {#if popupView == 'load'}
+        <div class="popup"> <!-- on:mouseleave={_ => popupView = null} -->
+            {#if popupView == 'examples'}
                 <table class="sandbox-loader">
                     <tbody>
-                        {#each repository as location}
+                        {#each directory as location}
                             <tr>
                                 <td>
                                     <span>{location.method}</span>
                                     {location.title}
                                 </td>
                                 <td class="button-group">
-                                    <button class="button" on:click={async _ => {await loadSandbox(location); popupView = null;}}>
+                                    <button class="button" on:click={() => handleLoad(location)}>
                                         Load
                                     </button>
-                                    <button class="button">
+                                    <button class="button" on:click={() => handleDelete(location)}>
                                         Remove
                                     </button>
                                 </td>
@@ -192,33 +216,59 @@
                         {/each}
                     </tbody>
                 </table>
-                <table class="sandbox-loader">
-                    <tbody>
-                        {#each repository as location}
-                            <tr>
-                                <td>
-                                    <span>{location.method}</span>
-                                    {location.title}
-                                </td>
-                                <td class="button-group">
-                                    <button class="button" on:click={async _ => {await loadSandbox(location); popupView = null;}}>
-                                        Load
-                                    </button>
-                                    <button class="button">
-                                        Remove
-                                    </button>
-                                </td>
-                            </tr>
-                        {/each}
-                    </tbody>
-                </table>
-            {:else if popupView == 'share'}
+            {:else if popupView == 'sandbox'}
+                <div class="button-group" style="widtha: 100%;">
+                    <button
+                        style="flex-grow: 1;"
+                        class="button"
+                        on:click={_ => handleSave(false)}
+                        disabled={!sandbox.handler.savable}>
+                        Save
+                    </button>
+                    <button
+                        style="flex-grow: 1;"
+                        on:click={_ => handleSave(true)}
+                        class="button">
+                        Clone
+                    </button>
+                    <button
+                        style="flex-grow: 1;"
+                        class="button"
+                        on:click={_ => handleSave(false)}
+                        disabled={sandbox.handler.savable || directoryContainsHandler(sandbox.handler)}>
+                        Save reference
+                    </button>
+                </div>
+                {#if directory.length}
+                    <h4>Load sandbox</h4>
+                    <table class="sandbox-loader">
+                        <tbody>
+                            {#each directory as location}
+                                <tr>
+                                    <td>
+                                        <span>{location.method == 'local' ? 'local' : 'remote'}</span>
+                                        {location.title}
+                                    </td>
+                                    <td class="button-group button-group-borderless">
+                                        <button class="button" on:click={() => handleLoad(location)}>
+                                            Load
+                                        </button>
+                                        <button class="button" on:click={() => handleDelete(location)}>
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
+                {/if}
+                <h4>Sharing</h4>
                 <ol>
                     <li>
                         <a href="#">Download the sandbox JSON.</a>
                     </li>
                     <li>
-                        Upload it as a public Github Gist (<a href="https://gist.github.com/" target="_blank">link</a>)
+                        Upload it as a public Github Gist (<a href="https://gist.github.com/" target="_blank">new tab</a>)
                     </li>
                     <li>
                         Copy the Gist URL
@@ -261,22 +311,23 @@
         align-items: center;
     }
 
-    .sandbox-loader .button {
-        color: #fff;
-    }
-
     .popup {
         position: absolute;
         right: 0;
         top: 38px;
-        min-width: 350px;
-        padding: 6px;
+        padding: 6px 18px;
         background-color: #252526;
         width: max-content;
         border: 1px solid #fff1;
         border-bottom-left-radius: 6px;
         border-top: none;
         border-right: none;
+    }
+
+    .popup h4 {
+        margin: 0.8em 0;
+        color: #aaa;
+        font-weight: 500;
     }
 
     .topbar {
@@ -300,6 +351,8 @@
             right: 0;
             left: 0;
             width: auto;
+            padding: 6px 6px;
+            padding-top: 0;
             top: 76px;
             border-bottom-left-radius: 0;
             border-left: none;
@@ -343,10 +396,17 @@
         justify-content: center;
         background-color: transparent;
         border: 1px solid #444;
-        color: #aaa;
+        color: #bbb;
         line-height: 1;
         gap: 0.5em;
         border-radius: 50em;
+        cursor: pointer;
+    }
+
+    .button:disabled {
+        pointer-events: none;
+        color: #555;
+        border-color: #444;
     }
 
     .button:not(.active):hover {
@@ -386,5 +446,29 @@
         padding-left: 14px;
         margin-right: -1px;
     }
-    
+
+    .button-group.button-group-borderless .button {
+        border: none;
+        border-radius: 0;
+        padding: 0 10px;
+        gap: 0;
+    }
+
+    .button-group.button-group-borderless .button:not(:first-child) {
+        padding-left: 0;
+        padding-right: 10px;
+    }
+    .button-group.button-group-borderless .button:not(:first-child)::before {
+        content: "";
+        display: list-item;
+        border-left: 1px solid #444;
+        padding-right: 10px;
+        height: 60%;
+        list-style: none;
+    }
+
+    .button-group.button-group-borderless .button:hover::before, .button-group.button-group-borderless .button:hover + .button::before {
+        border-color: transparent;
+    }
+
 </style>
