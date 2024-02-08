@@ -28,7 +28,20 @@
         onSandboxReload()
         // // console.log(await sandbox.exportFiles());
         // iframe.contentWindow?.document.location.reload()
-        
+    }
+
+    let downloadLink: HTMLAnchorElement;
+    
+    function handleDownloadClick() {
+        let filename = sandbox.getTitle().replace(/\W+/g, ' ').replace(/^ +| +$/, '')+".json"
+        let jsonString = JSON.stringify(sandbox.handler.serialize(sandbox))
+
+        downloadLink.setAttribute(
+            "href",
+            "data:text/json;charset=utf-8," + encodeURIComponent(jsonString)
+        )
+        downloadLink.setAttribute("download", filename);
+        // downloadLink.click();
     }
 
     // function on_fetch_progress(progress) {
@@ -165,6 +178,26 @@
         }
     }
 
+    async function handleLoadGistSandbox(e: any) {
+        e.preventDefault()
+
+        let url = prompt("Enter the Gist URL")
+        if (!url) return 
+        
+        let urlSplit = url.split('/')
+        let gistId = urlSplit[urlSplit.length - 1]
+        
+        let location: SandboxLocation = {
+            method: "gist",
+            version: 'v1',
+            params: {
+                id: gistId
+            },
+            title: null,
+        }
+
+        await handleLoad(location)
+    }
 
     let directory = getDirectory()
 
@@ -265,7 +298,11 @@
                 <h4>Sharing</h4>
                 <ol>
                     <li>
-                        <a href="#">Download the sandbox JSON.</a>
+                        <!-- svelte-ignore a11y-click-events-have-key-events -->
+                        <!-- svelte-ignore a11y-missing-attribute -->
+                        <a href="#download" bind:this={downloadLink} on:click={handleDownloadClick}>
+                            Download the sandbox JSON.
+                        </a>
                     </li>
                     <li>
                         Upload it as a public Github Gist (<a href="https://gist.github.com/" target="_blank">new tab</a>)
@@ -274,7 +311,7 @@
                         Copy the Gist URL
                     </li>
                     <li>
-                        Paste it <a href="#">in here</a>.
+                        Paste it <a href="#loadgist" on:click={handleLoadGistSandbox}>in here</a>.
                     </li>
                 </ol>
             {/if}

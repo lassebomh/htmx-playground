@@ -121,6 +121,67 @@ export class FetchSandboxHandler extends AbstractSandboxHandler {
     }
 }
 
+export class GistSandboxHandler extends AbstractSandboxHandler {
+    method = 'gist';
+    savable = false;
+
+    async getConfig(): Promise<any> {
+        // let gistId = 'dac3f13fdcaede2906a9350b8d8a773f'
+
+        console.log(this.params.id);
+
+        let gist = await (await fetch(`https://api.github.com/gists/${this.params.id}`, {
+            headers: {
+                "Accept": "application/vnd.github+json",
+                "X-Github-Api-Version": "2022-11-28",
+            }
+        })).json()
+
+        console.log(gist);
+
+        let files: any[] = Object.values(gist.files);
+
+        let configContent;
+
+        if (files.length == 1) {
+            configContent = files[0].content
+        } else {
+            for (const file of files) {
+                if (file.type == 'application/json') {
+                    configContent = file.content;
+                    break
+                }
+            }
+        }
+
+        if (!configContent) {
+            throw new Error("Couldn't find sandbox file in Gist")
+        }
+
+        let config = JSON.parse(configContent)
+        
+        return config
+    }
+
+    async getSandbox(config: any): Promise<Sandbox> {
+        // let fileNodes = config.nodes.filter((node: any) => node.type != 'folder')
+        // let nodeContents = Object.fromEntries(await Promise.all(fileNodes.map(async (node: any) =>
+        //     [node.id, await (await fetch(this.params.url + config.nodePaths[node.id])).text()]
+        // )))
+
+        // config.nodeContents = nodeContents;
+
+        return this.unserialize(config)
+    }
+
+    async save(sandbox: Sandbox): Promise<void> {
+        directoryAdd(this, sandbox.getTitle())
+    }
+    async delete(): Promise<void> {
+        directoryDelete(this)
+    }
+}
+
 export class Sandbox {
     private baseFiles?: {[path: string]: string}
     public nodeIndexer: Writable<{[path: string]: number}>
@@ -223,6 +284,8 @@ export function getHandler(location: SandboxLocation): AbstractSandboxHandler {
                 return LocalSandboxHandler
             case "fetch":
                 return FetchSandboxHandler
+            case "gist":
+                return GistSandboxHandler
             default:
                 throw new Error("Unknown method")
     }})()
