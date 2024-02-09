@@ -50,7 +50,10 @@
                     } else {
                         let requestClone = structuredClone(requestData)
                         requestClone.headers = Object.entries(requestClone.headers)
-                        requestClone.hasBody = requestClone.body != undefined
+                        if (requestClone.body) {
+                            requestClone.body = await requestClone.body.arrayBuffer()
+                        }
+                        console.log(requestClone.body);
 
                         let responseData = await window.requestHandler(requestClone)
 
@@ -123,7 +126,7 @@
     
                             domDiffDebounce = setTimeout(() => {
                                 sendDOMUpdate()
-                            }, 100)
+                            }, 200)
                         });
     
                         observer.observe(pgIframe.contentDocument.documentElement, {
@@ -244,20 +247,24 @@
 
                 await setupFilesPromise;
 
+
                 mainPromise = pyodide.runPythonAsync(`
                     import asyncio
                     import importlib
                     import sys
+                    from types import ModuleType
 
                     async def check_interrupt():
-                        for m in list(sys.modules.values()):
-                            if hasattr(m, '__file__') and m.__file__ is not None and not m.__file__.startswith('/lib/'):
-                                importlib.reload(m)
-                        
-                        import main
-                        from router import listen
+                        for k,v in list(sys.modules.items()):
+                            if not isinstance(v, ModuleType) or not hasattr(v, '__file__') or v.__file__ is None:
+                                continue
+                                
+                            if v.__file__.startswith('/home/'):
+                                del sys.modules[k]
 
-                        listen()
+                        from _internal import start
+
+                        start()
                         
                         while True:
                             await asyncio.sleep(.1)
@@ -286,6 +293,8 @@
                 } else if (event.data.type == 'reload') {
                     window.files = event.data.value;
                     runMain()
+                } else if (event.data.type == 'navigate') {
+                    pgIframe.src = event.data.value
                 }
 
                 navigator.serviceWorker.addEventListener('message', handleServiceWorkerRequest);

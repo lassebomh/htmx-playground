@@ -65,6 +65,24 @@
             "parent": "6",
             "type": "plaintext",
             "text": "requirements.txt"
+        },
+        {
+            "id": "12",
+            "parent": "__root__",
+            "type": "folder",
+            "text": "_internal"
+        },
+        {
+            "id": "10",
+            "parent": "12",
+            "type": "python",
+            "text": "__init__.py"
+        },
+        {
+            "id": "11",
+            "parent": "12",
+            "type": "python",
+            "text": "entrypoint.py"
         }
     ],
     "viewNode": null,
@@ -77,6 +95,8 @@
         "5": "/lib/requirements.txt",
         "7": "/router/__init__.py",
         "8": "/router/router.py",
-        "9": "/router/requirements.txt"
+        "9": "/router/requirements.txt",
+        "10": "/_internal/__init__.py",
+        "11": "/_internal/entrypoint.py"
     }
 }

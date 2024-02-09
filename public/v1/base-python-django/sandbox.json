@@ -1,0 +1,41 @@
+{
+    "nodes": [
+        {
+            "id": "__root__",
+            "parent": null,
+            "type": "folder",
+            "text": "Django Base"
+        },
+        {
+            "id": "/_internal",
+            "parent": "__root__",
+            "type": "folder",
+            "text": "_internal"
+        },
+        {
+            "id": "/_internal/__init__.py",
+            "parent": "/_internal",
+            "type": "python",
+            "text": "__init__.py"
+        },
+        {
+            "id": "/_internal/entrypoint.py",
+            "parent": "/_internal",
+            "type": "python",
+            "text": "entrypoint.py"
+        }
+    ],
+    "viewNode": null,
+    "openNodes": [],
+    "nodePaths": {
+        "/_internal/__init__.py": "/_internal/__init__.py",
+        "/_internal/entrypoint.py": "/_internal/entrypoint.py"
+    },
+    "baseLocation": {
+        "version": "v1",
+        "method": "fetch",
+        "params": {
+            "url": "/v1/base-python/sandbox.json"
+        }
+    }
+}

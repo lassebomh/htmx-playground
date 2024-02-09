@@ -1,7 +1,7 @@
 <script lang="ts">
     import { get } from "svelte/store";
     import { setWindowLocation, type SandboxLocation } from "../../location";
-    import { Sandbox, getHandler } from "../sandbox";
+    import { LocalSandboxHandler, Sandbox, getHandler } from "../sandbox";
     import { directoryContainsHandler, getDirectory } from "../directory";
 
     export let sandbox: Sandbox
@@ -19,6 +19,16 @@
     let iframe: HTMLIFrameElement;
     let currentLocation: string;
     
+    function handleURLKeyup(event: any) {
+        if (event.key === 'Enter') {
+            let data = {
+                type: 'navigate',
+                value: currentLocation
+            }
+            iframe.contentWindow!.postMessage(data, serverUrl.origin)
+        }
+    }
+    
 
     export async function reloadSandbox(){
         iframe.contentWindow!.postMessage({
@@ -31,22 +41,24 @@
     }
 
     let downloadLink: HTMLAnchorElement;
+    let copyLink: HTMLAnchorElement;
     
-    function handleDownloadClick() {
-        let filename = sandbox.getTitle().replace(/\W+/g, ' ').replace(/^ +| +$/, '')+".json"
+    async function handleDownloadSandbox(e: any, clipboard: boolean) {
         let jsonString = JSON.stringify(sandbox.handler.serialize(sandbox))
 
-        downloadLink.setAttribute(
-            "href",
-            "data:text/json;charset=utf-8," + encodeURIComponent(jsonString)
-        )
-        downloadLink.setAttribute("download", filename);
-        // downloadLink.click();
+        if (clipboard) {
+            e.preventDefault()
+            await navigator.clipboard.writeText(jsonString);
+        } else {
+            let filename = sandbox.getTitle().replace(/\W+/g, ' ').replace(/^ +| +$/, '')+".json"
+            downloadLink.setAttribute(
+                "href",
+                "data:text/json;charset=utf-8," + encodeURIComponent(jsonString)
+            )
+            downloadLink.setAttribute("download", filename);
+        }
     }
 
-    // function on_fetch_progress(progress) {
-    //     pending_imports = progress;
-    // }
     function on_error(event: any) {
         push_logs({ level: 'error', args: [event.value] });
     }
@@ -127,6 +139,13 @@
 		}
     })
 
+    async function setSandbox(newSandbox: Sandbox) {
+        sandbox = newSandbox;
+        setWindowLocation(sandbox.handler.getLocation(sandbox.getTitle()))
+        await reloadSandbox()
+        popupView = null
+    }
+
     async function handleLoad(location: SandboxLocation) {
         sandbox.viewNode.set(null)
         sandbox.openNodes.set([])
@@ -135,13 +154,7 @@
         let config = await handler.getConfig()
         let newSandbox: Sandbox = await handler.getSandbox(config)
 
-        sandbox = newSandbox;
-
-        setWindowLocation(sandbox.handler.getLocation(sandbox.getTitle()))
-        
-        await reloadSandbox()
-
-        popupView = null
+        await setSandbox(newSandbox)
     }
 
     async function handleDelete(location: SandboxLocation) {
@@ -178,14 +191,32 @@
         }
     }
 
+    async function handleLoadJSONfile(e: any) {
+        if (!confirm("Any unsaved changes to the current sandbox will be lost. Are you sure you want to load this sandbox?")) {
+            return
+        }
+        let config = JSON.parse(await e.srcElement.files[0].text())
+        let handler = new LocalSandboxHandler({})
+        let newSandbox = await handler.getSandbox(config)
+        await newSandbox.save()
+        await setSandbox(newSandbox)
+    }
+
     async function handleLoadGistSandbox(e: any) {
         e.preventDefault()
 
-        let url = prompt("Enter the Gist URL")
-        if (!url) return 
-        
-        let urlSplit = url.split('/')
-        let gistId = urlSplit[urlSplit.length - 1]
+        let input = prompt("Enter the Gist URL")
+        if (!input) return
+
+        let gistId;
+
+        if (!input.startsWith('http')) {
+            gistId = input.trim()
+        } else {
+            let urlSplit = input.split('/')
+            gistId = urlSplit[urlSplit.length - 1]
+        }
+
         
         let location: SandboxLocation = {
             method: "gist",
@@ -209,9 +240,7 @@
             <button on:click={_ => reloadSandbox()} class='reload icon-button' title="Reload playground (CTRL+S)">
                 <i class='codicon codicon-debug-restart'></i>
             </button>
-            <div class="url">
-                {currentLocation || "Loading..."}
-            </div>
+            <input type="text" class="url" bind:value={currentLocation} on:keyup={handleURLKeyup} />
         </div>
         <div>
             <div class="button-group">
@@ -272,8 +301,9 @@
                         Save reference
                     </button>
                 </div>
+                <h4>Load sandbox</h4>
+                <input type="file" on:change={handleLoadJSONfile}>
                 {#if directory.length}
-                    <h4>Load sandbox</h4>
                     <table class="sandbox-loader">
                         <tbody>
                             {#each directory as location}
@@ -298,11 +328,12 @@
                 <h4>Sharing</h4>
                 <ol>
                     <li>
-                        <!-- svelte-ignore a11y-click-events-have-key-events -->
-                        <!-- svelte-ignore a11y-missing-attribute -->
-                        <a href="#download" bind:this={downloadLink} on:click={handleDownloadClick}>
-                            Download the sandbox JSON.
+                        <a href="#download" bind:this={downloadLink} on:click={e => handleDownloadSandbox(e, false)}>
+                            Download
                         </a>
+                        or
+                        <a href="#copy" bind:this={copyLink} on:click={e => handleDownloadSandbox(e, true)}>copy</a>
+                        the sandbox JSON.
                     </li>
                     <li>
                         Upload it as a public Github Gist (<a href="https://gist.github.com/" target="_blank">new tab</a>)
@@ -346,6 +377,16 @@
     .sandbox-loader .button-group {
         justify-content: end;
         align-items: center;
+    }
+    .sandbox-loader {
+        border-collapse: collapse;
+        margin: 10px 0;
+    }
+    .sandbox-loader tr {
+        border-bottom: 1pt solid #fff1;
+    }
+    .sandbox-loader tr:first-child {
+        border-top: 1pt solid #fff1;
     }
 
     .popup {
@@ -414,6 +455,7 @@
         align-items: center;
         border-radius: 50em;
         flex-shrink: 1;
+        border: none;
     }
 
     .reload {

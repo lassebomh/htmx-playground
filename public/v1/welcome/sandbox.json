@@ -55,7 +55,7 @@
         "method": "fetch",
         "version": "v1",
         "params": {
-            "url": "/v1/python"
+            "url": "/v1/base-python-mini/sandbox.json"
         }
     }
 }

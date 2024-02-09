@@ -1,0 +1,21 @@
+{
+    "nodes": [
+        {
+            "id": "__root__",
+            "parent": null,
+            "type": "folder",
+            "text": "Python Base"
+        },
+        {
+            "id": "0",
+            "parent": "__root__",
+            "type": "html",
+            "text": "_server.html"
+        }
+    ],
+    "viewNode": null,
+    "openNodes": [],
+    "nodePaths": {
+        "0": "/_server.html"
+    }
+}

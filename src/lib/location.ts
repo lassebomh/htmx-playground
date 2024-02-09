@@ -73,7 +73,7 @@ export let defaultLocation: SandboxLocation = {
     method: "fetch",
     version: 'v1',
     params: {
-        url: "/v1/welcome"
+        url: "/v1/welcome/sandbox.json"
     },
     title: "Welcome"
 }

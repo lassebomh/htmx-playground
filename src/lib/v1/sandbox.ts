@@ -98,17 +98,26 @@ export class FetchSandboxHandler extends AbstractSandboxHandler {
     savable = false;
 
     async getConfig(): Promise<any> {
-        let data = await (await fetch(this.params.url + "/sandbox.json")).json()
+        let data = await (await fetch(this.params.url)).json()
         return data
     }
 
     async getSandbox(config: any): Promise<Sandbox> {
-        let fileNodes = config.nodes.filter((node: any) => node.type != 'folder')
-        let nodeContents = Object.fromEntries(await Promise.all(fileNodes.map(async (node: any) =>
-            [node.id, await (await fetch(this.params.url + config.nodePaths[node.id])).text()]
-        )))
+        if (!config.nodeContents) {
+            let fileNodes = config.nodes.filter((node: any) => node.type != 'folder')
 
-        config.nodeContents = nodeContents;
+            const parts = this.params.url.split('/');
+            if(parts[parts.length - 1].includes('.')) {
+              parts.pop();
+            }
+            const baseUrl = parts.join('/');
+
+            let nodeContents = Object.fromEntries(await Promise.all(fileNodes.map(async (node: any) =>
+                [node.id, await (await fetch(baseUrl + config.nodePaths[node.id])).text()]
+            )))
+    
+            config.nodeContents = nodeContents;
+        }
 
         return this.unserialize(config)
     }
@@ -126,18 +135,12 @@ export class GistSandboxHandler extends AbstractSandboxHandler {
     savable = false;
 
     async getConfig(): Promise<any> {
-        // let gistId = 'dac3f13fdcaede2906a9350b8d8a773f'
-
-        console.log(this.params.id);
-
         let gist = await (await fetch(`https://api.github.com/gists/${this.params.id}`, {
             headers: {
                 "Accept": "application/vnd.github+json",
                 "X-Github-Api-Version": "2022-11-28",
             }
         })).json()
-
-        console.log(gist);
 
         let files: any[] = Object.values(gist.files);
 

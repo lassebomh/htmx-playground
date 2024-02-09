@@ -76,8 +76,8 @@
     $openNodes = newOpenNodes;
   }
 
-  let fileTreePaneSize = mobile ? 85 : 20
-  let lastfileTreePaneSize = fileTreePaneSize
+  let fileTreePaneSize = 0
+  let lastfileTreePaneSize = mobile ? 85 : 20
 
   function toggleFileTree() {
     if (fileTreePaneSize < 5) {

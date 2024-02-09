@@ -11,8 +11,13 @@
 		<i class="codicon codicon-circle-slash"></i>
 	</button>
 	{#each logs as log}
-		<ConsoleLine {log} />
+		<div style="font-family: monospace;">
+			{log.args[0]}
+		</div>
 	{/each}
+	<!-- {#each logs as log}
+		<ConsoleLine {log} />
+	{/each} -->
 </div>
 
 <style>
@@ -23,6 +28,10 @@
 		flex-grow: 1;
 		padding-bottom: 8px;
 		position: relative;
+		padding: 10px 16px;
+		font-size: 14px;
+		line-height: 1.5;
+		color: #fffc;
 	}
 
 	.clear-button {
@@ -31,6 +40,10 @@
 		right: 4px;
 		font-size: 24px;
 		z-index: 10;
+	}
+
+	.log {
+		
 	}
 
 	.container > :global(*) {

@@ -1,4 +1,3 @@
-import js
 from pyodide.ffi import to_js
 
 from os.path import join, abspath, normpath, exists
@@ -78,10 +77,6 @@ class Router(HttpRouter):
             "headers": res.headers,
         }])
 
-    def listen(self):
-        js.requestHandler = self.request_handler
-        js.startclient()
-
 router = Router()
 
 GET = router.GET
@@ -96,4 +91,3 @@ PATCH = router.PATCH
 
 route = router.route
 static = router.static
-listen = router.listen
