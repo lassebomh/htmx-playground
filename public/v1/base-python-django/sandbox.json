@@ -1,14 +1,8 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Django Base"
-        },
-        {
             "id": "/_internal",
-            "parent": "__root__",
+            "parent": null,
             "type": "folder",
             "text": "_internal"
         },

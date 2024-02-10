@@ -138,6 +138,17 @@ blockquote > footer > cite::before {
     content: "‒ ";
 }
 
+.overflow-elipsis {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.codicon {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
 .icon-button {
     background-color: transparent;
     border: none;
@@ -192,10 +203,12 @@ blockquote > footer > cite::before {
 }
 
 
+
 .splitpanes__pane {
     background-color: transparent !important;
     display: flex;
     flex-direction: column;
+    transition-duration: 0s !important;
 }
 .splitpanes__splitter {
     border: none !important;

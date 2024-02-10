@@ -1,20 +1,14 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Internals"
-        },
-        {
             "id": "1",
-            "parent": "__root__",
+            "parent": null,
             "type": "javascript",
             "text": "lib.js"
         },
         {
             "id": "2",
-            "parent": "__root__",
+            "parent": null,
             "type": "html",
             "text": "_server.html"
         }

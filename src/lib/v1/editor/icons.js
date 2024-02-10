@@ -6,7 +6,8 @@ export const typeIcons = {
     "css": "codicon codicon-symbol-numeric icon-blue",
     "json": "codicon codicon-json icon-yellow",
     "markdown": "codicon codicon-markdown icon-blue",
-    "python": "codicon codicon-markdown icon-blue",
+    "python": "codicon codicon-file-code icon-blue",
+    "ini": "codicon codicon-gear",
 }
 
 export const typeExtensions = {
@@ -16,4 +17,6 @@ export const typeExtensions = {
     "json": "json",
     "md": "markdown",
     "py": "python",
+    "env": "ini",
+    "requirements.txt": "ini",
 }

@@ -1,22 +1,16 @@
 <script lang="ts">
-    // http://localhost:5173/?key=88b9749d-0157-4716-a3f8-6ba7a9e613f4&version=v1&method=local
-
     import './style.css'
     
-    import { onMount } from "svelte";
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
     
-    import { getFilenameLanguage } from "./files";
     import { Sandbox } from "./sandbox";
+    import type { Log } from "./tabs/console/console";
 
     import SandboxView from "./panes/SandboxView.svelte";
-    
     import DOMDiff from './tabs/DOMDiff.svelte'
     import Console from "./tabs/console/Console.svelte";
-    import type { Log } from "./tabs/console/console";
     import NetworkViewer from './tabs/NetworkViewer.svelte';
     import Editor from './editor/index.js'
-    import { get } from 'svelte/store';
     
     export let sandbox: Sandbox
 
@@ -30,26 +24,12 @@
 	let log_group_stack: Log[][] = [];
 	let current_log_group = logs;
 
-	function push_logs(log: Log) {
+	function pushLogs(log: Log) {
 		current_log_group.push((last_console_event = log));
 		logs = logs;
 	}
 
-	function group_logs(label: string, collapsed: boolean) {
-		const group_log: Log = { level: 'group', label, collapsed, logs: [] };
-		current_log_group.push({ level: 'group', label, collapsed, logs: [] });
-		// TODO: Investigate
-		log_group_stack.push(current_log_group);
-		current_log_group = group_log.logs ?? [];
-		logs = logs;
-	}
-
-	function ungroup_logs() {
-		const last = log_group_stack.pop();
-		if (last) current_log_group = last;
-	}
-
-	function increment_duplicate_log() {
+	function incrementDuplicateLog() {
 		const last_log = current_log_group[current_log_group.length - 1];
 
 		if (last_log) {
@@ -57,18 +37,17 @@
 			logs = logs;
 		} else {
 			last_console_event.count = 1;
-			push_logs(last_console_event);
+			pushLogs(last_console_event);
 		}
 	}
 
-	function clear_logs() {
+	function clearLogs() {
 		current_log_group = logs = [];
 	}
 
-
     let networkLogs: any[] = []
 
-    async function push_network_log(request: any, response: any) {
+    async function pushNetworkLog(request: any, response: any) {
         networkLogs = [
             {
                 url: new URL(request.url),
@@ -118,7 +97,7 @@
     let domDiff: DOMDiff
     let domDiffHistory: string[] = [];
 
-    function push_dom_diff(html: any) {
+    function pushDomDiff(html: any) {
         domDiffHistory = [...domDiffHistory.slice(domDiffHistory.length - 1), html]
     }
 
@@ -144,24 +123,29 @@
 <main class="{showView}" class:mobile={mobile}>
     <Splitpanes class="main-split-pane">
         <Pane class="editor-pane">
-            <Editor nodes={sandbox.nodes} nodeIndexer={sandbox.nodeIndexer} openNodes={sandbox.openNodes} viewNode={sandbox.viewNode} nodeContents={sandbox.nodeContents} />
+            <Editor
+                title={sandbox.title}
+                nodes={sandbox.nodes}
+                nodeIndexer={sandbox.nodeIndexer}
+                openNodes={sandbox.openNodes}
+                viewNode={sandbox.viewNode}
+                nodeContents={sandbox.nodeContents}
+            />
         </Pane>
-
         <Pane class="sandbox-pane">
             <Splitpanes horizontal={true} class="sandbox-split-pane">
                 <Pane>
                     <SandboxView
                         bind:this={sandboxView}
-                        {serverUrl}
                         bind:sandbox={sandbox}
+                        {serverUrl}
                         {onSandboxReload}
-                        {push_network_log}
-                        {push_dom_diff}
-                        {push_logs}
-                        {group_logs}
-                        {ungroup_logs}
-                        {increment_duplicate_log}
-                        {clear_logs} />
+                        {pushNetworkLog}
+                        {pushDomDiff}
+                        {pushLogs}
+                        {incrementDuplicateLog}
+                        {clearLogs}
+                    />
                 </Pane>
                 <Pane class="debugger-pane" bind:size={debuggerPaneSize}>
                     <button class='tabs' bind:this={debuggerTabs} on:click={toggleDebuggerPane}>
@@ -174,13 +158,13 @@
                         {/each}
                     </button>
                     {#if activeTab == 'Console'}
-                        <Console logs={logs} {clear_logs} />
+                        <Console logs={logs} {clearLogs} />
                     {:else if activeTab == 'DOM Diff'}
                         <DOMDiff bind:this={domDiff} bind:domDiffHistory={domDiffHistory} />
                     {:else if activeTab == 'README'}
                         {#if $readmeHTML}
+                            {@const title = sandbox.title}
                             <article>
-                                <h1>{sandbox.getTitle()}</h1>
                                 {@html $readmeHTML}
                             </article>
                         {/if}

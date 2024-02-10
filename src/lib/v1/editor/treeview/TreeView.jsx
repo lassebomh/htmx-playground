@@ -13,11 +13,6 @@ function TreeView({treeStore, onNodeSelect, onNodeDelete}) {
   const setTreeData = treeStore.set
 
   const handleDrop = (newTree) => {
-    newTree.forEach((node) => {
-      if (node.id != '__root__' && node.parent === null) {
-        node.parent = '__root__'
-      }
-    })
     setTreeData(newTree)
   };
 
@@ -35,7 +30,7 @@ function TreeView({treeStore, onNodeSelect, onNodeDelete}) {
         
         if (type != 'folder') {
           let split = value.split('.')
-          type = typeExtensions[split[split.length-1]] || 'plaintext'
+          type = typeExtensions[split[split.length-1]] || typeExtensions[value] || 'plaintext'
         }
 
         return {
@@ -79,8 +74,17 @@ function TreeView({treeStore, onNodeSelect, onNodeDelete}) {
         if (dropTarget.type != 'folder') return false
         return !getDescendants(currentTree, dragSourceId).includes(dropTarget)
       }}
-      canDrag={(node) => {
-        return node.id != '__root__'
+      sort={(nodeA, nodeB) => {
+        if (nodeA.type === 'folder' && nodeB.type !== 'folder') {
+            return -1;
+        }
+        if (nodeB.type === 'folder' && nodeA.type !== 'folder') {
+            return 1;
+        }
+        if (nodeB.type !== nodeA.type) {
+            return nodeA.type.localeCompare(nodeB.type);
+        }
+        return nodeA.text.localeCompare(nodeB.text);
       }}
       initialOpen={true}
       render={(node, { depth, isOpen, onToggle }) => (

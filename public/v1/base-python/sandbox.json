@@ -1,14 +1,8 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Python Base"
-        },
-        {
             "id": "0",
-            "parent": "__root__",
+            "parent": null,
             "type": "html",
             "text": "_server.html"
         }

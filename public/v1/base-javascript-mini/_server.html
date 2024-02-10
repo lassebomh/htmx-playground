@@ -308,7 +308,6 @@
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/_sw_v1.js').then(async () => {
-                    // console.log('Service Worker registered');
                     window.addEventListener('message', handleParentMessage)
                     window.parent.postMessage({type: "fetch-files"}, '*')
 
@@ -322,7 +321,6 @@
                     let registrations = await navigator.serviceWorker.getRegistrations();
                     
                     for (let registration of registrations) {
-                        // console.log("Unregistered", registration);
                         registration.unregister();
                     }
                 }

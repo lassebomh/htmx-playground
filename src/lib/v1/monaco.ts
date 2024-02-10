@@ -5,6 +5,7 @@ import cssWorker from 'monaco-editor/esm/vs/language/css/css.worker?worker';
 import htmlWorker from 'monaco-editor/esm/vs/language/html/html.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import tsWorker from 'monaco-editor/esm/vs/language/typescript/ts.worker?worker';
+import * as pyWorker from 'monaco-editor/esm/vs/basic-languages/python/python';
 
 self.MonacoEnvironment = {
     getWorker: function (_, label) {
@@ -22,6 +23,8 @@ self.MonacoEnvironment = {
             case 'typescript':
             case 'javascript':
                 return new tsWorker();
+            case 'python':
+                return new pyWorker();
             default:
                 return new editorWorker();
         }

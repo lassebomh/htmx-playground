@@ -1,20 +1,14 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Django"
-        },
-        {
             "id": "/requirements.txt",
-            "parent": "__root__",
+            "parent": null,
             "type": "plaintext",
             "text": "requirements.txt"
         },
         {
             "id": "/myproject",
-            "parent": "__root__",
+            "parent": null,
             "type": "folder",
             "text": "myproject"
         },

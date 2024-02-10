@@ -2,6 +2,7 @@
   import TreeView from './treeview/TreeView'
   import Monaco from "./Monaco.svelte";
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
+  import { v4 as uuidv4 } from 'uuid'
 
   import { sveltify } from "svelte-preprocess-react";
   import { createPortal } from "react-dom";
@@ -13,6 +14,7 @@
   export let viewNode;
   export let nodeContents;
   export let nodeIndexer;
+  export let title;
 
   
   const ReactTreeView = sveltify(
@@ -24,18 +26,6 @@
 
   let mobile = window.innerWidth < 800;
 
-  // let nodeIndexer;
-  let monacoComponent;
-
-  // $: {
-  //   let newNodeIndexer = {}
-
-  //   $nodes.forEach((node, i) => {
-  //     newNodeIndexer[node.id] = i
-  //   });
-
-  //   nodeIndexer = newNodeIndexer;
-  // }
 
   function onNodeSelect(node) {
     if (node.type !== 'folder') {
@@ -88,21 +78,49 @@
     }
   }
 
+  const handleNewFile = (e) => {
+    $nodes = [...$nodes, {
+        "id": uuidv4(),
+        "parent": null,
+        "type": "plaintext",
+        "content": "",
+        "text": "New file"
+    }]
+  };
+  const handleNewFolder = (e) => {
+    $nodes = [...$nodes, {
+        "id": uuidv4(),
+        "parent": null,
+        "type": "folder",
+        "text": "New folder"
+    }]
+  };
+
 </script>
 
 <main class="ce-root">
   <Splitpanes>
-    <Pane bind:size={fileTreePaneSize}>
+    <Pane bind:size={fileTreePaneSize} snapSize={5} >
       <div class="tree-view">
         <div class="topbar">
-          HTMX Playground
+          <img width="24" src="/img/logo_transparent_96.png" alt="HTMX Playground">
+          <span class="sandbox-title overflow-elipsis" contenteditable="true" bind:innerText={$title}>
+          </span>
+          <div class="root-buttons">
+            <button on:click={handleNewFile} class="iconWrapper">
+              <i class="codicon codicon-new-file"></i>
+            </button>
+            <button on:click={handleNewFolder} class="iconWrapper">
+              <i class="codicon codicon-new-folder"></i>
+            </button>
+          </div>
         </div>
         <ReactTreeView treeStore={nodes} {onNodeSelect} {onNodeDelete} />
       </div>
     </Pane>
     <Pane minSize={15}>
       <div class="editor">
-        <Monaco bind:this={monacoComponent} mobile={false} {nodes} {viewNode} {openNodes} {nodeIndexer} {nodeContents}>
+        <Monaco mobile={false} {nodes} {viewNode} {openNodes} {nodeIndexer} {nodeContents}>
           <button class="toggle-explorer icon-button" on:click={_ => toggleFileTree()}>
             <i class="codicon {fileTreePaneSize < 5 ? 'codicon-folder-opened' : 'codicon-triangle-left'}"></i>
           </button>
@@ -133,13 +151,24 @@
     flex-direction: column;
   }
 
-  .tree-view .topbar {
+  .topbar {
     padding: 0 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     box-shadow: 4px 4px 8px #0002;
   }
+
+  .root-buttons {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .sandbox-title {
+    flex-grow: 1;
+    margin-left: 8px;
+  }
+  
 
   .editor {
     flex-grow: 1;
@@ -151,7 +180,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 44px;
+    width: 34px;
     height: 100%;
     flex-shrink: 0;
     border-radius: 0;

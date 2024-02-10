@@ -5,7 +5,6 @@ self.addEventListener('install', (event) => {
 
 self.addEventListener('activate', (event) => {
     event.waitUntil(self.clients.claim());
-    // console.log('Activated service worker');
 });
 
 function urlIsMockServer(url) {
@@ -49,9 +48,6 @@ self.addEventListener('fetch', (event) => {
             resolve(fetch(event.request))
             return
         }
-
-        // console.log('client', client && client.id);
-        // console.log('server', server && client.id);
 
         messageChannel.port1.onmessage = (responseEvent) => {
 

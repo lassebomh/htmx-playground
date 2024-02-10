@@ -27,6 +27,7 @@ export abstract class AbstractSandboxHandler {
             viewNode: get(sandbox.viewNode),
             openNodes: get(sandbox.openNodes),
             nodeContents: get(sandbox.nodeContents),
+            title: get(sandbox.title),
             readmeHTML: sandbox.readmeHTML,
         }
     
@@ -41,16 +42,16 @@ export abstract class AbstractSandboxHandler {
             writable(config.viewNode),
             writable(config.nodeContents),
             writable(config.readmeHTML ?? null),
+            writable(config.title ?? null),
             config.baseLocation
         )
     }
 
-    getLocation(title: string | null): SandboxLocation {
+    getLocation(): SandboxLocation {
         return {
             version: this.version,
             method: this.method,
-            params: this.params,
-            title: title,
+            params: this.params
         }
     }
 }
@@ -81,8 +82,7 @@ export class LocalSandboxHandler extends AbstractSandboxHandler {
             }
         }
 
-        let title = sandbox.getTitle()
-        directoryAdd(this, title)
+        directoryAdd(this, get(sandbox.title))
 
         let serialized = JSON.stringify(this.serialize(sandbox))
         localStorage.setItem(this.params.id, serialized)
@@ -123,7 +123,7 @@ export class FetchSandboxHandler extends AbstractSandboxHandler {
     }
 
     async save(sandbox: Sandbox): Promise<void> {
-        directoryAdd(this, sandbox.getTitle())
+        directoryAdd(this, get(sandbox.title))
     }
     async delete(): Promise<void> {
         directoryDelete(this)
@@ -178,7 +178,7 @@ export class GistSandboxHandler extends AbstractSandboxHandler {
     }
 
     async save(sandbox: Sandbox): Promise<void> {
-        directoryAdd(this, sandbox.getTitle())
+        directoryAdd(this, get(sandbox.title))
     }
     async delete(): Promise<void> {
         directoryDelete(this)
@@ -196,6 +196,7 @@ export class Sandbox {
         public viewNode: Writable<string | null>,
         public nodeContents: Writable<{[path: string]: string}>,
         public readmeHTML: Writable<string | null>,
+        public title: Writable<string>,
         public baseLocation?: SandboxLocation,
     ) {
         this.nodeIndexer = writable(this.createIndex(get(this.nodes)))
@@ -204,10 +205,6 @@ export class Sandbox {
             this.nodeIndexer.set(this.createIndex(nodes))
         })
         this.updateReadme()
-    }
-
-    getTitle(): string {
-        return get(this.nodes).find((node) => node.id == '__root__').text
     }
 
     updateReadme() {
@@ -240,7 +237,7 @@ export class Sandbox {
     async save() {
         this.updateReadme()
         await this.handler.save(this);
-        setWindowLocation(this.handler.getLocation(this.getTitle()))
+        setWindowLocation(this.handler.getLocation(), get(this.title))
     }
 
     getFiles(): {[path: string]: string} {
@@ -250,7 +247,7 @@ export class Sandbox {
 
             let path = "/"
             let parent = node.parent && get(this.nodes)[get(this.nodeIndexer)[node.parent]]
-            while (parent != null && parent.id != '__root__') {
+            while (parent != null) {
                 path += parent.text + '/'
                 parent = parent.parent && get(this.nodes)[get(this.nodeIndexer)[parent.parent]]
             }

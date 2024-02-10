@@ -4,7 +4,7 @@ import { typeIcons } from '../icons'
 import { v4 as uuidv4 } from 'uuid'
 
 export const Node = (props) => {
-  const indent = props.depth * 10;
+  const indent = props.depth * 10 + 6;
 
   const { id, text } = props.node;
 
@@ -111,7 +111,7 @@ export const Node = (props) => {
               <i className={typeIcons[props.node.type]}></i>
             </div>
           )}
-          <div className={'labelGridItem'}>
+          <div className={'labelGridItem overflow-elipsis'}>
             {props.node.text}
           </div>
           <div className={'inputWrapper'}>
@@ -128,11 +128,9 @@ export const Node = (props) => {
             <button onClick={handleShowInput} className="iconWrapper">
               <i className={"codicon codicon-pencil"}></i>
             </button>
-            {id != '__root__' && (
-              <button onClick={handleDelete} className="iconWrapper">
-                <i className={"codicon codicon-trash"}></i>
-              </button>
-            )}
+            <button onClick={handleDelete} className="iconWrapper">
+              <i className={"codicon codicon-trash"}></i>
+            </button>
           </div>
         </>
       )}

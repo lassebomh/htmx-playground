@@ -1,14 +1,8 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Minimal"
-        },
-        {
             "id": "1",
-            "parent": "__root__",
+            "parent": null,
             "type": "python",
             "text": "main.py"
         }

@@ -55,8 +55,6 @@
 
             if ($viewNode == elem._nodeId) {
                 let viewIndex = $openNodes.indexOf($viewNode)
-                console.log('viewIndex', viewIndex);
-                
 
                 if (newOpenNodes.length > 0) {
                     $viewNode = newOpenNodes[Math.min(viewIndex, newOpenNodes.length - 1)]

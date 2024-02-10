@@ -8,11 +8,6 @@
     border: 1px solid transparent;
     cursor: pointer;
 }
-
-.tree-node#node-__root__ {
-    height: 30px;
-}
-
 .tree-node:not(.visibleInput) .inputWrapper {
     display: none;
 }
@@ -39,9 +34,6 @@
 
 .labelGridItem {
     padding-inline-start: 4px;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .inputWrapper {

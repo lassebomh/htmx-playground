@@ -151,17 +151,7 @@
                 // script.setAttribute('async', 'true')
                 script.setAttribute('config', JSON.stringify(config))
 
-                console.log('runMain')
-
                 document.body.appendChild(script)
-
-                // setTimeout(async () => {
-                //     await window.trigger(["https://google.com/", Object.entries({
-                //         headers: {
-                //             'content-type': 'asdf'
-                //         }
-                //     })])
-                // }, 1000)
             }
 
 
@@ -337,7 +327,6 @@
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/_sw_v1.js').then(async () => {
-                    // console.log('Service Worker registered');
                     window.addEventListener('message', handleParentMessage)
                     window.parent.postMessage({type: "fetch-files"}, '*')
 
@@ -351,7 +340,6 @@
                     let registrations = await navigator.serviceWorker.getRegistrations();
                     
                     for (let registration of registrations) {
-                        // console.log("Unregistered", registration);
                         registration.unregister();
                     }
                 }

@@ -1,26 +1,20 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Internals"
-        },
-        {
             "id": "1",
-            "parent": "__root__",
+            "parent": null,
             "type": "javascript",
             "text": "server.js"
         },
         {
             "id": "2",
-            "parent": "__root__",
+            "parent": null,
             "type": "html",
             "text": "index.html"
         },
         {
             "id": "3",
-            "parent": "__root__",
+            "parent": null,
             "type": "html",
             "text": "button.html"
         }

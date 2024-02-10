@@ -7,16 +7,24 @@
     export let sandbox: Sandbox
     export let serverUrl: URL;
 
-    export let push_logs: CallableFunction;
-    export let increment_duplicate_log: CallableFunction;
-    export let clear_logs: CallableFunction;
-    export let push_dom_diff: (html: any) => void;
-    export let push_network_log: CallableFunction;
+    export let pushLogs: CallableFunction;
+    export let incrementDuplicateLog: CallableFunction;
+    export let clearLogs: CallableFunction;
+    export let pushDomDiff: (html: any) => void;
+    export let pushNetworkLog: CallableFunction;
     export let onSandboxReload: CallableFunction;
 
     let iframe: HTMLIFrameElement;
     let currentLocation: string;
     
+    let downloadLink: HTMLAnchorElement;
+    let copyLink: HTMLAnchorElement;
+    
+    let directory = getDirectory()
+    let popupView: 'examples' | 'sandbox' | null = null
+
+    let runtimeStarting = true;
+
     function handleURLKeyup(event: any) {
         if (event.key === 'Enter') {
             let data = {
@@ -26,7 +34,6 @@
             iframe.contentWindow!.postMessage(data, serverUrl.origin)
         }
     }
-    
 
     export async function reloadSandbox(){
         let data = {
@@ -38,13 +45,11 @@
     }
 
     export async function fullReloadSandbox() {
+        runtimeStarting = true;
         iframe.contentWindow!.postMessage({type: 'full-reload', }, serverUrl.origin)
         onSandboxReload()
     }
 
-    let downloadLink: HTMLAnchorElement;
-    let copyLink: HTMLAnchorElement;
-    
     async function handleDownloadSandbox(e: any, clipboard: boolean) {
         let jsonString = JSON.stringify(sandbox.handler.serialize(sandbox))
 
@@ -52,7 +57,7 @@
             e.preventDefault()
             await navigator.clipboard.writeText(jsonString);
         } else {
-            let filename = sandbox.getTitle().replace(/\W+/g, ' ').replace(/^ +| +$/, '')+".json"
+            let filename = get(sandbox.title).replace(/\W+/g, ' ').replace(/^ +| +$/, '')+".json"
             downloadLink.setAttribute(
                 "href",
                 "data:text/json;charset=utf-8," + encodeURIComponent(jsonString)
@@ -61,69 +66,49 @@
         }
     }
 
-    function on_error(event: any) {
-        push_logs({ level: 'error', args: [event.value] });
+    function onError(event: any) {
+        pushLogs({ level: 'error', args: [event.value] });
     }
-    function on_unhandled_rejection(event: any) {
+    
+    function onUnhandledRejection(event: any) {
         let error = event.value;
         if (typeof error === 'string') error = { message: error };
         error.message = 'Uncaught (in promise): ' + error.message;
-        push_logs({ level: 'error', args: [error] });
+        pushLogs({ level: 'error', args: [error] });
     }
-    function on_console(log: any) {
+    
+    function onConsole(log: any) {
         if (log.level === 'clear') {
-            clear_logs();
-            push_logs(log);
+            clearLogs();
+            pushLogs(log);
         } else if (log.duplicate) {
-            increment_duplicate_log();
+            incrementDuplicateLog();
         } else {
-            push_logs(log);
+            pushLogs(log);
         }
     }
-    async function on_init(event: MessageEvent<any>) {
+
+    async function onInit(event: MessageEvent<any>) {
         event.source!.postMessage({
             type: 'init',
             value: (await sandbox.exportFiles())['/_server.html'],
         }, {targetOrigin: event.origin})
     }
 
-    async function on_fetch_files(event: MessageEvent<any>) {
+    async function onFetchFiles(event: MessageEvent<any>) {
         event.source!.postMessage({
                 type: 'fetch-files',
                 value: await sandbox.exportFiles(),
         }, {targetOrigin: event.origin})
     }
 
-    function on_location_update(event: MessageEvent<any>) {
+    function onLocationUpdate(event: MessageEvent<any>) {
         currentLocation = event.data.value;
     }
 
-    window.addEventListener('message', (event) => {
-        if (event.origin !== serverUrl.origin || event.source == null) return
-
-		switch (event.data.type) {
-			case 'init':
-                return on_init(event)
-			case 'fetch-files':
-                return on_fetch_files(event)
-			case 'location':
-                return on_location_update(event)
-            case 'domdiff':
-                return push_dom_diff(event.data.value)
-            case 'network':
-                return push_network_log(event.data.request, event.data.response)
-			case 'error':
-				return on_error(event.data);
-			case 'unhandledrejection':
-				return on_unhandled_rejection(event.data);
-			case 'console':
-				return on_console(event.data);
-		}
-    })
-
     async function setSandbox(newSandbox: Sandbox) {
         sandbox = newSandbox;
-        setWindowLocation(sandbox.handler.getLocation(sandbox.getTitle()))
+        setWindowLocation(sandbox.handler.getLocation(), get(sandbox.title))
         await reloadSandbox()
         popupView = null
     }
@@ -149,13 +134,11 @@
     }
 
     async function handleSave(local: boolean) {
-
         if (local) {
             sandbox.handler = getHandler({
                 method: "local",
                 version: "v1",
                 params: {},
-                title: sandbox.getTitle(),
             })
         }
 
@@ -163,9 +146,7 @@
         directory = getDirectory()
     }
 
-    let popupView: 'examples' | 'sandbox' | null = null
-
-    function handleButtonClick(viewName: any) {
+    function openToolbarTab(viewName: any) {
         if (popupView == viewName) {
             popupView = null
         } else {
@@ -198,7 +179,6 @@
             let urlSplit = input.split('/')
             gistId = urlSplit[urlSplit.length - 1]
         }
-
         
         let location: SandboxLocation = {
             method: "gist",
@@ -206,21 +186,47 @@
             params: {
                 id: gistId
             },
-            title: null,
         }
 
         await handleLoad(location)
     }
 
-    let directory = getDirectory()
+    window.addEventListener('message', (event) => {
+        if (event.origin !== serverUrl.origin || event.source == null) return
 
+		switch (event.data.type) {
+			case 'init':
+                return onInit(event)
+			case 'fetch-files':
+                return onFetchFiles(event)
+			case 'location':
+                return onLocationUpdate(event)
+            case 'domdiff':
+                return pushDomDiff(event.data.value)
+            case 'network':
+                return pushNetworkLog(event.data.request, event.data.response)
+			case 'error':
+				return onError(event.data);
+			case 'unhandledrejection':
+				return onUnhandledRejection(event.data);
+			case 'console':
+				return onConsole(event.data);
+            case 'runtime-started':
+                runtimeStarting = false;
+                return
+		}
+    })
 </script>
 
 <main>
     <div class="topbar">
         <div style="flex-grow: 1;">
-            <button on:click={_ => fullReloadSandbox()} class='reload icon-button' title="Reload playground (CTRL+S)">
-                <i class='codicon codicon-debug-rerun'></i>
+            <button on:click={_ => fullReloadSandbox()} class='reload icon-button' title="Reload runtime">
+                {#if runtimeStarting}
+                    <i class='codicon codicon-loading spinner'></i>
+                {:else}
+                    <i class='codicon codicon-debug-rerun'></i>
+                {/if}
             </button>
             <button on:click={_ => reloadSandbox()} class='reload icon-button' title="Reload playground (CTRL+S)">
                 <i class='codicon codicon-debug-restart'></i>
@@ -229,10 +235,10 @@
         </div>
         <div>
             <div class="button-group">
-                <button class='button' class:active={popupView == 'examples'} on:click={_ => {handleButtonClick('examples')}}>
+                <button class='button' class:active={popupView == 'examples'} on:click={_ => {openToolbarTab('examples')}}>
                     Find examples
                 </button>
-                <button class='button' class:active={popupView == 'sandbox'} on:click={_ => {handleButtonClick('sandbox')}}>
+                <button class='button' class:active={popupView == 'sandbox'} on:click={_ => {openToolbarTab('sandbox')}}>
                     Sandbox
                 </button>
             </div>
@@ -240,8 +246,7 @@
     </div>
     <iframe title="" bind:this={iframe} src={serverUrl.href} frameborder="0"></iframe>
     {#if popupView}
-        <!-- svelte-ignore a11y-no-static-element-interactions -->
-        <div class="popup"> <!-- on:mouseleave={_ => popupView = null} -->
+        <div class="popup">
             {#if popupView == 'examples'}
                 <table class="sandbox-loader">
                     <tbody>
@@ -346,6 +351,18 @@
     iframe {
         width: 100%;
         flex-grow: 1;
+    }
+    @keyframes spin {
+        0% {
+            transform: rotate(360deg);
+        }
+        100% {
+            transform: rotate(0);
+        }
+    }
+    .spinner {
+        transform: rotate(0);
+        animation: spin 0.5s infinite linear !important;
     }
 
     .sandbox-loader {

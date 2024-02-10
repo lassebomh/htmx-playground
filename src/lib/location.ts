@@ -2,21 +2,22 @@
 export type SandboxLocation = {
     version: string,
     method: string,
-    title: string | null,
     params: {[name: string]: string}
 }
 
-export function sandboxLocationToURLParams(sl: SandboxLocation) {
+export type TitledSandboxLocation = SandboxLocation & {title: string | null}
+
+export function sandboxLocationToURLParams(sl: SandboxLocation, title: string | null) {
     let urlparams = new URLSearchParams(Object.entries(sl.params))
     urlparams.set('m', sl.method)
     urlparams.set('p', Object.keys(sl.params).join(','))
-    if (sl.title) {
-        urlparams.set('t', sl.title)
+    if (title) {
+        urlparams.set('t', title)
     }
     return `/${sl.version}/?` + urlparams.toString()
 }
 
-export function parseSandboxLocationFromHref(href: string): SandboxLocation | null {
+export function parseSandboxLocationFromHref(href: string): TitledSandboxLocation | null {
     let url = new URL(href)
 
     let version = url.pathname.split('/')[1]
@@ -42,11 +43,11 @@ export function parseSandboxLocationFromHref(href: string): SandboxLocation | nu
         params[key] = url.searchParams.get(key)!
     })
 
-    let location: SandboxLocation = {
+    let location: TitledSandboxLocation = {
         version,
         method,
         params,
-        title: title ?? null,
+        title,
     }
 
     return location
@@ -69,20 +70,20 @@ export function compareSandboxLocations(a: SandboxLocation, b: SandboxLocation):
     return true
 }
 
-export let defaultLocation: SandboxLocation = {
+export let defaultLocation: SandboxLocation & {title: string} = {
     method: "fetch",
     version: 'v1',
     params: {
         url: "/v1/examples/Django.json"
     },
-    title: "Welcome"
+    title: "Welcome!!1"
 }
 
 
-export function setWindowLocation(sandboxLocation: SandboxLocation) {
-    let href = location.origin + sandboxLocationToURLParams(sandboxLocation)
-    if (sandboxLocation.title) {
-        document.title = sandboxLocation.title.trim() + ' - HTMX Playground';
+export function setWindowLocation(sandboxLocation: SandboxLocation, title: string) {
+    let href = location.origin + sandboxLocationToURLParams(sandboxLocation, title)
+    if (title) {
+        document.title = title.trim() + ' - HTMX Playground';
     }
     window.history.pushState(null, '', href);
 }

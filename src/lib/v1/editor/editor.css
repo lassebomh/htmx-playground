@@ -12,9 +12,6 @@
     border: none !important;
     font-size: 14px !important;
     cursor: initial !important;
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
 }
 
 .icon-button {

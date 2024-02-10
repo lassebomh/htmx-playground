@@ -1,14 +1,8 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Python Lib"
-        },
-        {
             "id": "1",
-            "parent": "__root__",
+            "parent": null,
             "type": "folder",
             "text": "lib"
         },
@@ -38,7 +32,7 @@
         },
         {
             "id": "6",
-            "parent": "__root__",
+            "parent": null,
             "type": "folder",
             "text": "router"
         },
@@ -62,7 +56,7 @@
         },
         {
             "id": "12",
-            "parent": "__root__",
+            "parent": null,
             "type": "folder",
             "text": "_internal"
         },

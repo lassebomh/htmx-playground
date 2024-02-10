@@ -4,9 +4,17 @@ import sys
 specificmodules = [
     "django.core.handlers.base",
     "django.core.handlers.wsgi",
+    "django.core.handlers",
+    "django.core.wsgi",
+    "django.core",
     "django.urls.resolvers",
     "django.urls",
 ]
+
+# for k in list(sys.modules.keys()):
+#     if k.startswith('django.core'):
+#         print(k)
+#         del sys.modules[k]
 
 for name in specificmodules:
     if name in sys.modules:
@@ -16,17 +24,12 @@ for name in specificmodules:
 from pyodide.ffi import to_js
 import js
 
-import os
 from io import BytesIO
 from urllib.parse import urlparse
 
 from django.core.wsgi import get_wsgi_application
 from django.contrib.staticfiles.handlers import StaticFilesHandler
 # from django.core.management import call_command
-
-
-os.environ['DJANGO_SETTINGS_MODULE'] = 'myproject.settings'
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 application = StaticFilesHandler(get_wsgi_application())
 application.load_middleware()

@@ -121,6 +121,7 @@
 
             window.startclient = () => {
                 setServerIndicator('done')
+                window.parent.postMessage({type: "runtime-started"}, '*')
 
                 if (!pgIframe) {
                     pgIframe = document.createElement('iframe')
@@ -148,7 +149,7 @@
     
                         onURLChange()
                         window.addEventListener('popstate', onURLChange);
-
+                        
                         document.getElementById('indicators').style.opacity = 0;
                     });
                     
@@ -246,14 +247,25 @@
                 setPipIndicator('loading')
 
                 let installPackages = []
+                let envvars = {}
                 
                 Object.entries(files).forEach(([path, contents]) => {
 
-                    if (path.endsWith('/requirements.txt') && contents.trim()) {
+                    if (path.endsWith('requirements.txt') && contents.trim()) {
                         let packages = contents.trim().split(/\s+/)
                         installPackages = [...installPackages, ...packages.filter(name => !(name in pyodide.loadedPackages))]
                     }
+
+                    if (path.endsWith('.env') && contents.trim()) {
+                        contents.split('\n').forEach(line => {
+                            if (line.startsWith('#') || !line.trim()) return 
+                            const [key, value] = line.split('=').map(kv => kv.trim());
+                            if (key) envvars[key] = value || '';
+                        });
+                    }
                 })
+
+                pyodide.globals.set('envvars', Object.entries(envvars))
 
                 if (installPackages.length) {
                     await pyodide.runPythonAsync(`
@@ -272,7 +284,10 @@
                     import asyncio
                     import importlib
                     import sys
+                    import os
                     from types import ModuleType
+
+                    os.environ.update({k: v for k, v in envvars})
 
                     async def check_interrupt():
                         for k,v in list(sys.modules.items()):
@@ -295,6 +310,11 @@
 
                     await check_interrupt()
                 `)
+
+                mainPromise.catch((e) => {
+                    setServerIndicator('error')
+                    console.error(e);
+                })
             }
 
             async function handleParentMessage(event) {
@@ -393,7 +413,7 @@
                     let registrations = await navigator.serviceWorker.getRegistrations();
                     
                     for (let registration of registrations) {
-                        // console.log("Unregistered", registration);
+                        // ("Unregistered", registration);
                         registration.unregister();
                     }
                 }

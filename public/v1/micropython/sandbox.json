@@ -1,14 +1,8 @@
 {
     "nodes": [
         {
-            "id": "__root__",
-            "parent": null,
-            "type": "folder",
-            "text": "Python Lib"
-        },
-        {
             "id": "2",
-            "parent": "__root__",
+            "parent": null,
             "type": "folder",
             "text": "lib"
         },
@@ -26,13 +20,13 @@
         },
         {
             "id": "3",
-            "parent": "__root__",
+            "parent": null,
             "type": "html",
             "text": "_server.html"
         },
         {
             "id": "4",
-            "parent": "__root__",
+            "parent": null,
             "type": "python",
             "text": "main.py"
         },
