@@ -9,6 +9,9 @@
   import ReactDOM from "react-dom/client";
   import { renderToString } from "react-dom/server";
 
+  export let mobile;
+  export let hideFileTree = false;
+
   export let nodes;
   export let openNodes;
   export let viewNode;
@@ -16,6 +19,8 @@
   export let nodeIndexer;
   export let title;
 
+
+  let main;
   
   const ReactTreeView = sveltify(
     TreeView,
@@ -23,9 +28,6 @@
     ReactDOM,
     renderToString,
   );
-
-  let mobile = window.innerWidth < 800;
-
 
   function onNodeSelect(node) {
     if (node.type !== 'folder') {
@@ -66,16 +68,16 @@
     $openNodes = newOpenNodes;
   }
 
-  let fileTreePaneSize = 0
-  let lastfileTreePaneSize = mobile ? 85 : 20
+  let fileTreePaneSize = mobile ? 100 : 20
+  let lastfileTreePanePx;
 
   function toggleFileTree() {
-    if (fileTreePaneSize < 5) {
-      fileTreePaneSize = lastfileTreePaneSize
+    if (hideFileTree) {
+      fileTreePaneSize = Math.min((lastfileTreePanePx/main.clientWidth) * 100, 100)
     } else {
-      lastfileTreePaneSize = fileTreePaneSize
-      fileTreePaneSize = 0
+      lastfileTreePanePx = fileTreePaneSize/100 * main.clientWidth;
     }
+    hideFileTree = !hideFileTree;
   }
 
   const handleNewFile = (e) => {
@@ -98,35 +100,46 @@
 
 </script>
 
-<main class="ce-root">
+<main bind:this={main} class="ce-root">
   <Splitpanes>
-    <Pane bind:size={fileTreePaneSize} snapSize={5} >
-      <div class="tree-view">
-        <div class="topbar">
-          <img width="24" src="/img/logo_transparent_96.png" alt="HTMX Playground">
-          <span class="sandbox-title overflow-elipsis" contenteditable="true" bind:innerText={$title}>
-          </span>
-          <div class="root-buttons">
-            <button on:click={handleNewFile} class="iconWrapper">
-              <i class="codicon codicon-new-file"></i>
-            </button>
-            <button on:click={handleNewFolder} class="iconWrapper">
-              <i class="codicon codicon-new-folder"></i>
-            </button>
+    {#if !hideFileTree}
+      <Pane bind:size={fileTreePaneSize} >
+        <div class="tree-view">
+          <div class="topbar">
+            <!-- <img width="24" src="/img/logo_transparent_96.png" alt="HTMX Playground"> -->
+            {#if !mobile}
+              <button class="toggle-explorer icon-button" on:click={_ => toggleFileTree()}>
+                <i class="codicon codicon-triangle-left"></i>
+              </button>
+            {/if}
+            <span class="sandbox-title overflow-elipsis" contenteditable="true" bind:innerText={$title}>
+            </span>
+            <div class="root-buttons">
+              <button on:click={handleNewFile} class="iconWrapper">
+                <i class="codicon codicon-new-file"></i>
+              </button>
+              <button on:click={handleNewFolder} class="iconWrapper">
+                <i class="codicon codicon-new-folder"></i>
+              </button>
+            </div>
           </div>
+          <ReactTreeView treeStore={nodes} {onNodeSelect} {onNodeDelete} />
         </div>
-        <ReactTreeView treeStore={nodes} {onNodeSelect} {onNodeDelete} />
-      </div>
-    </Pane>
-    <Pane minSize={15}>
-      <div class="editor">
-        <Monaco mobile={false} {nodes} {viewNode} {openNodes} {nodeIndexer} {nodeContents}>
-          <button class="toggle-explorer icon-button" on:click={_ => toggleFileTree()}>
-            <i class="codicon {fileTreePaneSize < 5 ? 'codicon-folder-opened' : 'codicon-triangle-left'}"></i>
-          </button>
-        </Monaco>
-      </div>
-    </Pane>
+      </Pane>
+    {/if}
+    {#if !mobile || hideFileTree}
+      <Pane>
+        <div class="editor">
+          <Monaco {mobile} {nodes} {viewNode} {openNodes} {nodeIndexer} {nodeContents}>
+            {#if !mobile && hideFileTree}
+              <button class="toggle-explorer icon-button" on:click={_ => toggleFileTree()}>
+                <i class="codicon codicon-root-folder-opened"></i>
+              </button>
+            {/if}
+          </Monaco>
+        </div>
+      </Pane>
+    {/if}
   </Splitpanes>
 </main>
 
@@ -152,7 +165,7 @@
   }
 
   .topbar {
-    padding: 0 8px;
+    padding-right: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -161,6 +174,7 @@
 
   .root-buttons {
     display: flex;
+    gap: 8px;
     flex-shrink: 0;
   }
 

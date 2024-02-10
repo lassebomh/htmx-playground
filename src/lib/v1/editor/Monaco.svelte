@@ -15,18 +15,28 @@
     let editorContainer: HTMLElement;
 
     onMount(async () => {
-        editor = monaco.editor.create(
-            editorContainer,
-            {
-                automaticLayout: true,
-                theme: 'vs-dark',
-                model: null,
-                minimap: {
-                    enabled: false
-                },
-                lineNumbers: mobile ? 'off' : 'on'
+        let options: monaco.editor.IStandaloneEditorConstructionOptions = {
+            automaticLayout: true,
+            theme: 'vs-dark',
+            model: null,
+            minimap: {
+                enabled: false
+            },
+        }
+
+        if (mobile) {
+            options = {
+                ...options,
+                lineNumbers: 'off',
+                glyphMargin: false,
+                folding: false,
+                // lineDecorationsWidth: 0,
+                lineNumbersMinChars: 0,
+                showFoldingControls: "never"
             }
-        );
+        }
+
+        editor = monaco.editor.create(editorContainer, options);
 
 
         editor.onDidChangeModelContent(() => {
@@ -139,6 +149,13 @@
         flex-direction: column;
     }
 
+    .topbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .topbar::-webkit-scrollbar { 
+        display: none;
+    }
     .editor {
         flex-grow: 1;
     }

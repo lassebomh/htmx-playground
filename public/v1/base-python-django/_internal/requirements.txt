@@ -1,1 +1,1 @@
-python-dotenv
+sqlite3

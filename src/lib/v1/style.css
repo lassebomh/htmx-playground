@@ -144,10 +144,26 @@ blockquote > footer > cite::before {
     text-overflow: ellipsis;
 }
 
+
+
+.topbar {
+    background: #252526 !important;
+    display: flex;
+    height: 38px !important;
+    flex-shrink: 0;
+    width: 100%;
+    overflow-x: auto;
+    border: none !important;
+    font-size: 14px !important;
+    cursor: initial !important;
+}
+
+
 .codicon {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 }
+
 
 .icon-button {
     background-color: transparent;
@@ -185,6 +201,39 @@ blockquote > footer > cite::before {
 }
 
 
+
+.iconWrapper {
+    align-items: center;
+    font-size: 0;
+    display: flex;
+    height: 22px;
+    justify-content: center;
+    width: 22px;
+}
+
+button.iconWrapper {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    border-radius: 3px;
+    color: #ccc;
+}
+
+button.iconWrapper:hover {
+    background-color: #fff3;
+    color: white;
+}
+
+.iconWrapper.isExpandable {
+    cursor: pointer;
+    transform: rotate(0deg);
+}
+.iconWrapper.isExpandable.isOpen {
+    transform: rotate(90deg);
+}
+
+
 ::-webkit-scrollbar {
     background-color: #ffffff1e;
     border-radius: 1000px;
@@ -215,6 +264,7 @@ blockquote > footer > cite::before {
     background-color: #1a1a1a !important;
     width: 0px !important;
     min-width: 0 !important;
+    z-index: 10000 !important;
 }
 .splitpanes--horizontal > .splitpanes__splitter {
     width: 100% !important;

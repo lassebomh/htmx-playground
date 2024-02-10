@@ -1,5 +1,6 @@
 <script lang="ts">
     import './style.css'
+    import '@vscode/codicons/dist/codicon.css'
     
 	import { Pane, Splitpanes } from 'svelte-splitpanes';
     
@@ -10,7 +11,8 @@
     import DOMDiff from './tabs/DOMDiff.svelte'
     import Console from "./tabs/console/Console.svelte";
     import NetworkViewer from './tabs/NetworkViewer.svelte';
-    import Editor from './editor/index.js'
+    import Editor from './editor/Editor.svelte'
+    import { get } from 'svelte/store';
     
     export let sandbox: Sandbox
 
@@ -20,29 +22,11 @@
 
 
 	let logs: Log[] = [];
-    let last_console_event: Log;
-	let log_group_stack: Log[][] = [];
-	let current_log_group = logs;
-
 	function pushLogs(log: Log) {
-		current_log_group.push((last_console_event = log));
-		logs = logs;
+		logs = [...logs, log];
 	}
-
-	function incrementDuplicateLog() {
-		const last_log = current_log_group[current_log_group.length - 1];
-
-		if (last_log) {
-			last_log.count = (last_log.count || 1) + 1;
-			logs = logs;
-		} else {
-			last_console_event.count = 1;
-			pushLogs(last_console_event);
-		}
-	}
-
 	function clearLogs() {
-		current_log_group = logs = [];
+		logs = [];
 	}
 
     let networkLogs: any[] = []
@@ -84,7 +68,7 @@
         'Console',
         'Network',
     ]
-    let activeTab = $readmeHTML ? "README" : 'Console'
+    let activeTab = $readmeHTML ? "README" : 'DOM Diff'
 
 
     $: {
@@ -113,26 +97,38 @@
         }
     }
 
-    let fileTreePaneSize = mobile ? 0 : (215 / window.innerWidth * 2) * 100;
-    let fileTreePaneSizeMin = (150 / window.innerWidth * 2) * 100;
+    let sandboxPaneSize: number | undefined;
+
+    $: if (mobile) {
+        if (showView != 'show-sandbox') {
+            sandboxPaneSize = 0;
+        } else {
+            sandboxPaneSize = 100;
+        }   
+    }
 
     let showView: 'show-editor' | 'show-sandbox' | 'show-all' = mobile ? 'show-sandbox' : 'show-all'
+    let hideFileTree = get(sandbox.openNodes).length > 0;
 
 </script>
 
-<main class="{showView}" class:mobile={mobile}>
+<main class:mobile={mobile}>
     <Splitpanes class="main-split-pane">
-        <Pane class="editor-pane">
-            <Editor
-                title={sandbox.title}
-                nodes={sandbox.nodes}
-                nodeIndexer={sandbox.nodeIndexer}
-                openNodes={sandbox.openNodes}
-                viewNode={sandbox.viewNode}
-                nodeContents={sandbox.nodeContents}
-            />
-        </Pane>
-        <Pane class="sandbox-pane">
+        {#if !mobile || showView != 'show-sandbox'}
+            <Pane class="editor-pane">
+                <Editor
+                    {mobile}
+                    bind:hideFileTree={hideFileTree}
+                    title={sandbox.title}
+                    nodes={sandbox.nodes}
+                    nodeIndexer={sandbox.nodeIndexer}
+                    openNodes={sandbox.openNodes}
+                    viewNode={sandbox.viewNode}
+                    nodeContents={sandbox.nodeContents}
+                />
+            </Pane>
+        {/if}
+        <Pane class="sandbox-pane" bind:size={sandboxPaneSize}>
             <Splitpanes horizontal={true} class="sandbox-split-pane">
                 <Pane>
                     <SandboxView
@@ -143,7 +139,6 @@
                         {pushNetworkLog}
                         {pushDomDiff}
                         {pushLogs}
-                        {incrementDuplicateLog}
                         {clearLogs}
                     />
                 </Pane>
@@ -178,8 +173,11 @@
     {#if mobile}
         <div class="view-switch">
             <div class="view-switch-buttons">
-                <button class:active={showView == 'show-editor'} on:click={_ => showView = 'show-editor'}>
-                    Input
+                <button class:active={showView == 'show-editor' && !hideFileTree} on:click={_ => {showView='show-editor'; hideFileTree=false;}}>
+                    Files
+                </button>
+                <button class:active={showView == 'show-editor' && hideFileTree} on:click={_ => {showView='show-editor'; hideFileTree=true;}}>
+                    Editor
                 </button>
                 <button class:active={showView == 'show-sandbox'} on:click={_ => showView = 'show-sandbox'}>
                     Output
@@ -198,8 +196,9 @@
 
     .view-switch {
         position: fixed;
-        bottom: 40px;
-        width: 100%;
+        bottom: 12vh;
+        right: 6px;
+        /* width: 100%; */
         display: flex;
         justify-content: center;
         z-index: 1000;
@@ -207,54 +206,35 @@
 
     .view-switch-buttons {
         display: flex;
-        /* gap: 8px; */
+        flex-direction: column;
+        border-radius: 4px;
+        background-color: #202020;
+        border: 2px solid #fff3;
     }
 
     .view-switch-buttons button {
-        font-size: 20px;
-        background-color: #202020;
+        font-size: 16px;
         padding: 8px 18px;
+        background-color: transparent;
         border: none;
         color: white;
-        border-radius: 10px;
-    }
-
-    .view-switch-buttons button.active {
-        background-color: #303030;
     }
 
     .view-switch-buttons button:first-child {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
+        border-top-left-radius: 0px;
+        border-top-right-radius: 0px;
     }
     .view-switch-buttons button:last-child {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        border-bottom-left-radius: 0px;
+        border-bottom-right-radius: 0px;
+    }
+
+    .view-switch-buttons button.active {
+        background-color: #ffffff15;
     }
 
     main.mobile :global(.splitpanes__splitter) {
         display: none;
-    }
-
-    main:not(.show-all) :global(.main-split-pane > .splitpanes__splitter) {
-        width: 0 !important;
-    }
-    main:not(.show-all) :global(.main-split-pane > .splitpanes__splitter::before) {
-        width: 0 !important;
-    }
-
-    main.show-editor :global(.sandbox-pane) {
-        width: 0 !important;
-    }
-    main.show-editor :global(.editor-pane) {
-        width: 100% !important;
-    }
-
-    main.show-sandbox :global(.editor-pane) {
-        width: 0 !important;
-    }
-    main.show-sandbox :global(.sandbox-pane) {
-        width: 100% !important;
     }
 
     :global(.debugger-pane) {
@@ -274,7 +254,7 @@
         border: none;
         display: flex;
         cursor: pointer;
-        background-color: #252526;
+        background-color: #ffffff08;
         padding: 0;
         box-shadow: 4px 4px 8px #0002;
     }
@@ -285,6 +265,13 @@
         padding: 8px;
         border-bottom: 2px solid transparent;
         color: rgb(146, 146, 146);
+        cursor: pointer;
+    }
+    .tab:hover {
+        background-color: #fff1;
+    }
+    .tab:not(.active):hover {
+        color: rgb(204, 204, 204);
     }
     .tab.active {
         border-bottom-color: #7CACF8;

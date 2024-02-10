@@ -8,7 +8,6 @@
     export let serverUrl: URL;
 
     export let pushLogs: CallableFunction;
-    export let incrementDuplicateLog: CallableFunction;
     export let clearLogs: CallableFunction;
     export let pushDomDiff: (html: any) => void;
     export let pushNetworkLog: CallableFunction;
@@ -81,8 +80,6 @@
         if (log.level === 'clear') {
             clearLogs();
             pushLogs(log);
-        } else if (log.duplicate) {
-            incrementDuplicateLog();
         } else {
             pushLogs(log);
         }
@@ -351,6 +348,7 @@
     iframe {
         width: 100%;
         flex-grow: 1;
+        border-left: 1px solid #fff1 !important;
     }
     @keyframes spin {
         0% {

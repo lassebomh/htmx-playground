@@ -17,13 +17,20 @@
             "parent": "/_internal",
             "type": "python",
             "text": "entrypoint.py"
+        },
+        {
+            "id": "/_internal/requirements.txt",
+            "parent": "/_internal",
+            "type": "plaintext",
+            "text": "requirements.txt"
         }
     ],
     "viewNode": null,
     "openNodes": [],
     "nodePaths": {
         "/_internal/__init__.py": "/_internal/__init__.py",
-        "/_internal/entrypoint.py": "/_internal/entrypoint.py"
+        "/_internal/entrypoint.py": "/_internal/entrypoint.py",
+        "/_internal/requirements.txt": "/_internal/requirements.txt"
     },
     "baseLocation": {
         "version": "v1",

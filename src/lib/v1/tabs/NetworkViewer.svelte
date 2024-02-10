@@ -189,7 +189,7 @@
 
     .log {
         padding: 8px;
-        padding-left: 10px;
+        padding-left: 11px;
         border: none;
         background-color: transparent;
         color: rgb(180, 180, 180);
@@ -206,8 +206,8 @@
     }
     .log.active {
         padding-left: 8px;
-        border-left: 2px solid #334768;
-        background-color: #ffffff08;
+        border-left: 3px solid rgb(36, 89, 173);
+        background-color: #ffffff04;
     }
 
     .log-viewer {
