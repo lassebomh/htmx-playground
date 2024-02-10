@@ -55,7 +55,7 @@ class Router(HttpRouter):
             _request.url,
             _request.method,
             {k: v for k,v in _request.headers},
-            _request.body if _request.hasBody else None,
+            _request.body.to_py().tobytes().decode('utf-8') if hasattr(_request, 'body') else None,
             _request.cache,
             _request.redirect,
             _request.referrer,

@@ -17,13 +17,18 @@ import rawStylesCSS from '../../lib/v1/style.css?raw'
 
 
 		let loc = parseSandboxLocationFromHref(window.location.href) || defaultLocation
-		setWindowLocation(loc)
+		// setWindowLocation(loc)
+
+		console.log(loc)
+
+		if (loc.title) {
+			document.getElementById('header')!.innerText = loc.title;
+		}
 
 		let handler = getHandler(loc)
 		var config = await handler.getConfig()
 
-		// document.getElementById('header')!.innerText = config.title;
-
+		
 		async function loadSandbox() {
 			let sandboxPromise = handler.getSandbox(config)
 			let runtime: any = await import('../../lib/v1/Runtime.svelte');
@@ -42,6 +47,7 @@ import rawStylesCSS from '../../lib/v1/style.css?raw'
 		if (localStorage.getItem('popup-shown') !== 'true') {
 			let readme = document.getElementById('readme')!
 	
+			console.log(config);
 			if (config.readmeHTML) {
 				readme.innerHTML = DOMPurify.sanitize(config.readmeHTML)
 			}

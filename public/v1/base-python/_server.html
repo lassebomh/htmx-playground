@@ -3,24 +3,35 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-            html, body {
-                height: 100%;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-            }
-            
-            iframe {
-                width: 100%;
-                height: 100%;
-                border: none;
-            }
-        </style>
-        <!-- <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script> -->
         <script type="module">
             const pyodidePromise = import("https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js")
             const mimePromise = import("https://esm.sh/mime@4.0.1/lite");
+
+            function createIndicator(text) {
+                let indicator = document.createElement("div")
+                indicator.innerText = text
+                indicator.classList.add('indicator')
+                let currentStatus = null;
+                function setStatus(newStatus) {
+                    if (currentStatus !== null) {
+                        indicator.classList.remove('indicator-'+currentStatus)
+                    }
+                    currentStatus = newStatus
+                    indicator.classList.add('indicator-'+currentStatus)
+                }
+                document.addEventListener('DOMContentLoaded', _ => document.getElementById("indicators").firstElementChild.appendChild(indicator))
+                return setStatus
+            }
+
+            let setSWIndicator = createIndicator("Starting service worker")
+            setSWIndicator('loading')
+
+            let setPyodideIndicator = createIndicator("Starting python runtime")
+
+            let setPipIndicator = createIndicator("Installing pip packages")
+
+            let setServerIndicator = createIndicator("Starting mock server")
+
 
             async function handleServiceWorkerRequest(event) {
                 let response;
@@ -53,8 +64,6 @@
                         if (requestClone.body) {
                             requestClone.body = await requestClone.body.arrayBuffer()
                         }
-                        console.log(requestClone.body);
-
                         let responseData = await window.requestHandler(requestClone)
 
                         let [body, options] = responseData
@@ -111,6 +120,8 @@
             let mainPromise;
 
             window.startclient = () => {
+                setServerIndicator('done')
+
                 if (!pgIframe) {
                     pgIframe = document.createElement('iframe')
                     pgIframe.src = "/"
@@ -137,6 +148,8 @@
     
                         onURLChange()
                         window.addEventListener('popstate', onURLChange);
+
+                        document.getElementById('indicators').style.opacity = 0;
                     });
                     
                     document.body.appendChild(pgIframe)
@@ -209,9 +222,12 @@
                 if (!pyodide) {
                     await pyodidePromise;
 
+                    setPyodideIndicator('loading')
+
                     pyodide = await loadPyodide({
                         packages: ['micropip']
                     });
+                    setPyodideIndicator('done')
                     pyodide.globals.set("control", control);
                 }
 
@@ -227,6 +243,8 @@
     
                 })();
                 
+                setPipIndicator('loading')
+
                 let installPackages = []
                 
                 Object.entries(files).forEach(([path, contents]) => {
@@ -244,9 +262,11 @@
                     `)
                 }
 
-
+                
                 await setupFilesPromise;
-
+                
+                setPipIndicator('done')
+                setServerIndicator('loading')
 
                 mainPromise = pyodide.runPythonAsync(`
                     import asyncio
@@ -275,12 +295,6 @@
 
                     await check_interrupt()
                 `)
-
-                // try {
-                // let main = pyodide.pyimport('main')
-                // } catch (error) {
-                //     console.log('catch error');
-                // }
             }
 
             async function handleParentMessage(event) {
@@ -325,105 +339,9 @@
                     };
                 });
 
-                [
-                    { method: 'group', type: 'console_group' },
-                    { method: 'groupEnd', type: 'console_group_end' },
-                    { method: 'groupCollapsed', type: 'console_group_collapsed' }
-                ].forEach((group_type) => {
-                    const original = window.console[group_type.method];
-                    window.console[group_type.method] = (label) => {
-                        parent.postMessage({ type: group_type.type, label }, '*');
-
-                        original(label);
-                    };
-                });
-
-                const timers = new Map();
-                const original_time = window.console.time;
-                const original_timelog = window.console.timeLog;
-                const original_timeend = window.console.timeEnd;
-
-                window.console.time = (label = 'default') => {
-                    original_time(label);
-                    timers.set(label, performance.now());
-                };
-                window.console.timeLog = (label = 'default') => {
-                    original_timelog(label);
-                    const now = performance.now();
-                    if (timers.has(label)) {
-                        parent.postMessage(
-                            {
-                                type: 'console',
-                                level: 'system-log',
-                                args: [`${label}: ${now - timers.get(label)}ms`]
-                            },
-                            '*'
-                        );
-                    } else {
-                        parent.postMessage(
-                            { type: 'console', level: 'system-warn', args: [`Timer '${label}' does not exist`] },
-                            '*'
-                        );
-                    }
-                };
-                window.console.timeEnd = (label = 'default') => {
-                    original_timeend(label);
-                    const now = performance.now();
-                    if (timers.has(label)) {
-                        parent.postMessage(
-                            {
-                                type: 'console',
-                                level: 'system-log',
-                                args: [`${label}: ${now - timers.get(label)}ms`]
-                            },
-                            '*'
-                        );
-                    } else {
-                        parent.postMessage(
-                            { type: 'console', level: 'system-warn', args: [`Timer '${label}' does not exist`] },
-                            '*'
-                        );
-                    }
-                    timers.delete(label);
-                };
-
-                const original_assert = window.console.assert;
-                window.console.assert = (condition, ...args) => {
-                    if (condition) {
-                        const stack = new Error().stack;
-                        parent.postMessage({ type: 'console', level: 'assert', args, stack }, '*');
-                    }
-                    original_assert(condition, ...args);
-                };
-
                 const counter = new Map();
                 const original_count = window.console.count;
                 const original_countreset = window.console.countReset;
-
-                window.console.count = (label = 'default') => {
-                    counter.set(label, (counter.get(label) || 0) + 1);
-                    parent.postMessage(
-                        { type: 'console', level: 'system-log', args: `${label}: ${counter.get(label)}` },
-                        '*'
-                    );
-                    original_count(label);
-                };
-
-                window.console.countReset = (label = 'default') => {
-                    if (counter.has(label)) {
-                        counter.set(label, 0);
-                    } else {
-                        parent.postMessage(
-                            {
-                                type: 'console',
-                                level: 'system-warn',
-                                args: `Count for '${label}' does not exist`
-                            },
-                            '*'
-                        );
-                    }
-                    original_countreset(label);
-                };
 
                 const original_trace = window.console.trace;
 
@@ -457,13 +375,15 @@
 
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('/_sw_v1.js').then(async () => {
-                    // console.log('Service Worker registered');
                     window.addEventListener('message', handleParentMessage)
                     window.parent.postMessage({type: "fetch-files"}, '*')
-
+                    setSWIndicator('done')
                 }).catch(error => {
                     console.error('Service Worker registration failed:', error);
+                    setSWIndicator('error')
                 });
+            } else {
+                setSWIndicator('error')
             }
 
             window.beforeunload = async () => {
@@ -479,5 +399,68 @@
         </script>
     </head>
     <body>
+        <div id="indicators">
+            <div></div>
+        </div>
     </body>
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #indicators {
+            position: absolute;
+            inset: 0;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            line-height: 1.5;
+            --indicator-color: #585858;
+        }
+
+        .indicator {
+            font-family: monospace;
+            color: var(--indicator-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .indicator::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            background-color: var(--indicator-color);
+            border-radius: 50rem;
+        }
+        .indicator::after {
+            content: "...";
+            opacity: 0;
+        }
+        .indicator-loading::after {
+            opacity: 1;
+        }
+        .indicator-error {
+            --indicator-color: rgb(255, 111, 111);
+        }
+        .indicator-done {
+            --indicator-color: rgb(0, 148, 0);
+        }
+        .indicator-loading {
+            --indicator-color: rgb(255, 255, 255);
+        }
+
+        
+        iframe {
+            position: absolute;
+            border: none;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
 </html>

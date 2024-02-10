@@ -154,8 +154,8 @@
 
     .tab {
         width: max-content;
-        padding-right: 8px;
-        padding-left: 12px;
+        padding-right: 4px;
+        padding-left: 8px;
         background: transparent;
         color: #969696;
         border: none;
