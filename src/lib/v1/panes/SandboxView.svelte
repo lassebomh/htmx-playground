@@ -8,8 +8,6 @@
     export let serverUrl: URL;
 
     export let push_logs: CallableFunction;
-    export let group_logs: CallableFunction;
-    export let ungroup_logs: CallableFunction;
     export let increment_duplicate_log: CallableFunction;
     export let clear_logs: CallableFunction;
     export let push_dom_diff: (html: any) => void;
@@ -31,13 +29,17 @@
     
 
     export async function reloadSandbox(){
-        iframe.contentWindow!.postMessage({
+        let data = {
             type: 'reload',
             value: await sandbox.exportFiles(),
-        }, serverUrl.origin)
+        }
+        iframe.contentWindow!.postMessage(data, serverUrl.origin)
         onSandboxReload()
-        // // console.log(await sandbox.exportFiles());
-        // iframe.contentWindow?.document.location.reload()
+    }
+
+    export async function fullReloadSandbox() {
+        iframe.contentWindow!.postMessage({type: 'full-reload', }, serverUrl.origin)
+        onSandboxReload()
     }
 
     let downloadLink: HTMLAnchorElement;
@@ -78,15 +80,6 @@
             push_logs(log);
         }
     }
-    function on_console_group(action: any) {
-        group_logs(action.label, false);
-    }
-    function on_console_group_end() {
-        ungroup_logs();
-    }
-    function on_console_group_collapsed(action: any) {
-        group_logs(action.label, true);
-    }
     async function on_init(event: MessageEvent<any>) {
         event.source!.postMessage({
             type: 'init',
@@ -119,23 +112,12 @@
                 return push_dom_diff(event.data.value)
             case 'network':
                 return push_network_log(event.data.request, event.data.response)
-			// case 'cmd_error':
-			// case 'cmd_ok':
-			// 	return handle_command_message(event.data);
-			// case 'fetch_progress':
-			// 	return on_fetch_progress(args.remaining);
 			case 'error':
 				return on_error(event.data);
 			case 'unhandledrejection':
 				return on_unhandled_rejection(event.data);
 			case 'console':
 				return on_console(event.data);
-			case 'console_group':
-				return on_console_group(event.data);
-			case 'console_group_collapsed':
-				return on_console_group_collapsed(event.data);
-			case 'console_group_end':
-				return on_console_group_end();
 		}
     })
 
@@ -237,6 +219,9 @@
 <main>
     <div class="topbar">
         <div style="flex-grow: 1;">
+            <button on:click={_ => fullReloadSandbox()} class='reload icon-button' title="Reload playground (CTRL+S)">
+                <i class='codicon codicon-debug-rerun'></i>
+            </button>
             <button on:click={_ => reloadSandbox()} class='reload icon-button' title="Reload playground (CTRL+S)">
                 <i class='codicon codicon-debug-restart'></i>
             </button>

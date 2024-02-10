@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ConsoleLine from './ConsoleLine.svelte';
+	import JSONNode from 'svelte-json-tree';
     import type { Log } from './console';
 
 	export let logs: Log[];
@@ -11,13 +11,16 @@
 		<i class="codicon codicon-circle-slash"></i>
 	</button>
 	{#each logs as log}
-		<div style="font-family: monospace;">
-			{log.args[0]}
+		<div style="font-family: monospace;" class="log console-{log.level}">
+			{#if log.args?.length == 1 && typeof log.args[0] == 'string'}
+				{log.args[0]}
+			{:else}
+				{#each log.args ?? [] as arg}
+					<JSONNode value={arg} />
+				{/each}
+			{/if}
 		</div>
 	{/each}
-	<!-- {#each logs as log}
-		<ConsoleLine {log} />
-	{/each} -->
 </div>
 
 <style>

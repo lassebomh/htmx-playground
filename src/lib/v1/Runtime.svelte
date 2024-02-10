@@ -105,13 +105,13 @@
         'Console',
         'Network',
     ]
-    let activeTab = $readmeHTML ? "README" : 'DOM Diff'
+    let activeTab = $readmeHTML ? "README" : 'Console'
 
 
     $: {
         readmeHTML = sandbox.readmeHTML
         if (!readmeHTML && activeTab == 'README') {
-            activeTab = 'DOM Diff';
+            activeTab = 'Console';
         }
     }
 

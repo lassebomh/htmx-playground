@@ -307,6 +307,8 @@
                 } else if (event.data.type == 'reload') {
                     window.files = event.data.value;
                     runMain()
+                } else if (event.data.type == 'full-reload') {
+                    window.location.reload()
                 } else if (event.data.type == 'navigate') {
                     pgIframe.src = event.data.value
                 }

@@ -22,7 +22,7 @@ from urllib.parse import urlparse
 
 from django.core.wsgi import get_wsgi_application
 from django.contrib.staticfiles.handlers import StaticFilesHandler
-from django.core.management import call_command
+# from django.core.management import call_command
 
 
 os.environ['DJANGO_SETTINGS_MODULE'] = 'myproject.settings'
@@ -31,7 +31,7 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 application = StaticFilesHandler(get_wsgi_application())
 application.load_middleware()
 
-call_command('migrate')
+# call_command('migrate')
 
 def handle(_request):
     url = urlparse(_request.url)
@@ -40,7 +40,6 @@ def handle(_request):
         'SERVER_NAME': 'localhost',
         'SERVER_PORT': '80',
         'REQUEST_METHOD': _request.method,
-        # 'CONTENT_LENGTH': 0,
         'PATH_INFO': url.path,
         'QUERY_STRING': url.query,
         **{
@@ -53,11 +52,8 @@ def handle(_request):
     }
 
     if hasattr(_request, 'body'):
-        # print(_request.body.to_py())
         body = BytesIO(_request.body.to_py().tobytes())
-        # environ['CONTENT_LENGTH'] = len(body)
         environ['wsgi.input'] = body
-
 
     response = application(environ, lambda a,b:...)
 

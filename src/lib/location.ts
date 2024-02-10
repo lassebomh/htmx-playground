@@ -73,7 +73,7 @@ export let defaultLocation: SandboxLocation = {
     method: "fetch",
     version: 'v1',
     params: {
-        url: "/v1/welcome/sandbox.json"
+        url: "/v1/examples/Django.json"
     },
     title: "Welcome"
 }
