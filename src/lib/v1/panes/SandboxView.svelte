@@ -106,7 +106,7 @@
     async function setSandbox(newSandbox: Sandbox) {
         sandbox = newSandbox;
         setWindowLocation(sandbox.handler.getLocation(), get(sandbox.title))
-        await reloadSandbox()
+        await fullReloadSandbox()
         popupView = null
     }
 

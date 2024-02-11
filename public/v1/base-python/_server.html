@@ -30,7 +30,7 @@
 
             let setPipIndicator = createIndicator("Installing pip packages")
 
-            let setServerIndicator = createIndicator("Starting mock server")
+            let setServerIndicator = createIndicator("Starting server")
 
 
             async function handleServiceWorkerRequest(event) {
@@ -61,6 +61,9 @@
                     } else {
                         let requestClone = structuredClone(requestData)
                         requestClone.headers = Object.entries(requestClone.headers)
+
+                        requestClone.headers.push(["cookie", document.cookie])
+
                         if (requestClone.body) {
                             requestClone.body = await requestClone.body.arrayBuffer()
                         }
@@ -69,6 +72,13 @@
                         let [body, options] = responseData
 
                         options = Object.fromEntries(options);
+
+                        options.headers.forEach(([k,v]) => {
+                            if (k.toLowerCase().trim() == 'set-cookie') {
+                                document.cookie = v + '; SameSite=None; Secure'
+                            }
+                        })
+
                         options.headers = Object.fromEntries(options.headers);
 
                         response = new Response(body, options)
@@ -215,6 +225,7 @@
 
                 if (mainPromise) {
                     control['stop'] = true
+                    pyodide.globals.set("initial_startup", false);
                     await mainPromise;
                     mainPromise = null;
                     control['stop'] = false
@@ -230,6 +241,7 @@
                     });
                     setPyodideIndicator('done')
                     pyodide.globals.set("control", control);
+                    pyodide.globals.set("initial_startup", true);
                 }
 
                 let setupFilesPromise = (async ()=> {
@@ -297,10 +309,13 @@
                             if v.__file__.startswith('/home/'):
                                 del sys.modules[k]
 
-                        from _internal import start
+                        from setup import main, init
 
-                        start()
+                        if initial_startup:
+                            init()
                         
+                        main()
+
                         while True:
                             await asyncio.sleep(.1)
                             if control.stop == True:

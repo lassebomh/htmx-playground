@@ -85,7 +85,7 @@
         domDiffHistory = [...domDiffHistory.slice(domDiffHistory.length - 1), html]
     }
 
-    let debuggerPaneSize = 50;
+    let debuggerPaneSize = 0;
     let debuggerTabs: HTMLButtonElement;
 
     function toggleDebuggerPane(event: any) {

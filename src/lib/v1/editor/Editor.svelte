@@ -68,7 +68,7 @@
     $openNodes = newOpenNodes;
   }
 
-  let fileTreePaneSize = mobile ? 100 : 20
+  let fileTreePaneSize = mobile ? 100 : (240/(document.body.clientWidth/2)) * 100
   let lastfileTreePanePx;
 
   function toggleFileTree() {
