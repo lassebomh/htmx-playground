@@ -66,6 +66,9 @@
                             requestClone.headers.push(["cookie", document.cookie])
                         }
 
+                        requestClone.headers.push(['host', window.location.host]);
+                        requestClone.headers.push(['origin', window.location.origin]);
+
                         if (requestClone.body) {
                             requestClone.contentType = requestClone.body.type;
                             requestClone.contentLength = requestClone.body.size;
@@ -77,15 +80,27 @@
 
                         options = Object.fromEntries(options);
 
-                        options.headers.forEach(([header, value]) => {
-                            if (header.toLowerCase().trim() == 'set-cookie') {
-                                let cookie = value.replace(/;?\s*httponly/i, '')
-                                cookie += '; SameSite=None; Secure; Partitioned'
-                                document.cookie = cookie
-                            }
-                        })
+                        options.headers = Object.fromEntries(options.headers.filter(
+                            ([header, value], i) => {
+                                let normHeader = header.toLowerCase().trim();
 
-                        options.headers = Object.fromEntries(options.headers);
+                                switch (normHeader) {
+                                    case 'set-cookie':
+                                        let cookie = value.replace(/;?\s*httponly/i, '')
+                                        cookie += '; SameSite=None; Secure; Partitioned'
+                                        document.cookie = cookie
+                                        return false
+
+                                    case 'x-frame-options':
+                                        return false
+                                    
+                                    // TODO: csp
+                                
+                                    default:
+                                        return true
+                                }
+                            }
+                        ))
 
                         response = new Response(body, options)
                     }
