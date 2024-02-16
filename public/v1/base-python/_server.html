@@ -62,15 +62,14 @@
                         let requestClone = structuredClone(requestData)
                         requestClone.headers = Object.entries(requestClone.headers)
 
-                        requestClone.headers.push(["cookie", document.cookie])
-
+                        if (document.cookie) {
+                            requestClone.headers.push(["cookie", document.cookie])
+                        }
 
                         if (requestClone.body) {
                             requestClone.contentType = requestClone.body.type;
                             requestClone.contentLength = requestClone.body.size;
                             requestClone.body = await requestClone.body.arrayBuffer()
-                            // console.log(requestClone.contentType);
-                            // console.log(requestClone.body);
                         }
                         let responseData = await window.requestHandler(requestClone)
 
@@ -78,9 +77,11 @@
 
                         options = Object.fromEntries(options);
 
-                        options.headers.forEach(([k,v]) => {
-                            if (k.toLowerCase().trim() == 'set-cookie') {
-                                document.cookie = v + '; SameSite=None; Secure; Partitioned'
+                        options.headers.forEach(([header, value]) => {
+                            if (header.toLowerCase().trim() == 'set-cookie') {
+                                let cookie = value.replace(/;?\s*httponly/i, '')
+                                cookie += '; SameSite=None; Secure; Partitioned'
+                                document.cookie = cookie
                             }
                         })
 
