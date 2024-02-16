@@ -64,8 +64,13 @@
 
                         requestClone.headers.push(["cookie", document.cookie])
 
+
                         if (requestClone.body) {
+                            requestClone.contentType = requestClone.body.type;
+                            requestClone.contentLength = requestClone.body.size;
                             requestClone.body = await requestClone.body.arrayBuffer()
+                            // console.log(requestClone.contentType);
+                            // console.log(requestClone.body);
                         }
                         let responseData = await window.requestHandler(requestClone)
 
@@ -75,7 +80,7 @@
 
                         options.headers.forEach(([k,v]) => {
                             if (k.toLowerCase().trim() == 'set-cookie') {
-                                document.cookie = v + '; SameSite=None; Secure'
+                                document.cookie = v + '; SameSite=None; Secure; Partitioned'
                             }
                         })
 
