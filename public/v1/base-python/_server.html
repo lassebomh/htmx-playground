@@ -205,7 +205,8 @@
                             folders[_path] = "";
                         }
                     }
-                    pyodide.FS.writeFile(basePath+path, contents, { encoding: "utf8" });
+                    console.debug('WRITING FILE', basePath+path)
+                    pyodide.FS.writeFile(basePath+path, contents || '', { encoding: "utf8" });
                 })
             }
 
