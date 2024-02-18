@@ -7,30 +7,30 @@
             "text": "_internal"
         },
         {
-            "id": "/_internal/__init__.py",
-            "parent": "/_internal",
+            "id": "/setup.py",
+            "parent": null,
             "type": "python",
-            "text": "__init__.py"
-        },
-        {
-            "id": "/_internal/entrypoint.py",
-            "parent": "/_internal",
-            "type": "python",
-            "text": "entrypoint.py"
+            "text": "setup.py"
         },
         {
             "id": "/_internal/requirements.txt",
             "parent": "/_internal",
             "type": "plaintext",
             "text": "requirements.txt"
+        },
+        {
+            "id": "/_internal/.env",
+            "parent": "/_internal",
+            "type": "plaintext",
+            "text": ".env"
         }
     ],
     "viewNode": null,
     "openNodes": [],
     "nodePaths": {
-        "/_internal/__init__.py": "/_internal/__init__.py",
-        "/_internal/entrypoint.py": "/_internal/entrypoint.py",
-        "/_internal/requirements.txt": "/_internal/requirements.txt"
+        "/setup.py": "/setup.py",
+        "/_internal/requirements.txt": "/_internal/requirements.txt",
+        "/_internal/.env": "/_internal/.env"
     },
     "baseLocation": {
         "version": "v1",
