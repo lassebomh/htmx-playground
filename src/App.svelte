@@ -130,16 +130,7 @@
         return _playground;
     }
     
-    let loaderEntry = new URLSearchParams(window.location.search).entries().next();
-    let initLoad;
     let showEditor = true;
-
-    if (loaderEntry.value) {
-        let [method, location] = loaderEntry.value;
-        initLoad = loadPlayground(method, decodeURIComponent(location), true)
-    } else {
-        initLoad = loadPlayground('url', './playgrounds/welcome/.playground.json', false)
-    }
 
     async function loadPlaygroundFromURL(location) {
         if (location) {
@@ -154,11 +145,27 @@
             await loadPlayground('json', string, true)
             updateSrcdoc()
         }
-
     }
 
     onMount(async () => {
-        await initLoad;
+        
+        let failed = true;
+
+        for (const [method, location] of new URLSearchParams(window.location.search).entries()) {
+            try {
+                await loadPlayground(method, decodeURIComponent(location), true)
+                failed = false;
+                break;
+            } catch (error) {
+                console.warn(error);
+                continue
+            }
+        }
+    
+        if (failed) {
+            await loadPlayground('url', './playgrounds/welcome/.playground.json', false)
+        }
+
         updateSrcdoc()
     })
 

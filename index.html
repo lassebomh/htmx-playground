@@ -4,48 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HTMX Playground</title>
-    <script type="module" src="./src/main.ts" defer></script>
-    <script>
-        function addScript(src, type, crossorigin, charset, defer) {
-            var script = document.createElement('script');
-            script.src = src;
-            script.type = type || 'text/javascript';
-            if (charset) script.charset = charset;
-            if (defer) script.defer = true;
-            if (crossorigin) script.setAttribute('crossorigin', '');
-            document.head.appendChild(script);
-        }
-    
-        function addStylesheet(href) {
-            var link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = href;
-            document.head.appendChild(link);
-        }
-
-        function loadAssets() {
-            addScript('./ace/src-min/ace.js', 'text/javascript', null, 'utf-8', true);
-            addStylesheet('./ace/css/theme/monokai.css');
-            // addScript('/htmx-playground/assets/index.js', 'module', 'anonymous');
-            // addStylesheet('/htmx-playground/assets/index.css');
-            console.log('Load assets...');
-        }
-
-        if (localStorage.getItem('popup-shown') == 'true') {
-            loadAssets()
-        }
-
-        function closePopup() {
-            document.body.classList.add('hide-popup')
-
-            if (localStorage.getItem('popup-shown') !== 'true') {
-                localStorage.setItem('popup-shown', 'true')
-                loadAssets();
-            }
-        }
-    </script>  
-    <link rel="icon" href="./logo_full.png" type="image/png" />
+    <link rel="icon" href="./favicon.png" type="image/png" />
     <meta name="description" content="HTMX Playground allows you to write code in a backend-like environment, running entirely inside the browser. You can define endpoints within server.js and render your own templates. It will run a mock server that intercepts outgoing requests from HTMX.">
+    <script src="./src/main.js" type="module"></script>
     <style>
         
         body {
@@ -190,7 +151,7 @@
                 </p>
 
                 <div style="text-align: center;">
-                    <button id="close-popup" onclick="closePopup()">Go to playground ↪</button>
+                    <button id="close-popup" onclick="window.closePopup()">Go to playground ↪</button>
                 </div>
                 <p>
                     Check out the examples! I've adapted them from the original <a href="https://htmx.org/examples/">htmx.org examples</a>.
